@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="utf-8">
+<title>Agent Hub: giao diện chính</title>
+<script src="81f8d201-9acc-4c63-8eb9-ac7d6039d5e3"></script>
+<meta name="hz:slide-selector" content="[data-canvas-width]"><meta name="hz:canvas-width" content="1440"><meta name="hz:canvas-height" content="900"></head>
+<body>
+<x-dc>
+<helmet>
+<style>/* latin-ext */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("4cd622ba-f7e1-47b7-be42-25eba8519765") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("77bc5620-6d0c-451c-a9a6-5403ab9c03ac") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("4cd622ba-f7e1-47b7-be42-25eba8519765") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("77bc5620-6d0c-451c-a9a6-5403ab9c03ac") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("4cd622ba-f7e1-47b7-be42-25eba8519765") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("77bc5620-6d0c-451c-a9a6-5403ab9c03ac") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("4cd622ba-f7e1-47b7-be42-25eba8519765") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("77bc5620-6d0c-451c-a9a6-5403ab9c03ac") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPx3cwhsk.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxTcwhsk.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxPcwhsk.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPx_cwhsk.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPx7cwhsk.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("ef6e72c1-d973-4d3e-8460-6513e096ea91") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPx3cwhsk.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxTcwhsk.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxPcwhsk.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPx_cwhsk.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPx7cwhsk.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("ef6e72c1-d973-4d3e-8460-6513e096ea91") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
+<style>
+body{margin:0}
+.app{--bg:#F5F6F8;--sf:#FFFFFF;--sf2:#EDEFF3;--ln:#DADFE6;--fg:#151A21;--mu:#566170;--ac:#151A21;--acf:#FFFFFF;--tipb:#151A21;--tipf:#F5F6F8;--bl:#1D4ED8;--blb:#E6EEFF;--or:#9A4A00;--orb:#FFEBD6;--tl:#0B6B63;--tlb:#DAF3EF;--gr:#166534;--grb:#DEF2E4;--gy:#4B5563;--gyb:#E9ECF0;--rd:#B42318;--rdb:#FDE8E6;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;color:var(--fg);background:var(--bg)}
+.app.dark{--bg:#0F1318;--sf:#171C23;--sf2:#1F252E;--ln:#2C3440;--fg:#E8ECF1;--mu:#9AA6B4;--ac:#E8ECF1;--acf:#0F1318;--tipb:#E8ECF1;--tipf:#0F1318;--bl:#8DB1FF;--blb:#1B2A4D;--or:#FFB35C;--orb:#3B2A12;--tl:#5FD6C8;--tlb:#12332F;--gr:#7ADC9C;--grb:#14301F;--gy:#B4BDC9;--gyb:#262D37;--rd:#FF9B90;--rdb:#3E1A17}
+.app *{box-sizing:border-box}
+.app button,.app input,.app select,.app textarea{font:inherit;color:inherit}
+.app :focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px}
+.mu{color:var(--mu)}
+[data-tip]{position:relative}
+[data-tip]:hover::after,[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;z-index:50;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);width:max-content;max-width:240px;padding:6px 10px;border-radius:6px;background:var(--tipb);color:var(--tipf);font:500 12px/1.4 'DM Sans',system-ui,sans-serif;text-align:left;white-space:normal;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+[data-tip-pos="below"]:hover::after,[data-tip-pos="below"]:focus-visible::after{bottom:auto;top:calc(100% + 8px)}
+[data-tip-pos="right"]:hover::after,[data-tip-pos="right"]:focus-visible::after{left:calc(100% + 8px);bottom:auto;top:50%;transform:translateY(-50%)}
+[data-tip-pos="left"]:hover::after,[data-tip-pos="left"]:focus-visible::after{left:auto;right:calc(100% + 8px);bottom:auto;top:50%;transform:translateY(-50%)}
+.shell{display:flex;flex-wrap:wrap;min-height:900px}
+.side{flex:1 1 232px;min-width:0;display:flex;flex-direction:column;gap:16px;padding:16px 12px;background:var(--sf);border-right:1px solid var(--ln)}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px;font-weight:700;font-size:16px}
+.logo{width:28px;height:28px;border-radius:8px;background:var(--ac);color:var(--acf);display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+.proj{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;height:40px;padding:0 12px;border-radius:8px;border:1px solid var(--ln);background:var(--bg);cursor:pointer;text-align:left}
+.navs{display:flex;flex-direction:column;gap:2px}
+.nav{display:flex;align-items:center;gap:10px;width:100%;height:36px;padding:0 12px;border-radius:8px;border:0;background:none;color:var(--mu);font-weight:500;cursor:pointer;text-align:left}
+.nav:hover,.nav.on{background:var(--sf2);color:var(--fg)}
+.nav.on{font-weight:600}
+.sidefoot{margin-top:auto;padding:12px;border-radius:8px;background:var(--sf2);font-size:13px;color:var(--mu)}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 24px;background:var(--sf);border-bottom:1px solid var(--ln)}
+.ttl{margin:0;font-size:18px;font-weight:700}
+.grow{flex:1 1 0;min-width:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--ln);background:var(--sf);font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--mu)}
+.btn.pri{background:var(--ac);color:var(--acf);border-color:var(--ac)}
+.btn.sm{height:30px;padding:0 10px;font-size:13px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--gyb);color:var(--gy)}
+.chip.bl{background:var(--blb);color:var(--bl)}
+.chip.or{background:var(--orb);color:var(--or)}
+.chip.tl{background:var(--tlb);color:var(--tl)}
+.chip.gr{background:var(--grb);color:var(--gr)}
+.chip.rd{background:var(--rdb);color:var(--rd)}
+.content{display:flex;flex-wrap:wrap;flex:1 1 auto;min-width:0}
+.view{flex:999 1 560px;min-width:0;padding:16px 24px 32px;display:flex;flex-direction:column;gap:16px}
+.panel{flex:1 1 420px;max-width:520px;min-width:0;background:var(--sf);border-left:1px solid var(--ln);display:flex;flex-direction:column}
+.panelh{display:flex;align-items:flex-start;gap:12px;padding:16px;border-bottom:1px solid var(--ln)}
+.panelb{padding:16px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;padding:8px 16px 0;border-bottom:1px solid var(--ln)}
+.tab{height:34px;padding:0 12px;border:0;border-bottom:2px solid transparent;background:none;color:var(--mu);font-weight:600;cursor:pointer}
+.tab.on{color:var(--fg);border-bottom-color:var(--fg)}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(248px,1fr);gap:12px;overflow-x:auto;padding-bottom:12px;align-items:start}
+.colh{display:flex;align-items:center;gap:8px;padding:4px 4px 8px}
+.colh b{font-size:13px}
+.cnt{font-size:12px;color:var(--mu)}
+.col{display:flex;flex-direction:column;gap:8px;min-width:0;padding:8px;border-radius:10px;background:var(--sf2)}
+.card{display:flex;flex-direction:column;gap:8px;width:100%;padding:12px;border-radius:10px;border:1px solid var(--ln);background:var(--sf);text-align:left;cursor:pointer}
+.card:hover{border-color:var(--mu)}
+.card.sel{border-color:var(--fg);box-shadow:0 0 0 1px var(--fg)}
+.card-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;font-weight:600}
+.row{display:flex;align-items:center;gap:8px;min-width:0}
+.wrap{flex-wrap:wrap}
+.ag{display:inline-flex;align-items:center;justify-content:center;flex:0 0 22px;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;background:var(--gyb);color:var(--gy)}
+.ag.claude{background:var(--orb);color:var(--or)}
+.ag.gemini{background:var(--blb);color:var(--bl)}
+.ag.codex{background:var(--tlb);color:var(--tl)}
+.bar{display:block;width:100%;height:6px;border-radius:999px;background:var(--sf2);overflow:hidden}
+.card .bar{background:var(--gyb)}
+.bar-i{display:block;height:100%;border-radius:999px;background:var(--bl)}
+.bar-i.or{background:var(--or)}
+.bar-i.rd{background:var(--rd)}
+.bar-i.gr{background:var(--gr)}
+.box{background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.boxh{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.boxh h2{margin:0;font-size:15px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr));gap:12px}
+.kpi{display:flex;flex-direction:column;gap:2px;padding:12px 16px;border-radius:10px;border:1px solid var(--ln);background:var(--sf)}
+.kpi b{font-size:26px;line-height:1.2}
+.term{background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px;overflow-x:auto}
+.logl{display:flex;gap:12px;white-space:pre}
+pre.code{margin:0;padding:12px;border-radius:8px;background:var(--bg);border:1px solid var(--ln);overflow-x:auto;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;line-height:1.6}
+.add{color:var(--gr)}
+.del{color:var(--rd)}
+.sw{position:relative;flex:0 0 40px;width:40px;height:24px;border-radius:999px;border:0;background:var(--ln);cursor:pointer;padding:0}
+.sw.on{background:var(--ac)}
+.sw[disabled]{opacity:.55;cursor:not-allowed}
+.knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--sf);transition:left .15s}
+.sw.on .knob{left:19px;background:var(--acf)}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-top:1px solid var(--ln)}
+.opt:first-child{border-top:0}
+.optb{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 0}
+.optb b{overflow-wrap:anywhere}
+.inp{width:100%;min-height:36px;padding:6px 10px;border-radius:8px;border:1px solid var(--ln);background:var(--sf)}
+.lbl{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:13px}
+.notice{padding:10px 14px;border-radius:8px;background:var(--tlb);color:var(--tl);font-weight:500}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:8px;overflow-x:auto}
+.day{display:flex;flex-direction:column;gap:8px;min-height:200px;padding:8px;border-radius:8px;background:var(--sf2)}
+.ev{display:flex;flex-direction:column;gap:2px;padding:8px;border-radius:8px;background:var(--sf);border:1px solid var(--ln);font-size:12px;overflow-wrap:anywhere}
+.split{display:flex;flex-wrap:wrap;gap:16px}
+.split>.l{flex:1 1 200px;min-width:0}
+.split>.r{flex:999 1 360px;min-width:0}
+.listb{display:flex;flex-direction:column;gap:4px}
+.listb .nav{height:40px}
+.acc{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:10px;border:1px solid var(--ln);background:var(--sf);min-width:0}
+.qrow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mu)}
+.qrow .bar{flex:1 1 0}
+.qrow span:first-child{flex:0 0 52px}
+.qrow span:last-child{flex:0 0 36px;text-align:right}
+.bars{display:flex;align-items:flex-end;gap:12px;height:140px}
+.bcol{flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%;font-size:12px;color:var(--mu)}
+.bcol i{display:block;width:100%;max-width:40px;border-radius:6px 6px 0 0;background:var(--ac)}
+</style>
+</helmet>
+<div class="app {{ themeClass }}" data-canvas-width="1440" data-canvas-height="900" data-document-role="page" data-label="Giao diện chính">
+<div class="shell">
+
+<aside class="side">
+  <div class="brand"><span class="logo">AH</span><span>Agent Hub</span></div>
+  <button type="button" class="proj" data-tip="Chuyển dự án. Mỗi dự án có board, prompt và hồ sơ kỹ thuật riêng" data-tip-pos="right">
+    <span class="row"><span class="mono">my-project</span><sc-if value="{{ x.multirepo }}" hint-placeholder-val="{{ true }}"><span class="chip" data-tip="Workspace gồm nhiều repo, mỗi task chọn một repo đích">3 repo</span></sc-if></span>
+    <svg width="14" height="14" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+  </button>
+  <nav class="navs" aria-label="Điều hướng chính">
+    <button type="button" class="{{ navc.board }}" sc-camel-on-click="{{ go.board }}" data-tip="Bảng task theo trạng thái" data-tip-pos="right"><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"></rect><rect x="10" y="4" width="5" height="10" rx="1"></rect><rect x="17" y="4" width="4" height="13" rx="1"></rect></svg>Board</button>
+    <sc-if value="{{ nav.agents }}" hint-placeholder-val="{{ true }}"><button type="button" class="{{ navc.agents }}" sc-camel-on-click="{{ go.agents }}" data-tip="Agent, vai trò và tài khoản subscription" data-tip-pos="right"><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c0-4 3-6 7-6s7 2 7 6"></path></svg>Agent và tài khoản</button></sc-if>
+    <sc-if value="{{ nav.dash }}" hint-placeholder-val="{{ true }}"><button type="button" class="{{ navc.dash }}" sc-camel-on-click="{{ go.dash }}" data-tip="Ai đang làm gì, bao giờ xong, báo cáo" data-tip-pos="right"><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>Dashboard</button></sc-if>
+    <sc-if value="{{ nav.cal }}" hint-placeholder-val="{{ true }}"><button type="button" class="{{ navc.cal }}" sc-camel-on-click="{{ go.cal }}" data-tip="Task chạy theo lịch định kỳ" data-tip-pos="right"><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>Lịch</button></sc-if>
+    <sc-if value="{{ nav.prompts }}" hint-placeholder-val="{{ true }}"><button type="button" class="{{ navc.prompts }}" sc-camel-on-click="{{ go.prompts }}" data-tip="Prompt theo agent, hồ sơ kỹ thuật, skill" data-tip-pos="right"><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"></path><path d="M9 12h7M9 16h7"></path></svg>Prompt và tri thức</button></sc-if>
+    <sc-if value="{{ nav.integ }}" hint-placeholder-val="{{ true }}"><button type="button" class="{{ navc.integ }}" sc-camel-on-click="{{ go.integ }}" data-tip="GitHub, Linear, Telegram, điện thoại" data-tip-pos="right"><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="6" r="3"></circle><circle cx="18" cy="18" r="3"></circle><path d="M9 11l6-4M9 13l6 4"></path></svg>Tích hợp</button></sc-if>
+    <button type="button" class="{{ navc.settings }}" sc-camel-on-click="{{ go.settings }}" data-tip="Bật hoặc tắt từng tính năng" data-tip-pos="right"><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"></path><circle cx="16" cy="7" r="2"></circle><circle cx="8" cy="17" r="2"></circle></svg>Cài đặt: Tính năng</button>
+  </nav>
+  <div class="sidefoot">Đang bật {{ onCount }} / {{ total }} tính năng. Menu bên trên chỉ hiện những gì bạn đã bật.</div>
+</aside>
+
+<div class="main">
+  <header class="top">
+    <h1 class="ttl">{{ viewTitle }}</h1>
+    <span class="chip" data-tip="Toàn bộ số liệu trong bản demo là dữ liệu mẫu để xem giao diện" data-tip-pos="below">Dữ liệu minh họa</span>
+    <sc-if value="{{ x.server }}" hint-placeholder-val="{{ true }}"><span class="chip gr" data-tip="Hệ thống đang chạy 24/7 trên server, bạn chỉ cần vào duyệt" data-tip-pos="below">Server: đang chạy</span></sc-if>
+    <sc-if value="{{ x.mobile }}" hint-placeholder-val="{{ true }}"><span class="chip" data-tip="Điện thoại đã ghép đôi, nhận thông báo và duyệt từ xa" data-tip-pos="below">Điện thoại: 1 máy</span></sc-if>
+    <span class="grow"></span>
+    <sc-if value="{{ v.board }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn pri" sc-camel-on-click="{{ openNew }}" data-tip="Tạo task, chọn PM và Worker" data-tip-pos="below"><svg width="14" height="14" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Giao task</button></sc-if>
+  </header>
+
+  <div class="content">
+
+  <sc-if value="{{ v.board }}" hint-placeholder-val="{{ true }}">
+  <section class="view" aria-label="Board">
+    <div class="row wrap">
+      <span class="chip" data-tip="Số task đang có agent làm việc" data-tip-pos="below">3 đang chạy</span>
+      <sc-if value="{{ x.human }}" hint-placeholder-val="{{ true }}"><span class="chip or" data-tip="Task đang chờ bạn duyệt hoặc quyết định" data-tip-pos="below">1 cần bạn</span></sc-if>
+      <span class="grow"></span>
+      <span class="mu">Bấm vào thẻ để xem chi tiết bên phải</span>
+    </div>
+    <div class="board">
+      <sc-for list="{{ cols }}" as="col" hint-placeholder-count="5">
+      <div class="col">
+        <div class="colh"><span class="chip {{ col.cls }}" data-tip="{{ col.tip }}" data-tip-pos="below">{{ col.name }}</span><span class="cnt">{{ col.count }}</span></div>
+        <sc-for list="{{ col.cards }}" as="c" hint-placeholder-count="2">
+        <button type="button" class="card {{ c.selCls }}" sc-camel-on-click="{{ c.open }}">
+          <span class="card-t">{{ c.title }}</span>
+          <sc-if value="{{ x.worktree }}" hint-placeholder-val="{{ true }}"><span class="mono mu" data-tip="Task chạy trong git worktree và nhánh riêng" data-tip-pos="below">{{ c.branch }}</span></sc-if>
+          <span class="row"><span class="ag {{ c.agCls }}" data-tip="{{ c.agTip }}">{{ c.agL }}</span><span class="mu">{{ c.who }}</span></span>
+          <sc-if value="{{ c.hasBar }}" hint-placeholder-val="{{ true }}"><span class="bar"><span class="bar-i" style="width: {{ c.w }}"></span></span></sc-if>
+          <sc-if value="{{ c.hasChips }}" hint-placeholder-val="{{ true }}"><span class="row wrap"><sc-for list="{{ c.chips }}" as="ch" hint-placeholder-count="2"><span class="chip {{ ch.c }}" data-tip="{{ ch.tip }}">{{ ch.l }}</span></sc-for></span></sc-if>
+        </button>
+        </sc-for>
+        <sc-if value="{{ col.empty }}" hint-placeholder-val="{{ false }}"><div class="mu" style="padding:8px">Chưa có task</div></sc-if>
+      </div>
+      </sc-for>
+    </div>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ v.agents }}" hint-placeholder-val="{{ false }}">
+  <section class="view" aria-label="Agent và tài khoản">
+    <sc-if value="{{ x.roles }}" hint-placeholder-val="{{ true }}">
+    <div class="box">
+      <div class="boxh"><h2>Vai trò mặc định</h2><span class="chip" data-tip="Mỗi task có thể chọn lại vai trò riêng khi giao">Có thể đổi theo từng task</span></div>
+      <div class="grid2">
+        <label class="lbl">PM (giao việc và kiểm tra)<sc-raw-select class="inp"><option>Claude</option><option>Gemini</option><option>Codex</option></sc-raw-select></label>
+        <label class="lbl">Worker (code hàng loạt)<sc-raw-select class="inp"><option>Gemini</option><option>Claude</option><option>Codex</option></sc-raw-select></label>
+        <sc-if value="{{ x.test }}" hint-placeholder-val="{{ true }}"><label class="lbl">Agent test (unit test)<sc-raw-select class="inp"><option>Codex</option><option>Gemini</option><option>Claude</option></sc-raw-select></label></sc-if>
+        <sc-if value="{{ x.doc }}" hint-placeholder-val="{{ true }}"><label class="lbl">Agent tài liệu (chạy khi task xong)<sc-raw-select class="inp"><option>Claude</option><option>Gemini</option><option>Codex</option></sc-raw-select></label></sc-if>
+      </div>
+    </div>
+    </sc-if>
+    <div class="box">
+      <div class="boxh"><h2>Tài khoản subscription đã kết nối</h2><span class="grow"></span>
+        <button type="button" class="btn sm" data-tip="Tạo một thư mục HOME riêng cho account mới rồi mở trang đăng nhập của CLI. Token chỉ nằm trong thư mục đó" data-tip-pos="left">Thêm account</button></div>
+      <p class="mu" style="margin:0">Mỗi account chạy với thư mục HOME riêng, nên đăng nhập của các account không đè nhau. Hệ thống chỉ dùng CLI chính thức đã đăng nhập.</p>
+      <sc-if value="{{ x.failover }}" hint-placeholder-val="{{ true }}"><div class="notice" style="background:var(--blb);color:var(--bl)">Tự chuyển tài khoản đang bật: khi một account hết hạn mức, task chuyển sang account kế tiếp cùng nhà cung cấp.</div></sc-if>
+      <div class="grid2">
+        <sc-for list="{{ accs }}" as="a" hint-placeholder-count="3">
+        <div class="acc">
+          <div class="row"><span class="ag {{ a.agCls }}">{{ a.agL }}</span><b class="mono">{{ a.id }}</b><span class="grow"></span><span class="chip {{ a.stc }}">{{ a.st }}</span></div>
+          <div class="mu">{{ a.prov }} {{ a.plan }} · {{ a.use }}</div>
+          <sc-if value="{{ x.quota }}" hint-placeholder-val="{{ true }}">
+          <div class="qrow" data-tip="Phần hạn mức 5 giờ đã dùng. Hệ thống ước lượng từ lịch sử chạy"><span>5 giờ</span><span class="bar"><span class="bar-i {{ a.q5c }}" style="width: {{ a.q5w }}"></span></span><span>{{ a.q5w }}</span></div>
+          <div class="qrow" data-tip="Phần hạn mức tuần đã dùng"><span>Tuần</span><span class="bar"><span class="bar-i {{ a.qwc }}" style="width: {{ a.qww }}"></span></span><span>{{ a.qww }}</span></div>
+          </sc-if>
+          <div class="row wrap">
+            <sc-if value="{{ x.failover }}" hint-placeholder-val="{{ true }}"><span class="chip" data-tip="Thứ tự được chọn khi tự chuyển tài khoản">Ưu tiên {{ a.prio }}</span></sc-if>
+            <span class="grow"></span>
+            <button type="button" class="btn sm" data-tip="Mở lại trang đăng nhập của CLI cho account này">Đăng nhập lại</button>
+          </div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+    <sc-if value="{{ x.apikey }}" hint-placeholder-val="{{ true }}">
+    <div class="box">
+      <div class="boxh"><h2>API key dự phòng</h2><span class="chip" data-tip="Tính tiền theo token, chỉ dùng khi subscription hết hạn mức">Trả theo token</span></div>
+      <div class="row wrap"><label class="lbl" style="flex:1 1 240px">Nhà cung cấp<sc-raw-select class="inp"><option>Anthropic</option><option>Google</option><option>OpenAI</option></sc-raw-select></label><label class="lbl" style="flex:2 1 320px">Khóa<input class="inp mono" type="password" placeholder="Dán khóa tại đây, lưu mã hóa"></label></div>
+    </div>
+    </sc-if>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ v.dash }}" hint-placeholder-val="{{ false }}">
+  <section class="view" aria-label="Dashboard">
+    <div class="grid4">
+      <div class="kpi"><span class="mu">Đang chạy</span><b>3</b></div>
+      <sc-if value="{{ x.human }}" hint-placeholder-val="{{ true }}"><div class="kpi"><span class="mu">Cần bạn</span><b>1</b></div></sc-if>
+      <sc-if value="{{ x.report }}" hint-placeholder-val="{{ true }}"><div class="kpi"><span class="mu">Xong tuần này</span><b>14</b></div></sc-if>
+      <sc-if value="{{ x.cost }}" hint-placeholder-val="{{ true }}"><div class="kpi" data-tip="Tổng phần hạn mức subscription đã dùng trong tuần"><span class="mu">Hạn mức tuần đã dùng</span><b>27%</b></div></sc-if>
+    </div>
+    <div class="grid2">
+      <sc-if value="{{ x.live }}" hint-placeholder-val="{{ true }}">
+      <div class="box">
+        <div class="boxh"><h2>Agent đang làm việc</h2></div>
+        <sc-for list="{{ live }}" as="l" hint-placeholder-count="3">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="row"><span class="ag {{ l.agCls }}">{{ l.agL }}</span><b style="overflow-wrap:anywhere">{{ l.task }}</b></div>
+          <div class="qrow"><span class="mono">{{ l.who }}</span><span class="bar"><span class="bar-i" style="width: {{ l.w }}"></span></span><span>{{ l.w }}</span></div>
+          <sc-if value="{{ x.eta }}" hint-placeholder-val="{{ true }}"><div class="mu" data-tip="Dự tính từ lịch sử các lần chạy trước">Dự tính xong: {{ l.eta }}</div></sc-if>
+        </div>
+        </sc-for>
+      </div>
+      </sc-if>
+      <sc-if value="{{ x.cost }}" hint-placeholder-val="{{ true }}">
+      <div class="box">
+        <div class="boxh"><h2>Hạn mức đã dùng theo agent</h2><span class="chip" data-tip="Với subscription, hệ thống tính theo phần trăm hạn mức thay vì tiền">Tuần này</span></div>
+        <sc-for list="{{ costs }}" as="k" hint-placeholder-count="3">
+        <div class="qrow"><span>{{ k.n }}</span><span class="bar"><span class="bar-i {{ k.c }}" style="width: {{ k.w }}"></span></span><span>{{ k.w }}</span></div>
+        </sc-for>
+      </div>
+      </sc-if>
+      <sc-if value="{{ x.report }}" hint-placeholder-val="{{ true }}">
+      <div class="box">
+        <div class="boxh"><h2>Báo cáo tuần</h2><span class="grow"></span><button type="button" class="btn sm" data-tip="Xuất báo cáo tuần ra file để gửi đi" data-tip-pos="left">Xuất báo cáo</button></div>
+        <div class="bars" role="img" aria-label="Số task hoàn thành mỗi ngày: T2 hai, T3 ba, T4 một, T5 bốn, T6 bốn">
+          <sc-for list="{{ week }}" as="d" hint-placeholder-count="7"><div class="bcol"><span>{{ d.n }}</span><i style="height: {{ d.h }}"></i><span>{{ d.d }}</span></div></sc-for>
+        </div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ x.tree }}" hint-placeholder-val="{{ true }}">
+      <div class="box">
+        <div class="boxh"><h2>Cây PM và agent con</h2><span class="chip" data-tip="Ai giao việc cho ai trong task đang chạy">Task #3</span></div>
+        <sc-for list="{{ tree }}" as="r" hint-placeholder-count="4"><div class="row" style="padding-left: {{ r.pad }}"><span class="ag {{ r.agCls }}">{{ r.agL }}</span><span>{{ r.label }}</span></div></sc-for>
+      </div>
+      </sc-if>
+    </div>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ v.cal }}" hint-placeholder-val="{{ false }}">
+  <section class="view" aria-label="Lịch">
+    <div class="row wrap">
+      <button type="button" class="btn sm" data-tip="Tạo task định kỳ mới">Thêm lịch</button>
+      <span class="chip">Tuần 44</span>
+      <sc-if value="{{ x.quiet }}" hint-placeholder-val="{{ true }}"><span class="chip or" data-tip="Agent không tự khởi chạy trong khung giờ này để khỏi tranh hạn mức với bạn">Giờ cấm: 09:00 đến 18:00</span></sc-if>
+    </div>
+    <div class="cal">
+      <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+      <div class="day"><b>{{ d.n }}</b>
+        <sc-for list="{{ d.evs }}" as="e" hint-placeholder-count="1"><div class="ev" data-tip="{{ e.tip }}"><span class="mono">{{ e.t }}</span><span>{{ e.title }}</span></div></sc-for>
+      </div>
+      </sc-for>
+    </div>
+    <div class="grid2">
+      <sc-if value="{{ x.md }}" hint-placeholder-val="{{ true }}">
+      <div class="box">
+        <div class="boxh"><h2>Job viết bằng Markdown</h2><span class="chip" data-tip="File nằm trong repo nên có lịch sử git">.cron/jobs/pr-tuan.md</span></div>
+        <pre class="code">---
+name: Tóm tắt PR tuần trước
+schedule: "30 6 * * 1"
+agent: claude
+account: claude-1
+---
+Tóm tắt các PR đã merge tuần trước
+và gửi vào kênh Telegram.</pre>
+      </div>
+      </sc-if>
+      <sc-if value="{{ x.night }}" hint-placeholder-val="{{ true }}">
+      <div class="box">
+        <div class="boxh"><h2>Hàng đợi chạy qua đêm</h2><span class="chip tl">Bắt đầu 23:00</span></div>
+        <p class="mu" style="margin:0">5 task đang chờ. Sáng mai bạn nhận chuỗi PR để duyệt.</p>
+        <div class="row wrap"><button type="button" class="btn sm" data-tip="Nạp thêm task vào hàng đợi đêm nay">Thêm vào hàng đợi</button><button type="button" class="btn sm" data-tip="Dừng hàng đợi, các task chưa chạy giữ nguyên">Tạm dừng</button></div>
+      </div>
+      </sc-if>
+    </div>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ v.prompts }}" hint-placeholder-val="{{ false }}">
+  <section class="view" aria-label="Prompt và tri thức">
+    <div class="split">
+      <div class="l"><div class="box"><b>Agent</b><div class="listb">
+        <sc-for list="{{ pAgents }}" as="p" hint-placeholder-count="4"><button type="button" class="{{ p.cls }}" sc-camel-on-click="{{ p.go }}" data-tip="{{ p.tip }}" data-tip-pos="right"><span class="ag {{ p.agCls }}">{{ p.agL }}</span>{{ p.name }}</button></sc-for>
+      </div></div></div>
+      <div class="r">
+        <div class="box">
+          <div class="tabs" style="padding:0">
+            <sc-for list="{{ pTabs }}" as="t" hint-placeholder-count="4"><button type="button" class="{{ t.cls }}" sc-camel-on-click="{{ t.go }}">{{ t.label }}</button></sc-for>
+          </div>
+          <sc-if value="{{ pt.prompt }}" hint-placeholder-val="{{ true }}">
+            <div class="boxh"><h2>Prompt: {{ pName }}</h2><span class="chip" data-tip="Mỗi lần lưu tạo một phiên bản, có thể quay lại">v3</span><span class="grow"></span><button type="button" class="btn sm" data-tip="Chạy thử prompt với một task mẫu">Thử</button><button type="button" class="btn sm pri">Lưu</button></div>
+            <pre class="code" style="white-space:pre-wrap">{{ pText }}</pre>
+          </sc-if>
+          <sc-if value="{{ pt.tech }}" hint-placeholder-val="{{ false }}">
+            <div class="boxh"><h2>Hồ sơ kỹ thuật dự án</h2><span class="chip" data-tip="Mọi agent đọc hồ sơ này trước khi làm việc">Mọi agent đều đọc</span></div>
+            <sc-for list="{{ techRows }}" as="r" hint-placeholder-count="5"><div class="opt"><div class="optb"><span class="mu">{{ r.k }}</span><b>{{ r.v }}</b></div></div></sc-for>
+            <sc-if value="{{ x.sync }}" hint-placeholder-val="{{ true }}"><div class="row wrap"><button type="button" class="btn sm" data-tip="Sinh CLAUDE.md, AGENTS.md và rule của từng agent từ một nguồn">Đồng bộ AGENTS.md và CLAUDE.md</button></div></sc-if>
+          </sc-if>
+          <sc-if value="{{ pt.skill }}" hint-placeholder-val="{{ false }}">
+            <div class="boxh"><h2>Skill theo chuẩn SKILL.md</h2><span class="grow"></span><button type="button" class="btn sm" data-tip="Cài skill từ một kho GitHub bằng đường dẫn" data-tip-pos="left">Cài từ GitHub</button></div>
+            <sc-for list="{{ skills }}" as="s" hint-placeholder-count="3"><div class="opt"><div class="optb"><b class="mono">{{ s.n }}</b><span class="mu">{{ s.d }}</span></div><span class="chip">{{ s.a }}</span></div></sc-for>
+          </sc-if>
+          <sc-if value="{{ pt.mem }}" hint-placeholder-val="{{ false }}">
+            <div class="boxh"><h2>Bộ nhớ dùng chung</h2><span class="chip" data-tip="Mỗi mục ghi rõ agent nào viết">Agent nào viết cũng đọc được</span></div>
+            <sc-for list="{{ mems }}" as="m" hint-placeholder-count="4"><div class="opt"><span class="chip {{ m.c }}">{{ m.k }}</span><div class="optb"><span>{{ m.t }}</span><span class="mu">Ghi bởi {{ m.a }}</span></div></div></sc-for>
+            <div class="row wrap">
+              <sc-if value="{{ x.learn }}" hint-placeholder-val="{{ true }}"><span class="chip gr" data-tip="Cuối mỗi task, agent ghi bài học vào bộ nhớ">Tự ghi bài học sau task: bật</span></sc-if>
+              <sc-if value="{{ x.graph }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn sm" data-tip="Xem quan hệ giữa module, quyết định và tài liệu">Mở đồ thị tri thức</button></sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ v.integ }}" hint-placeholder-val="{{ false }}">
+  <section class="view" aria-label="Tích hợp">
+    <div class="grid2">
+      <sc-for list="{{ integs }}" as="i" hint-placeholder-count="4">
+      <div class="box">
+        <div class="boxh"><h2>{{ i.name }}</h2><span class="grow"></span><span class="chip {{ i.stc }}">{{ i.st }}</span></div>
+        <p class="mu" style="margin:0">{{ i.d }}</p>
+        <div class="row"><button type="button" class="btn sm" data-tip="{{ i.tip }}">{{ i.btn }}</button></div>
+      </div>
+      </sc-for>
+    </div>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ v.settings }}" hint-placeholder-val="{{ false }}">
+  <section class="view" aria-label="Cài đặt: Tính năng">
+    <div class="box">
+      <div class="boxh"><h2>Gói mẫu</h2><span class="mu">Bấm một gói để bật cả bộ, rồi chỉnh từng mục bên dưới.</span></div>
+      <div class="row wrap">
+        <button type="button" class="btn" sc-camel-on-click="{{ packSolo }}" data-tip="Một người, một dự án: 8 tính năng cơ bản">Solo nhẹ</button>
+        <button type="button" class="btn" sc-camel-on-click="{{ packTeam }}" data-tip="Vài người, nhiều tài khoản AI, có test, tài liệu, PR, lịch">Nhóm nhỏ</button>
+        <button type="button" class="btn" sc-camel-on-click="{{ packFull }}" data-tip="Bật toàn bộ 41 tính năng">Đầy đủ</button>
+        <span class="grow"></span>
+        <span class="chip bl">Đang bật {{ onCount }} / {{ total }}</span>
+      </div>
+      <sc-if value="{{ hasNotice }}" hint-placeholder-val="{{ false }}"><div class="notice" role="status">{{ notice }}</div></sc-if>
+    </div>
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+    <div class="box">
+      <div class="boxh"><h2>{{ g.title }}</h2><span class="chip">{{ g.on }} / {{ g.n }} đang bật</span></div>
+      <div>
+        <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+        <div class="opt">
+          <button type="button" class="sw {{ it.swc }}" role="switch" aria-checked="{{ it.aria }}" aria-label="{{ it.name }}" sc-camel-on-click="{{ it.toggle }}" disabled="{{ it.locked }}" data-tip="{{ it.swTip }}" data-tip-pos="right"><span class="knob"></span></button>
+          <div class="optb"><b>{{ it.name }}</b><span class="mu">{{ it.desc }}</span><sc-if value="{{ it.hasReq }}" hint-placeholder-val="{{ false }}"><span class="mu" style="font-size:12px">{{ it.reqText }}</span></sc-if></div>
+          <span class="chip" data-tip="Công sức triển khai ước lượng">{{ it.eff }}</span>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-for>
+    <sc-if value="{{ x.audit }}" hint-placeholder-val="{{ true }}">
+    <div class="box">
+      <div class="boxh"><h2>Nhật ký thay đổi tính năng</h2><span class="chip" data-tip="Ghi lại ai bật hoặc tắt gì, lúc nào">Nhật ký kiểm toán</span></div>
+      <sc-for list="{{ auditRows }}" as="a" hint-placeholder-count="3"><div class="opt"><span class="mono mu">{{ a.t }}</span><span>{{ a.m }}</span></div></sc-for>
+    </div>
+    </sc-if>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ p.open }}" hint-placeholder-val="{{ false }}">
+  <aside class="panel" aria-label="Chi tiết">
+
+    <sc-if value="{{ p.isTask }}" hint-placeholder-val="{{ true }}">
+    <div class="panelh">
+      <div class="grow" style="display:flex;flex-direction:column;gap:6px">
+        <span class="row wrap"><span class="chip {{ d.stc }}">{{ d.status }}</span><span class="mono mu">Task #{{ d.id }}</span></span>
+        <b style="font-size:16px;overflow-wrap:anywhere">{{ d.title }}</b>
+      </div>
+      <button type="button" class="btn sm" sc-camel-on-click="{{ closePanel }}" aria-label="Đóng" data-tip="Đóng chi tiết" data-tip-pos="below">Đóng</button>
+    </div>
+    <div class="tabs">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3"><button type="button" class="{{ t.cls }}" sc-camel-on-click="{{ t.go }}">{{ t.label }}</button></sc-for>
+    </div>
+    <div class="panelb">
+      <sc-if value="{{ tb.over }}" hint-placeholder-val="{{ true }}">
+        <div class="box">
+          <b>Phân công</b>
+          <sc-for list="{{ d.roles }}" as="r" hint-placeholder-count="3"><div class="row"><span class="ag {{ r.agCls }}">{{ r.agL }}</span><span class="grow"><b>{{ r.role }}</b> <span class="mu">{{ r.agent }}</span></span></div></sc-for>
+        </div>
+        <sc-if value="{{ x.dag }}" hint-placeholder-val="{{ true }}">
+        <div class="box">
+          <div class="boxh"><b>Đồ thị task do PM chia</b><span class="chip" data-tip="PM tự phân rã mục tiêu, chạy song song các task độc lập">3 bước</span></div>
+          <div class="row"><span class="chip gr">Xong</span><span>Thiết kế schema</span></div>
+          <div class="row"><span class="chip bl">Đang chạy</span><span>Code form</span><span class="mu">cần: thiết kế</span></div>
+          <div class="row"><span class="chip">Chờ</span><span>Unit test</span><span class="mu">cần: code form</span></div>
+        </div>
+        </sc-if>
+        <div class="box">
+          <b>Chạy ở đâu</b>
+          <div class="row wrap"><span class="mono">{{ d.branch }}</span>
+            <sc-if value="{{ x.sandbox }}" hint-placeholder-val="{{ false }}"><span class="chip or" data-tip="Chạy lệnh lạ trong container, không chạm máy thật">Sandbox</span></sc-if>
+            <sc-if value="{{ x.ssh }}" hint-placeholder-val="{{ false }}"><span class="chip" data-tip="Agent chạy trên máy từ xa qua SSH">SSH: build-server</span></sc-if>
+          </div>
+        </div>
+        <div class="row wrap">
+          <button type="button" class="btn sm" data-tip="Dừng agent, giữ nguyên nhánh và worktree">Dừng</button>
+          <sc-if value="{{ x.multi }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn sm" data-tip="Chuyển task sang một account khác cùng nhà cung cấp">Đổi account</button></sc-if>
+          <sc-if value="{{ x.pr }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn sm pri" data-tip="Tạo PR, mô tả do AI viết từ lịch sử commit">Tạo PR</button></sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ tb.live }}" hint-placeholder-val="{{ false }}">
+        <div class="term mono"><sc-for list="{{ d.log }}" as="ln" hint-placeholder-count="5"><div class="logl"><span class="mu">{{ ln.t }}</span><span>{{ ln.m }}</span></div></sc-for></div>
+        <label class="lbl">Chỉ đạo giữa chừng<input id="steer" class="inp" placeholder="Gửi một yêu cầu cho agent đang chạy"></label>
+      </sc-if>
+      <sc-if value="{{ tb.diff }}" hint-placeholder-val="{{ false }}">
+        <div class="row wrap"><span class="chip">3 file</span><span class="chip gr">+42</span><span class="chip rd">-11</span><span class="grow"></span><button type="button" class="btn sm" data-tip="Chạy dev server của nhánh này để xem thử" data-tip-pos="left">Mở bản xem trước</button></div>
+        <pre class="code"><span class="mu">src/features/login/form.tsx</span>
+<span class="del">- const valid = email.length &gt; 0</span>
+<span class="add">+ const valid = isEmail(email) &amp;&amp; password.length &gt;= 8</span>
+<span class="add">+ if (!valid) return setError(t('login.invalid'))</span></pre>
+      </sc-if>
+      <sc-if value="{{ tb.replay }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ d.runs }}" as="r" hint-placeholder-count="3"><div class="opt"><span class="mono mu">{{ r.t }}</span><div class="optb"><b>{{ r.title }}</b><span class="mu">{{ r.sub }}</span></div><span class="chip {{ r.c }}">{{ r.st }}</span></div></sc-for>
+        <button type="button" class="btn sm" data-tip="Phát lại toàn bộ sự kiện của lần chạy gần nhất">Phát lại lần chạy gần nhất</button>
+      </sc-if>
+      <sc-if value="{{ tb.approve }}" hint-placeholder-val="{{ false }}">
+        <div class="box">
+          <b>Agent xin quyền</b>
+          <pre class="code">pnpm test --filter login</pre>
+          <p class="mu" style="margin:0">Lệnh chạy trong worktree của task, không đụng nhánh chính.</p>
+          <div class="row wrap"><button type="button" class="btn sm pri" data-tip="Cho chạy một lần">Duyệt</button><button type="button" class="btn sm" data-tip="Từ chối, agent sẽ chọn cách khác">Từ chối</button></div>
+        </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ p.isNew }}" hint-placeholder-val="{{ false }}">
+    <div class="panelh"><div class="grow"><b style="font-size:16px">Giao task mới</b></div><button type="button" class="btn sm" sc-camel-on-click="{{ closePanel }}" data-tip="Đóng, không lưu" data-tip-pos="below">Đóng</button></div>
+    <div class="panelb">
+      <label class="lbl" for="nt-title">Tiêu đề<input id="nt-title" class="inp" placeholder="Ví dụ: Thêm trang đăng ký"></label>
+      <label class="lbl" for="nt-desc">Mô tả và tiêu chí hoàn thành<textarea id="nt-desc" class="inp" rows="4" placeholder="PM sẽ dùng phần này để chia task và kiểm tra kết quả"></textarea></label>
+      <sc-if value="{{ x.roles }}" hint-placeholder-val="{{ true }}">
+      <div class="grid2" style="grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr))">
+        <label class="lbl" for="nt-pm">PM<sc-raw-select id="nt-pm" class="inp"><option>Claude</option><option>Gemini</option><option>Codex</option></sc-raw-select></label>
+        <label class="lbl" for="nt-wk">Worker<sc-raw-select id="nt-wk" class="inp"><option>Gemini</option><option>Claude</option><option>Codex</option></sc-raw-select></label>
+        <sc-if value="{{ x.multi }}" hint-placeholder-val="{{ true }}"><label class="lbl" for="nt-acc">Account<sc-raw-select id="nt-acc" class="inp"><option>Tự chọn (xoay vòng)</option><option>gemini-1</option><option>gemini-2</option><option>gemini-3</option></sc-raw-select></label></sc-if>
+      </div>
+      </sc-if>
+      <div class="box">
+        <b>Tùy chọn theo tính năng đã bật</b>
+        <sc-if value="{{ x.test }}" hint-placeholder-val="{{ true }}"><label class="row" for="nt-test"><input id="nt-test" type="checkbox" checked="">Agent test viết và chạy unit test</label></sc-if>
+        <sc-if value="{{ x.doc }}" hint-placeholder-val="{{ true }}"><label class="row" for="nt-doc"><input id="nt-doc" type="checkbox" checked="">Agent tài liệu cập nhật tài liệu khi xong</label></sc-if>
+        <sc-if value="{{ x.human }}" hint-placeholder-val="{{ true }}"><label class="row" for="nt-appr"><input id="nt-appr" type="checkbox">Cần tôi duyệt kế hoạch trước khi chạy</label></sc-if>
+        <sc-if value="{{ x.dag }}" hint-placeholder-val="{{ true }}"><label class="row" for="nt-dag"><input id="nt-dag" type="checkbox" checked="">PM tự chia thành đồ thị task</label></sc-if>
+        <sc-if value="{{ x.sandbox }}" hint-placeholder-val="{{ true }}"><label class="row" for="nt-sb"><input id="nt-sb" type="checkbox">Chạy trong sandbox</label></sc-if>
+        <sc-if value="{{ x.cal }}" hint-placeholder-val="{{ true }}"><label class="row" for="nt-cal"><input id="nt-cal" type="checkbox">Lặp lại theo lịch</label></sc-if>
+        <sc-if value="{{ x.pr }}" hint-placeholder-val="{{ true }}"><label class="row" for="nt-pr"><input id="nt-pr" type="checkbox" checked="">Tự tạo PR khi qua kiểm tra</label></sc-if>
+      </div>
+      <div class="row wrap"><button type="button" class="btn pri" data-tip="Tạo task và giao cho agent">Giao task</button><button type="button" class="btn" sc-camel-on-click="{{ closePanel }}">Hủy</button></div>
+    </div>
+    </sc-if>
+
+  </aside>
+  </sc-if>
+
+  </div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false},&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+const MODS = [
+['auth-basic',0,'Đăng ký / đăng nhập hệ thống','Tài khoản người dùng và workspace riêng.','','Nhẹ',1],
+['auth-cli',0,'Kết nối subscription qua CLI chính thức','Chạy Claude Code, Codex, Gemini CLI đã đăng nhập sẵn, không cần API key.','auth-basic','Vừa',0],
+['auth-multi',0,'Nhiều tài khoản cùng một nhà cung cấp','Mỗi account có thư mục HOME riêng, ví dụ 5 account Gemini Pro.','auth-cli','Vừa',0],
+['auth-quota',0,'Theo dõi hạn mức từng tài khoản','Thanh hạn mức 5 giờ và theo tuần cho mỗi account.','auth-cli','Vừa',0],
+['auth-failover',0,'Tự chuyển tài khoản khi hết hạn mức','Task tự sang account kế tiếp khi một account cạn.','auth-multi,auth-quota','Vừa',0],
+['auth-apikey',0,'API key trả theo token làm dự phòng','Dùng khi subscription hết hạn mức hoặc không hỗ trợ.','auth-basic','Nhẹ',0],
+['orch-roles',1,'Chọn Lead (PM) và Worker cho từng task','Ví dụ Claude làm PM, Gemini làm worker code hàng loạt.','auth-cli','Vừa',0],
+['orch-doc',1,'Agent viết tài liệu tự chạy khi task xong','Cập nhật README, changelog, tài liệu thiết kế.','orch-roles','Vừa',0],
+['orch-test',1,'Agent test chuyên trách','Viết và chạy unit test, báo pass hoặc fail cho PM.','orch-roles','Vừa',0],
+['orch-dag',1,'PM tự phân rã mục tiêu thành đồ thị task','Chia task có phụ thuộc, chạy song song các task độc lập.','orch-roles','Nặng',0],
+['orch-human',1,'Cổng duyệt của con người','Task dừng ở cột Cần bạn khi cần duyệt kế hoạch hoặc quyền chạy lệnh.','','Vừa',0],
+['orch-bus',1,'Kênh nhắn tin giữa các agent','Agent hỏi nhau và chia sẻ kết quả trung gian.','orch-roles','Nặng',0],
+['run-worktree',2,'Mỗi task một git worktree và branch riêng','Agent làm trong nhánh cô lập, không làm hỏng code đang chạy.','','Vừa',0],
+['run-pr',2,'Tạo PR với mô tả do AI viết, merge khi đạt điều kiện','Từ task đến PR đã merge, có thể bật auto-merge.','run-worktree,integ-git','Vừa',0],
+['run-ssh',2,'Chạy trên máy từ xa qua SSH','Agent chạy trên server, file đồng bộ hai chiều.','run-worktree','Nặng',0],
+['run-server',2,'Tự host, chạy 24/7 trên server','Hệ thống chạy liên tục, bạn chỉ vào xem và duyệt.','','Vừa',0],
+['run-multirepo',2,'Workspace nhiều repo','Mỗi task chọn một repo đích trong workspace.','run-worktree','Vừa',0],
+['dash-board',3,'Bảng task dạng Kanban theo trạng thái','Thẻ tự di chuyển giữa các cột khi agent làm việc.','','Vừa',1],
+['dash-live',3,'Xem agent nào đang làm gì theo thời gian thực','Trạng thái từng agent và luồng output trực tiếp.','','Vừa',0],
+['dash-eta',3,'Dự tính thời điểm xong của task','Ước lượng từ lịch sử các lần chạy trước.','dash-live,dash-replay','Nặng',0],
+['dash-report',3,'Báo cáo tổng kết ngày và tuần','Task xong, task kẹt, PR đã merge, agent làm nhiều nhất.','dash-board,dash-replay','Vừa',0],
+['dash-cost',3,'Token và chi phí theo task, theo agent','Với subscription, tính theo phần trăm hạn mức đã dùng.','dash-live','Vừa',0],
+['dash-diff',3,'Xem diff trong giao diện và mở bản xem trước','Review code của agent tại chỗ, mở dev server của nhánh.','run-worktree','Vừa',0],
+['dash-replay',3,'Xem lại lịch sử từng lần chạy','Mỗi task lưu toàn bộ sự kiện để phát lại.','','Vừa',0],
+['dash-tree',3,'Cây quan hệ PM và agent con','Ai giao việc cho ai trong task đang chạy.','orch-roles,dash-live','Nhẹ',0],
+['sched-cal',4,'Calendar để lên lịch task định kỳ','Lịch tuần và tháng, xem lần chạy tiếp theo.','auth-cli','Vừa',0],
+['sched-md',4,'Job viết bằng file Markdown','Phần đầu khai báo lịch và agent, phần thân là prompt.','sched-cal','Nhẹ',0],
+['sched-quiet',4,'Khung giờ cấm chạy','Ví dụ không chạy 9h đến 18h.','sched-cal','Nhẹ',0],
+['sched-night',4,'Hàng đợi chạy qua đêm','Tối nạp task, sáng nhận chuỗi PR để duyệt.','sched-cal','Vừa',0],
+['prompt-lib',5,'Thư viện prompt gắn theo agent và theo skill','Mỗi agent có bộ prompt riêng, có phiên bản.','orch-roles','Vừa',0],
+['prompt-tech',5,'Hồ sơ kỹ thuật dự án','Techstack, các layer, quy ước, lệnh build và test.','prompt-lib','Vừa',0],
+['prompt-skillmd',5,'Skill theo chuẩn SKILL.md','Dùng chung cho Claude Code, Codex, Gemini.','prompt-lib','Vừa',0],
+['prompt-sync',5,'Đồng bộ file hướng dẫn từ một nguồn','Sinh CLAUDE.md, AGENTS.md và rule cho từng agent.','prompt-tech,prompt-skillmd','Vừa',0],
+['prompt-memory',5,'Bộ nhớ dùng chung giữa các agent','Quyết định, sự kiện, bẫy đã gặp, sở thích.','prompt-lib','Nặng',0],
+['prompt-learn',5,'Tự ghi bài học sau mỗi task','Cuối task, agent cập nhật bộ nhớ.','prompt-memory','Nhẹ',0],
+['prompt-graph',5,'Đồ thị tri thức của code','Quan hệ giữa module, quyết định và tài liệu.','prompt-memory','Nặng',0],
+['integ-git',6,'Nối GitHub, GitLab, Linear','Issue thành task, PR và CI hiện trên thẻ.','auth-basic','Vừa',0],
+['integ-notify',6,'Thông báo qua Telegram, Discord, Slack','Nhận tóm tắt khi task xong hoặc cần duyệt.','','Vừa',0],
+['integ-mobile',6,'Duyệt và theo dõi từ điện thoại','Xem tiến độ, duyệt quyền chạy lệnh từ di động.','auth-basic,orch-human,dash-live','Vừa',0],
+['safe-audit',7,'Nhật ký kiểm toán','Ghi lại mọi thay đổi, ai làm và khi nào.','','Nhẹ',0],
+['safe-sandbox',7,'Sandbox cho task rủi ro','Chạy lệnh lạ trong container, không chạm máy thật.','run-worktree','Nặng',0]
+];
+const GROUPS = ['Tài khoản và kết nối AI','Điều phối agent','Chạy và cô lập code','Dashboard, theo dõi và báo cáo','Lịch và tự động hóa','Prompt, skill và tri thức','Tích hợp','An toàn'];
+const FLAGS = {cli:'auth-cli',multi:'auth-multi',quota:'auth-quota',failover:'auth-failover',apikey:'auth-apikey',roles:'orch-roles',doc:'orch-doc',test:'orch-test',dag:'orch-dag',human:'orch-human',worktree:'run-worktree',pr:'run-pr',ssh:'run-ssh',server:'run-server',multirepo:'run-multirepo',live:'dash-live',eta:'dash-eta',report:'dash-report',cost:'dash-cost',diff:'dash-diff',replay:'dash-replay',tree:'dash-tree',cal:'sched-cal',md:'sched-md',quiet:'sched-quiet',night:'sched-night',lib:'prompt-lib',tech:'prompt-tech',skill:'prompt-skillmd',sync:'prompt-sync',mem:'prompt-memory',learn:'prompt-learn',graph:'prompt-graph',git:'integ-git',notify:'integ-notify',mobile:'integ-mobile',audit:'safe-audit',sandbox:'safe-sandbox'};
+const TASKS = [
+{id:1,col:0,title:'Thiết kế schema bảng users',pm:'Claude',worker:'Gemini',acct:'gemini-1',prog:0,eta:'chưa bắt đầu',cost:'0%',branch:'task/users-schema'},
+{id:2,col:0,title:'Trang cài đặt hồ sơ người dùng',pm:'Claude',worker:'Gemini',acct:'gemini-2',prog:0,eta:'chưa bắt đầu',cost:'0%',branch:'task/profile-page'},
+{id:3,col:1,title:'Form đăng nhập và kiểm tra dữ liệu',pm:'Claude',worker:'Gemini',acct:'gemini-1',prog:62,eta:'còn ~12 phút',cost:'3%',branch:'task/login-form'},
+{id:4,col:1,title:'Viết unit test cho module thanh toán',pm:'Claude',worker:'Codex',acct:'codex-1',prog:35,eta:'còn ~25 phút',cost:'5%',branch:'task/billing-tests',test:'Đang test',testc:'bl'},
+{id:5,col:1,title:'Migrate bảng orders',pm:'Claude',worker:'Gemini',acct:'gemini-2',prog:80,eta:'còn ~6 phút',cost:'2%',branch:'task/orders-migrate'},
+{id:6,col:2,title:'Xóa cột legacy_id khỏi bảng orders',pm:'Claude',worker:'Gemini',acct:'gemini-3',prog:100,eta:'chờ bạn duyệt',cost:'1%',branch:'task/drop-legacy-id'},
+{id:7,col:3,title:'Refactor adapter thanh toán',pm:'Claude',worker:'Codex',acct:'codex-1',prog:100,eta:'xong',cost:'4%',branch:'task/pay-adapter',pr:'PR #128',test:'Test đạt',testc:'gr'},
+{id:8,col:4,title:'Cập nhật tài liệu API',pm:'Claude',worker:'Claude',acct:'claude-1',prog:100,eta:'xong',cost:'1%',branch:'task/api-docs',pr:'PR #126',test:'Test đạt',testc:'gr'}
+];
+const STATUS = [['Backlog','Chưa giao cho agent','gy'],['Đang chạy','Agent đang làm việc','bl'],['Cần bạn','Đang chờ bạn duyệt hoặc quyết định','or'],['Đang review','PR đã mở, chờ review hoặc CI','tl'],['Sẵn sàng merge','Đã qua test và review','gr']];
+const ACCS = [
+{id:'claude-1',prov:'Claude',plan:'Max',st:'Đã đăng nhập',stc:'gr',q5:42,qw:18,use:'đang làm Task #3 (PM)',prio:1},
+{id:'gemini-1',prov:'Gemini',plan:'Pro',st:'Đã đăng nhập',stc:'gr',q5:71,qw:40,use:'đang làm Task #3',prio:1},
+{id:'gemini-2',prov:'Gemini',plan:'Pro',st:'Đã đăng nhập',stc:'gr',q5:55,qw:33,use:'đang làm Task #5',prio:2},
+{id:'gemini-3',prov:'Gemini',plan:'Pro',st:'Hết phiên',stc:'or',q5:0,qw:0,use:'cần đăng nhập lại',prio:3},
+{id:'codex-1',prov:'Codex',plan:'ChatGPT Plus',st:'Hết hạn mức 5 giờ',stc:'rd',q5:100,qw:64,use:'reset sau 1 giờ 20 phút',prio:1}
+];
+const PROMPTS = {
+pm:'Bạn là PM của dự án.\nNhiệm vụ: chia mục tiêu thành task nhỏ, giao đúng agent, kiểm tra kết quả theo tiêu chí hoàn thành trước khi cho qua.\nKhông tự viết code. Khi task thiếu thông tin, hỏi người dùng thay vì đoán.',
+worker:'Bạn là Worker.\nChỉ làm đúng phạm vi task được giao, trong worktree của task.\nTuân thủ hồ sơ kỹ thuật dự án. Xong thì báo lại kèm danh sách file đã đổi.',
+test:'Bạn là agent test.\nViết unit test cho phần Worker vừa code, chạy và báo kết quả pass hoặc fail.\nKhông sửa code sản phẩm; nếu test lộ lỗi, mô tả lỗi cho PM.',
+doc:'Bạn là agent tài liệu.\nKhi task xong, cập nhật README, changelog và tài liệu thiết kế liên quan.\nViết ngắn, đúng với code hiện tại, không suy đoán.'
+};
+function allOn(){ const f = {}; MODS.forEach(function(m){ f[m[0]] = true; }); return f; }
+class Component extends DCLogic {
+constructor(props){
+  super(props);
+  this.state = {view:'board',panel:'task',taskId:3,tab:'over',feats:allOn(),notice:'',pAgent:'pm',pTab:'prompt',audit:[{t:'Hôm qua',m:'Bật "Hàng đợi chạy qua đêm"'},{t:'Hôm qua',m:'Bật "Tự chuyển tài khoản khi hết hạn mức"'}]};
+}
+byId(){ const o = {}; MODS.forEach(function(m){ o[m[0]] = {id:m[0],g:m[1],name:m[2],desc:m[3],req:m[4] ? m[4].split(',') : [],eff:m[5],lock:!!m[6]}; }); return o; }
+setFeat(id,on){
+  const by = this.byId(), f = Object.assign({}, this.state.feats), changed = [];
+  if (by[id].lock) { return; }
+  if (on) {
+    const st = [id];
+    while (st.length) { const k = st.pop(); if (!f[k]) { f[k] = true; if (k !== id) { changed.push(by[k].name); } } by[k].req.forEach(function(r){ if (!f[r]) { st.push(r); } }); }
+  } else {
+    f[id] = false;
+    let again = true;
+    while (again) { again = false; MODS.forEach(function(m){ if (f[m[0]] && by[m[0]].req.some(function(r){ return !f[r]; })) { f[m[0]] = false; changed.push(m[2]); again = true; } }); }
+  }
+  const notice = changed.length ? (on ? 'Đã bật kèm vì cần thiết: ' : 'Đã tắt kèm vì phụ thuộc: ') + changed.join(', ') + '.' : '';
+  const audit = [{t:'Vừa xong',m:(on ? 'Bật "' : 'Tắt "') + by[id].name + '"'}].concat(this.state.audit).slice(0,6);
+  this.setState({feats:f,notice:notice,audit:audit});
+}
+setPack(name){
+  const solo = ['auth-basic','auth-cli','orch-roles','run-worktree','dash-board','dash-live','prompt-lib','prompt-tech'];
+  const team = solo.concat(['auth-multi','auth-quota','auth-failover','orch-test','orch-doc','dash-diff','run-pr','integ-git','orch-human','sched-cal','dash-cost','integ-notify','dash-replay']);
+  const f = {}; MODS.forEach(function(m){ f[m[0]] = false; });
+  const pick = name === 'solo' ? solo : (name === 'team' ? team : MODS.map(function(m){ return m[0]; }));
+  pick.forEach(function(k){ f[k] = true; });
+  const label = name === 'solo' ? 'Solo nhẹ' : (name === 'team' ? 'Nhóm nhỏ' : 'Đầy đủ');
+  this.setState({feats:f,notice:'Đã áp dụng gói "' + label + '".'});
+}
+card(t,x,self){
+  const chips = [];
+  if (x.eta && t.col === 1) { chips.push({l:t.eta,tip:'Dự tính từ lịch sử các lần chạy trước',c:'bl'}); }
+  if (x.cost) { chips.push({l:t.cost + ' hạn mức',tip:'Phần hạn mức subscription task này đã dùng',c:''}); }
+  if (x.pr && t.pr) { chips.push({l:t.pr,tip:'Pull request của task này',c:'tl'}); }
+  if (x.test && t.test) { chips.push({l:t.test,tip:'Kết quả của agent test',c:t.testc}); }
+  const shown = chips.slice(0,3);
+  const lower = t.worker.toLowerCase();
+  return {title:t.title,branch:t.branch,agL:t.worker.charAt(0),agCls:lower,agTip:t.worker + (x.multi ? ' · ' + t.acct : ''),who:(x.roles ? 'PM ' + t.pm + ' → ' : '') + t.worker,hasBar:t.prog > 0 && t.prog < 100,w:t.prog + '%',chips:shown,hasChips:shown.length > 0,selCls:(self.state.panel === 'task' && self.state.taskId === t.id) ? 'sel' : '',open:function(){ self.setState({panel:'task',taskId:t.id,tab:'over'}); }};
+}
+renderVals(){
+  const s = this.state, f = s.feats, self = this, by = this.byId();
+  const x = {}; Object.keys(FLAGS).forEach(function(k){ x[k] = !!f[FLAGS[k]]; });
+  const nav = {board:true,agents:x.cli,dash:x.live || x.report || x.cost,cal:x.cal,prompts:x.lib,integ:x.git || x.notify || x.mobile,settings:true};
+  let view = s.view; if (!nav[view]) { view = 'settings'; }
+  const titles = {board:'Board',agents:'Agent và tài khoản',dash:'Dashboard',cal:'Lịch',prompts:'Prompt và tri thức',integ:'Tích hợp',settings:'Cài đặt: Tính năng'};
+  const v = {}, navc = {}, go = {};
+  Object.keys(nav).forEach(function(k){ v[k] = view === k; navc[k] = 'nav' + (view === k ? ' on' : ''); go[k] = function(){ self.setState({view:k,panel:k === 'board' ? s.panel : null}); }; });
+  const onCount = MODS.filter(function(m){ return f[m[0]]; }).length;
+  // board
+  const colIdx = [0,1,2,3,4].filter(function(i){ return i !== 2 || x.human; });
+  const cols = colIdx.map(function(i){
+    const cards = TASKS.filter(function(t){ return ((t.col === 2 && !x.human) ? 1 : t.col) === i; }).map(function(t){ return self.card(t,x,self); });
+    return {name:STATUS[i][0],tip:STATUS[i][1],cls:STATUS[i][2],count:cards.length,cards:cards,empty:cards.length === 0};
+  });
+  // panel
+  const open = s.panel === 'task' || s.panel === 'new';
+  const T = TASKS.filter(function(t){ return t.id === s.taskId; })[0] || TASKS[2];
+  const st = STATUS[(T.col === 2 && !x.human) ? 1 : T.col];
+  const tabDefs = [['over','Tổng quan',true],['live','Trực tiếp',x.live],['diff','Diff',x.diff],['replay','Lịch sử',x.replay],['approve','Duyệt',x.human]].filter(function(t){ return t[2]; });
+  let tab = s.tab; if (!tabDefs.some(function(t){ return t[0] === tab; })) { tab = 'over'; }
+  const tabs = tabDefs.map(function(t){ return {label:t[1],cls:'tab' + (tab === t[0] ? ' on' : ''),go:function(){ self.setState({tab:t[0]}); }}; });
+  const tb = {over:tab === 'over',live:tab === 'live',diff:tab === 'diff',replay:tab === 'replay',approve:tab === 'approve'};
+  const roles = [{role:'PM',agent:T.pm}].filter(function(){ return x.roles; });
+  roles.push({role:'Worker',agent:T.worker + (x.multi ? ' · ' + T.acct : '')});
+  if (x.test) { roles.push({role:'Test',agent:'Codex · codex-1'}); }
+  if (x.doc) { roles.push({role:'Tài liệu',agent:'Claude · claude-1'}); }
+  roles.forEach(function(r){ r.agL = r.agent.charAt(0); r.agCls = r.agent.split(' ')[0].toLowerCase(); });
+  const d = {id:T.id,title:T.title,status:st[0],stc:st[2],branch:T.branch,roles:roles,
+    log:[{t:'10:42',m:'Đọc hồ sơ kỹ thuật dự án'},{t:'10:43',m:'Tạo worktree ' + T.branch},{t:'10:47',m:'Sửa src/features/login/form.tsx'},{t:'10:51',m:'Chạy pnpm test --filter login'},{t:'10:52',m:'Test đạt, đang chuẩn bị báo cáo cho PM'}],
+    runs:[{t:'10:42',title:'Lần chạy 2',sub:'Sửa theo góp ý của PM',st:'Đang chạy',c:'bl'},{t:'09:58',title:'Lần chạy 1',sub:'Bản đầu tiên, PM yêu cầu bổ sung kiểm tra mật khẩu',st:'Đã xong',c:'gr'}]};
+  // agents
+  const seen = {};
+  const accs = ACCS.filter(function(a){ if (x.multi) { return true; } if (seen[a.prov]) { return false; } seen[a.prov] = true; return true; }).map(function(a){
+    const cl = function(n){ return n >= 100 ? 'rd' : (n >= 70 ? 'or' : ''); };
+    return {id:a.id,prov:a.prov,plan:a.plan,st:a.st,stc:a.stc,use:a.use,prio:a.prio,agL:a.prov.charAt(0),agCls:a.prov.toLowerCase(),q5w:a.q5 + '%',qww:a.qw + '%',q5c:cl(a.q5),qwc:cl(a.qw)};
+  });
+  // dashboard
+  const live = [['Gemini · gemini-1','Form đăng nhập và kiểm tra dữ liệu',62,'~12 phút'],['Codex · codex-1','Viết unit test cho module thanh toán',35,'~25 phút'],['Gemini · gemini-2','Migrate bảng orders',80,'~6 phút']].map(function(r){ return {who:r[0],task:r[1],w:r[2] + '%',eta:r[3],agL:r[0].charAt(0),agCls:r[0].split(' ')[0].toLowerCase()}; });
+  const costs = [['Claude',18,''],['Gemini',40,''],['Codex',64,'or']].map(function(r){ return {n:r[0],w:r[1] + '%',c:r[2]}; });
+  const week = [['T2',2],['T3',3],['T4',1],['T5',4],['T6',4],['T7',0],['CN',0]].map(function(r){ return {d:r[0],n:r[1],h:(r[1] / 4 * 100) + '%'}; });
+  const tree = [[0,'Claude','PM · điều phối Task #3'],[20,'Gemini','Worker · code form đăng nhập'],[20,'Codex','Test · viết test cho form'],[40,'Claude','Tài liệu · chờ task xong']].map(function(r){ return {pad:r[0] + 'px',agL:r[1].charAt(0),agCls:r[1].toLowerCase(),label:r[1] + ' ' + r[2]}; });
+  // calendar
+  const evs = [['T2',[['06:30','Tóm tắt PR tuần trước','Claude · claude-1']]],['T3',[['02:00','Quét phụ thuộc có lỗ hổng','Gemini · gemini-1']]],['T4',[['02:00','Chạy toàn bộ test','Codex · codex-1']]],['T5',[['06:30','Báo cáo tuần','Claude · claude-1']]],['T6',[['23:00','Hàng đợi qua đêm: 5 task','Nhiều agent']]],['T7',[]],['CN',[['20:00','Dọn worktree cũ','Hệ thống']]]];
+  const days = evs.map(function(d){ return {n:d[0],evs:d[1].map(function(e){ return {t:e[0],title:e[1],tip:'Chạy bằng ' + e[2]}; })}; });
+  // prompts
+  const pDefs = [['pm','PM','Claude'],['worker','Worker','Gemini'],['test','Agent test','Codex'],['doc','Agent tài liệu','Claude']].filter(function(p){ return p[0] === 'pm' || p[0] === 'worker' || (p[0] === 'test' && x.test) || (p[0] === 'doc' && x.doc); });
+  let pa = s.pAgent; if (!pDefs.some(function(p){ return p[0] === pa; })) { pa = 'pm'; }
+  const pAgents = pDefs.map(function(p){ return {name:p[1],cls:'nav' + (pa === p[0] ? ' on' : ''),agL:p[2].charAt(0),agCls:p[2].toLowerCase(),tip:'Prompt của ' + p[1],go:function(){ self.setState({pAgent:p[0]}); }}; });
+  const pTabDefs = [['prompt','Prompt',true],['tech','Hồ sơ kỹ thuật',x.tech],['skill','Skill',x.skill],['mem','Bộ nhớ',x.mem]].filter(function(t){ return t[2]; });
+  let ptab = s.pTab; if (!pTabDefs.some(function(t){ return t[0] === ptab; })) { ptab = 'prompt'; }
+  const pTabs = pTabDefs.map(function(t){ return {label:t[1],cls:'tab' + (ptab === t[0] ? ' on' : ''),go:function(){ self.setState({pTab:t[0]}); }}; });
+  const pt = {prompt:ptab === 'prompt',tech:ptab === 'tech',skill:ptab === 'skill',mem:ptab === 'mem'};
+  const techRows = [['Techstack','Next.js · TypeScript · PostgreSQL (ví dụ)'],['Các layer','feature · base · code extension'],['Quy ước đặt tên','kebab-case cho file, PascalCase cho component'],['Lệnh build và test','pnpm build · pnpm test'],['Ranh giới','feature không import trực tiếp feature khác']].map(function(r){ return {k:r[0],v:r[1]}; });
+  const skills = [['viet-unit-test','Cách viết và chạy unit test cho module mới','Worker, Test'],['cap-nhat-tai-lieu','Cập nhật README và changelog sau task','Tài liệu'],['review-pr','Checklist kiểm tra PR trước khi cho qua','PM']].map(function(r){ return {n:r[0],d:r[1],a:r[2]}; });
+  const mems = [['decision','Mỗi task chạy trong worktree riêng','Claude','bl'],['gotcha','Migration phải chạy trước khi seed dữ liệu','Gemini','or'],['fact','Dự án dùng pnpm workspace','Codex',''],['preference','Commit message viết bằng tiếng Anh','Claude','tl']].map(function(r){ return {k:r[0],t:r[1],a:r[2],c:r[3]}; });
+  // integrations
+  const integs = [];
+  if (x.git) { integs.push({name:'GitHub',st:'Đã kết nối',stc:'gr',d:'Issue thành task, PR và trạng thái CI hiện trên thẻ.',btn:'Quản lý',tip:'Chọn repo và bộ lọc issue'}); integs.push({name:'GitLab',st:'Chưa kết nối',stc:'',d:'Merge request và pipeline hiện trên thẻ.',btn:'Kết nối',tip:'Đăng nhập GitLab để cấp quyền'}); integs.push({name:'Linear',st:'Chưa kết nối',stc:'',d:'Ticket thành task, trạng thái đồng bộ hai chiều.',btn:'Kết nối',tip:'Đăng nhập Linear để cấp quyền'}); }
+  if (x.notify) { integs.push({name:'Telegram',st:'Đã kết nối',stc:'gr',d:'Tóm tắt khi task xong hoặc cần duyệt, nhắn lại để chỉ đạo.',btn:'Quản lý',tip:'Chọn sự kiện nào được gửi'}); integs.push({name:'Discord và Slack',st:'Chưa kết nối',stc:'',d:'Chuyển thông báo vào kênh của nhóm.',btn:'Kết nối',tip:'Cấp quyền cho bot'}); }
+  if (x.mobile) { integs.push({name:'Điện thoại',st:'1 máy đã ghép',stc:'gr',d:'Xem tiến độ và duyệt quyền chạy lệnh từ di động.',btn:'Ghép máy mới',tip:'Quét mã để ghép thêm một điện thoại'}); }
+  // settings
+  const groups = GROUPS.map(function(title,gi){
+    const items = MODS.filter(function(m){ return m[1] === gi; }).map(function(m){
+      const on = !!f[m[0]], lock = !!m[6];
+      const reqs = by[m[0]].req.map(function(r){ return by[r].name; });
+      return {name:m[2],desc:m[3],eff:m[5],locked:lock,swc:on ? 'on' : '',aria:on ? 'true' : 'false',hasReq:reqs.length > 0,reqText:'Cần bật trước: ' + reqs.join(', '),swTip:lock ? 'Luôn bật: giao diện chính dựa vào tính năng này' : (on ? 'Đang bật. Bấm để tắt' : 'Đang tắt. Bấm để bật'),toggle:function(){ self.setFeat(m[0],!on); }};
+    });
+    return {title:title,n:items.length,on:items.filter(function(i){ return i.swc === 'on'; }).length,items:items};
+  });
+  return {
+    themeClass:this.props.dark ? 'dark' : '',x:x,nav:nav,navc:navc,go:go,v:v,viewTitle:titles[view],onCount:onCount,total:MODS.length,
+    cols:cols,openNew:function(){ self.setState({panel:'new'}); },closePanel:function(){ self.setState({panel:null}); },
+    p:{open:open,isTask:s.panel === 'task',isNew:s.panel === 'new'},d:d,tabs:tabs,tb:tb,
+    accs:accs,live:live,costs:costs,week:week,tree:tree,days:days,
+    pAgents:pAgents,pTabs:pTabs,pt:pt,pName:pDefs.filter(function(p){ return p[0] === pa; })[0][1],pText:PROMPTS[pa],techRows:techRows,skills:skills,mems:mems,
+    integs:integs,groups:groups,notice:s.notice,hasNotice:s.notice !== '',auditRows:s.audit,
+    packSolo:function(){ self.setPack('solo'); },packTeam:function(){ self.setPack('team'); },packFull:function(){ self.setPack('full'); }
+  };
+}
+}
+</script>
+
+
+</body></html>
