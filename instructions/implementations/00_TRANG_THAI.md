@@ -66,7 +66,7 @@ Cột Phụ thuộc: task phải `DONE` (hoặc `DONE_WITH_GAPS` chấp nhận �
 | :-: | :--- | :--- | :--- | :--- | :--- |
 | T01 | Khung workspace, chuỗi công cụ, hồ sơ | Bước 0 | ✅ DONE | | `reports/T01.md` |
 | T01B | Chỉnh khung theo cấu trúc chuẩn (sau kiểm T01) | T01 | ✅ DONE | | `reports/T01B.md` |
-| T02 | Cổng `verify` và các script kiểm | T01B | ⏳ Todo | | |
+| T02 | Cổng `verify` và các script kiểm | T01B | ✅ DONE | | `reports/T02.md` |
 | T03 | Cơ sở dữ liệu lõi | T02 | ⏳ Todo | | |
 | T04 | Bus sự kiện | T03 | ⏳ Todo | | |
 | T05 | Hợp đồng module và `gen-modules` | T03, T04 | ⏳ Todo | | |
