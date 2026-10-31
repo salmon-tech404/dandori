@@ -1,0 +1,16 @@
+[package]
+name = "dandori-agent-adapters"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+dandori-types = { workspace = true }
+dandori-process = { workspace = true }
+dandori-agent-port = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }

@@ -1,0 +1,17 @@
+[package]
+name = "dandori-registry"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+dandori-types = { workspace = true }
+dandori-events = { workspace = true }
+dandori-db = { workspace = true }
+dandori-module-api = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }

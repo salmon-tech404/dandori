@@ -1,0 +1,18 @@
+[package]
+name = "dandori-vault"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+dandori-types = { workspace = true }
+aes-gcm = { workspace = true }
+zeroize = { workspace = true }
+secrecy = { workspace = true }
+keyring = { workspace = true }
+thiserror = { workspace = true }
+rand = { workspace = true }
