@@ -1,9 +1,11 @@
 //! Quản lý tiến trình con an toàn của Dandori.
 
-#![warn(missing_docs)]
+pub mod error;
+pub mod event;
+pub mod executor;
+pub mod spec;
 
-/// Khởi tạo module tiến trình con.
-#[must_use]
-pub fn init() -> &'static str {
-    "dandori-process initialized"
-}
+pub use error::ProcessError;
+pub use event::ProcessEvent;
+pub use executor::spawn;
+pub use spec::ProcessSpec;
