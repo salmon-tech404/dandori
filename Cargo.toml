@@ -68,6 +68,7 @@ uuid = { version = "1.13", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 ts-rs = { version = "10.1", features = ["chrono-impl", "uuid-impl"] }
 argon2 = "0.5"
+sha2 = "0.10"
 rand = "0.8"
 secrecy = { version = "0.10", features = ["serde"] }
 zeroize = { version = "1.8", features = ["derive"] }
