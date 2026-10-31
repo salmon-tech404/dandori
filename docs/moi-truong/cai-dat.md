@@ -94,7 +94,7 @@ Ba gói trên sẽ tạo ra các lệnh sau:
 | `cargo-nextest` | `cargo-nextest.exe` | `cargo nextest ...` |
 | `sqlx-cli` | `sqlx.exe` và `cargo-sqlx.exe` | `sqlx ...` và `cargo sqlx ...` |
 
-*(Tên file là [kiến thức chung]; cách kiểm đúng là chạy `cargo install --list` sau khi cài xong, nó liệt kê công cụ và file đã cài.)*
+*(Tên file đã được kiểm lại bằng `cargo install --list` sau khi cài, khớp bảng trên.)*
 
 ### 3a. `cargo-deny`: nhân viên kiểm hàng nhập kho
 
@@ -148,9 +148,21 @@ cargo nextest --version
 cargo install --list
 ```
 
-- **Trạng thái:** **chưa xong.** Lần chạy đầu thất bại do terminal chưa nhận PATH (xem `../su-co/2026-10-30-cargo-khong-nhan-ra.md`).
-- **Việc còn lại:** cài lại trong cửa sổ PowerShell mở mới; rồi dán đầu ra bốn lệnh trên vào đây.
-- **Kết quả kiểm:** _(điền sau khi cài xong)_
+- **Trạng thái:** **xong** (2026-10-30). Lần chạy đầu thất bại do terminal chưa nhận PATH (xem `../su-co/2026-10-30-cargo-khong-nhan-ra.md`); sau khi mở cửa sổ mới thì cài được.
+- **Kết quả kiểm [đã kiểm, 2026-10-30], đầu ra nguyên văn:**
+  ```text
+  cargo-deny 0.20.2
+  sqlx-cli 0.9.0
+  cargo-nextest 0.9.150 (d225b1daf 2026-10-26)
+
+  cargo-deny v0.20.2:
+      cargo-deny.exe
+  cargo-nextest v0.9.150:
+      cargo-nextest.exe
+  sqlx-cli v0.9.0:
+      cargo-sqlx.exe
+      sqlx.exe
+  ```
 
 ## Bước 4. Công cụ đã có sẵn từ trước
 
@@ -164,25 +176,20 @@ cargo install --list
 
 ```text
 node -v        ->  v24.19.0
-pnpm -v        ->  10.13.1
+pnpm -v        ->  12.14.0
 git --version  ->  git version 2.55.0.windows.5
 ```
+
+**Lưu ý về pnpm (đã kiểm 2026-10-31):** bản pnpm cài toàn cục là **12.14.0**. Lúc đầu ghi chú này từng ghi `10.13.1` vì tôi chạy lệnh khi đang đứng trong thư mục dự án Vibe Kanban, nơi `package.json` có dòng `packageManager: pnpm@10.13.1`; pnpm 12 tự chuyển sang phiên bản dự án khai báo. Vì vậy Dandori **phải ghim `packageManager`** (làm ở T01B).
 
 **CLI agent** (các "nhân viên" AI mà Dandori điều phối): `claude` và `agy` **có** trên máy; `codex` **chưa cài** (chỉ cần nếu muốn dùng nhà cung cấp OpenAI); `gh` (GitHub CLI) chưa cài, không bắt buộc.
 
 ## Bước 5. Repo git
 
 - **Là gì:** "két sắt lưu lịch sử" của dự án.
-- **Trạng thái [đã kiểm, 2026-10-30]:** repo đã được khởi tạo ở `D:\19-dandori`, nhánh `master`, **chưa có commit nào**.
-- **Vì sao cần commit baseline trước khi giao task:** baseline là **mốc xuất phát**. Mọi lần kiểm sau này ("agent có đụng vào file không được đụng không?") đều so sánh với mốc này. Chưa có mốc thì không so sánh được.
-- **Việc còn lại:**
-  ```text
-  git branch -m main
-  git add instructions docs
-  git commit -m "chore: baseline instructions before dandori build"
-  git rev-parse --short HEAD
-  ```
-- **Mã baseline:** _(điền sau khi commit)_
+- **Trạng thái [đã kiểm, 2026-10-30]:** xong. Nhánh `main`, commit baseline **`f1532bc`** ("first commit"), đã đẩy lên `https://github.com/salmon-tech404/dandori.git`; cây làm việc sạch, khớp `origin/main`. Có 28 file trong `instructions/` và 11 file trong `docs/` được theo dõi.
+- **Vì sao cần baseline trước khi giao task:** baseline là **mốc xuất phát**. Mọi lần kiểm sau này ("agent có đụng vào file không được đụng không?") đều so sánh với mốc này.
+- **Mã baseline:** `f1532bc`
 
 ## Cách thêm một bước mới
 

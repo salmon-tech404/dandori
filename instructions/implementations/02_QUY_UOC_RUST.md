@@ -92,9 +92,11 @@ Chuẩn này dựa trên các nguồn dưới đây. Cột "Đã đọc" cho bi�
 | RS-API-001 | Mọi kiểu công khai implement `Debug` (kiểu chứa bí mật dùng `Debug` tự viết đã che) | T1 | API `C-DEBUG`; MS `M-PUBLIC-DEBUG` | `[workspace.lints.rust] missing_debug_implementations = "warn"` (+ `-D warnings`) |
 | RS-API-002 | Đặt tên theo RFC 430 (`snake_case` hàm, `UpperCamelCase` kiểu, `SCREAMING_SNAKE_CASE` hằng); tiền tố chuyển đổi `as_`/`to_`/`into_`; getter không có `get_` | T1 (casing) / T3 | API `C-CASE`, `C-CONV`, `C-GETTER` | rustc cảnh báo casing mặc định (`non_snake_case`...) → `-D warnings` |
 | RS-API-003 | Tên ngắn, **không** hậu tố mơ hồ `Manager`, `Service`, `Factory`, `Handler` khi không có nghĩa riêng | T3 | MS `M-WEASEL-WORDS`, `M-SHORT-NAMES` (tóm tắt) | Review |
-| RS-DOC-001 | Mục công khai của crate lõi có doc comment: câu đầu một dòng; mục `# Errors`, `# Panics`, `# Safety` khi áp dụng | T2 | API `C-FAILURE`; MS `M-CANONICAL-DOCS`, `M-FIRST-DOC-SENTENCE` (nguyên văn) | `#![warn(missing_docs)]` ở `dandori-module-api`, `dandori-types`; Review phần còn lại |
+| RS-DOC-001 | Mục công khai của crate lõi có doc comment: câu đầu một dòng; mục `# Errors`, `# Panics`, `# Safety` khi áp dụng | T2 | API `C-FAILURE`; MS `M-CANONICAL-DOCS`, `M-FIRST-DOC-SENTENCE` (nguyên văn) | `#![warn(missing_docs)]` ở **mọi crate thư viện** (T01B đã bật; kèm `-D warnings` nên mục công khai nào thiếu tài liệu sẽ làm `verify` đỏ); Review phần còn lại |
 | RS-DOC-002 | Doc comment mô tả **hành vi hiện tại**, không kể quá trình thiết kế/tác giả AI | T3 | MS `M-NO-META-DESIGN-DOCUMENTATION` (nguyên văn) | Review |
 | RS-DOC-003 | Hằng "magic" có tên và chú thích; không số/chuỗi lạ rải rác | T3 | MS `M-DOCUMENTED-MAGIC` (tóm tắt) | Review |
+| RS-DOC-004 | Mỗi crate có **`description`** trong `Cargo.toml`; câu đầu của `//!` là một dòng ngắn | T1 | API `C-METADATA`; MS `M-FIRST-DOC-SENTENCE` (nguyên văn) | `check-lints.mjs` kiểm `description` |
+| RS-DOC-005 | `cargo doc --workspace --no-deps` với `RUSTDOCFLAGS="-D warnings"` phải qua (không liên kết gãy) | T1 | API `C-CRATE-DOC`; quy ước Cargo | bước trong `verify` (T02) |
 
 ### 2.7 Nhật ký
 
@@ -110,10 +112,15 @@ Chuẩn này dựa trên các nguồn dưới đây. Cột "Đã đọc" cho bi�
 | RS-ARCH-001 | Luật phụ thuộc crate ở `01` mục 3 | T1 | Kantanda `ARCH-DDD-005` (hexagonal), `ARCH-MOD-002`; DAN | `scripts/check-architecture.mjs` đọc `cargo metadata`, dừng khi có cạnh cấm; kèm `tests/tooling/` có ca xanh/đỏ |
 | RS-ARCH-002 | **Module không phụ thuộc module.** `mod-*` chỉ phụ thuộc `dandori-types` + `dandori-module-api` | T1 | PDF ("module không gọi nhau trực tiếp"); `ARCH-MOD-002` | cùng script |
 | RS-ARCH-003 | Bật/tắt module là **trạng thái chạy**, không dùng cargo feature để bật/tắt module. Cargo feature (nếu có) chỉ mang tính cộng thêm | T2 | MS `M-FEATURES-ADDITIVE` (tóm tắt); D-18 | Review |
-| RS-ARCH-004 | Crate xếp **phẳng** dưới `crates/`; mọi crate là thành viên workspace; phụ thuộc ngoài khai báo ở `[workspace.dependencies]` với phiên bản, crate dùng `dep = { workspace = true }` | T1 | MS `M-CRATES-FLAT-FOLDER`, `M-CRATES-IN-WORKSPACE`, `M-CARGO-WORKSPACE` (tóm tắt) | `check-architecture.mjs`; `cargo deny` cấm `*` |
+| RS-ARCH-004 | Crate xếp **phẳng** dưới `crates/`; gốc là virtual manifest với **`members = ["crates/*"]`** và `resolver` ghi rõ; mọi crate là thành viên workspace; phụ thuộc ngoài khai báo ở `[workspace.dependencies]` với phiên bản, crate dùng `dep = { workspace = true }`; `[profile.*]` chỉ ở gốc | T1 | CB (Workspaces, Profiles), MS `M-CRATES-FLAT-FOLDER`, `M-CRATES-IN-WORKSPACE`, `M-CARGO-WORKSPACE` (tóm tắt) | `check-architecture.mjs`; `cargo deny` cấm `*` |
 | RS-ARCH-005 | Không `pub use x::*` (glob re-export) ở API công khai; không `use x::*` trừ trong `#[cfg(test)]` | T1 | MS `M-NO-GLOB-REEXPORTS`, `M-NO-PRELUDE` (tóm tắt); CLP (`enum_glob_use`: có trong ví dụ cấu hình của tài liệu; `wildcard_imports`: chưa xác nhận) | `clippy::enum_glob_use`, `wildcard_imports` = `deny` (T01 xác nhận) |
 | RS-ARCH-006 | Macro là **phương án cuối**; ưu tiên hàm/generic/trait | T3 | MS `M-MACRO-LAST-RESORT`, `M-EXAMPLE-OVER-PROC` (nguyên văn) | Review |
 | RS-ARCH-007 | Mỗi crate có một mục đích; tách khi một phần dùng độc lập được. Không đặt logic nghiệp vụ trong `dandori-server` ngoài việc ghép nối | T2 | MS `M-SMALLER-CRATES` (tóm tắt); Kantanda `ARCH-LAY-001` | Review |
+| RS-ARCH-008 | Chia module theo kiểu **`foo.rs`** (+ thư mục `foo/` cho module con), **không** dùng `mod.rs`; không trộn hai kiểu | T1 | RB ch07-05 (trộn hai kiểu cho cùng một module là lỗi biên dịch) | `clippy::mod_module_files = "deny"` (T01B xác nhận tên lint bằng cách chạy) |
+| RS-ARCH-009 | Crate chương trình: `main.rs` **mỏng** (cấu hình, gọi `lib.rs`), logic nằm trong `lib.rs` để test được. Test tích hợp ở `tests/` của chính crate; test xuyên suốt Rust ở `crates/dandori-e2e/tests/`; thư mục `tests/` ở gốc chỉ cho test script Node | T2 | CB (Layout: gốc virtual manifest không có package nên không biên dịch `tests/` ở gốc); MK (ý kiến) | Review; `check-architecture` cấm `tests/*.rs` ở gốc |
+| RS-ARCH-010 | Crate `dandori-modules` do `gen-modules` sinh; **không sửa tay**; `dandori-server` chỉ phụ thuộc crate này, không phụ thuộc trực tiếp `mod-*` | T1 | ADR 0020 | `gen-modules --check`; `check-architecture.mjs` |
+| RS-ARCH-011 | **Tên crate và thư mục mô tả mục đích**; **cấm** tên chung chung `utils`, `common`, `helpers`, `misc`, `base`, `lib`; nhóm theo tiền tố `dandori-*`, `mod-*` | T1 | MK (ý kiến), MS `M-WEASEL-WORDS`, `M-SHORT-NAMES` (tóm tắt) | `check-architecture.mjs` có danh sách tên bị cấm |
+| RS-ARCH-012 | Có `README.md` ở gốc và ở `crates/`, `frontend/`, `scripts/`, `docs/` | T1 | ADR 0020 mục 5 | `check-architecture.mjs` kiểm tồn tại |
 
 ### 2.9 Phụ thuộc và chuỗi cung ứng
 
@@ -142,6 +149,14 @@ Chuẩn này dựa trên các nguồn dưới đây. Cột "Đã đọc" cho bi�
 | RS-DB-001 | Migration **chỉ tiến**, bảng của module có tiền tố `m_<id>_`; truy vấn dùng sqlx macro với cache offline `.sqlx/` được commit | T1 | D-08; sqlx | `cargo sqlx prepare --check` trong `verify` (T01 xác nhận lệnh bằng `--help`) |
 | RS-DB-002 | Bảng chủ sở hữu theo `project`/`workspace`: mọi truy vấn dữ liệu của người dùng lọc theo phạm vi sở hữu | T1/T2 | Kantanda `BE-DB-001`, `SEC-BOLA-002` | Test: người dùng A không đọc/sửa được dữ liệu workspace của B |
 | RS-TS-001 | Mọi kiểu API dùng ở frontend được sinh bằng ts-rs vào `shared/types.ts`; file sinh ra không lệch | T1 | D-12; VK (`generate-types:check` đã xác nhận có ở `package.json`) | `cargo run --bin generate_types -- --check` (tên binary do T02 đặt) |
+
+### 2.12 Vận hành
+
+| ID | Rule | Tier | Nguồn | Cách kiểm |
+| :--- | :--- | :---: | :--- | :--- |
+| RS-OPS-001 | **Tắt êm** khi nhận **Ctrl+C và SIGTERM**: `CancellationToken` báo mọi task, `TaskTracker` chờ chúng xong, có thời hạn; máy chủ axum dùng `with_graceful_shutdown`. Nếu việc nghe tín hiệu lỗi vẫn phải tắt | T1 | TK (tokio.rs/tokio/topics/shutdown; ví dụ chính thức axum); 12F Disposability | Test: gửi hủy → chương trình thoát trong thời hạn, không còn task (T07, T10); SIGTERM test trên Linux hoặc giả lập (P4-09) |
+| RS-OPS-002 | Cấu hình qua **biến môi trường `DANDORI_*`**; nhật ký ra **stdout** bằng `tracing`; ứng dụng không tự định tuyến hay lưu nhật ký | T2 | 12F Config, Logs | Review; test cấu hình mặc định |
+| RS-OPS-003 | `[profile.release]` chỉ ở `Cargo.toml` gốc. Hiện đặt `strip = true`; **không** đặt `lto`/`codegen-units` cho tới khi **đo** ở P5-01; `panic` giữ **`unwind`** (RS-PANIC-003: panic ở một worker không được làm sập cả chương trình) | T2 | CB (Profiles); DAN | Review; `check-lints.mjs` kiểm không có `panic = "abort"` |
 
 ## 3. Cấu hình mẫu (T01 tạo, T02 khóa)
 
@@ -174,6 +189,7 @@ enum_glob_use = "deny"
 wildcard_imports = "deny"
 too_many_lines = "warn"
 indexing_slicing = "warn"
+mod_module_files = "deny"        # RS-ARCH-008; T01B xác nhận tên lint
 ```
 
 ```toml
@@ -275,3 +291,7 @@ Rule **không phụ thuộc ngôn ngữ** của Kantanda vẫn áp dụng cho Ru
 5. Phiên bản Rust ổn định đang cài (`rustc --version`) để ghim, và `rust-version`.
 
 Chỗ nào kết quả khác mô tả ở đây: **kết quả chạy thật thắng**; sửa file này bằng một dòng "Đã chỉnh" kèm lý do (đây là ngoại lệ của điều cấm sửa `instructions/**`, chỉ với file này và chỉ ở T01).
+
+- **Đã chỉnh (2026-10-30, T01):** Bổ sung `[workspace.lints.rust] unknown_lints = "deny"` vào `Cargo.toml`. Lý do: `rustc` mặc định đặt `unknown_lints` là cảnh báo và bỏ qua `-D warnings`; cần bật tường minh thành `deny` để thực thi RS-LINT-005 khi có lint giả.
+- **Đã chỉnh (2026-10-30, T01):** Thêm `private = { ignore = true }` vào `[licenses]` và `allow-wildcard-paths = true` vào `[bans]` trong `deny.toml`. Lý do: Crate nội bộ có `publish = false` không cần khai báo license, và path dependency của workspace không bị tính là wildcard. Bỏ `version = 2` ở mục `[bans]` và `[sources]` do `cargo-deny 0.20.2` không hỗ trợ khóa này.
+- **Đã chỉnh (2026-10-31, T01B):** Bổ sung `clippy::mod_module_files = "deny"` vào `[workspace.lints.clippy]`. Xác nhận lint thuộc nhóm `clippy::restriction` (mặc định `allow`), hoạt động chính xác với mức `deny` trên Rust 1.99.1 để thực thi RS-ARCH-008.

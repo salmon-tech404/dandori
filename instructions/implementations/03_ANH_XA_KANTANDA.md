@@ -11,7 +11,7 @@ Theo `D:\10-kantanda\rules\architecture\styles.md`, khai báo **theo gói**:
 | Gói / đường dẫn | Partitioning | Dependency style | Khác |
 | :--- | :--- | :--- | :--- |
 | `crates/` (Rust) | domain-partitioned (mỗi module một crate) | hexagonal (port do lõi sở hữu: `dandori-module-api`, `dandori-agent-port`; adapter cắm ở `dandori-server`) | `domain-model` không áp dụng (CRUD là chính) |
-| `web/app/` (TypeScript) | domain-partitioned | — | `feature-slice` (`src/features/<module-id>/`) |
+| `frontend/app/` (TypeScript) | domain-partitioned | — | `feature-slice` (`src/features/<module-id>/`) |
 
 Hệ quả:
 
@@ -69,7 +69,7 @@ Hệ quả:
 - **Trạng thái:** dữ liệu máy chủ qua `@tanstack/react-query`; trạng thái UI toàn cục qua `zustand`; trạng thái lọc/phân trang trong URL (`FE-STA-002`).
 - **Giao diện:** bố cục, ô cắm (slot) và token theo `04_GIAO_DIEN.md`. Mọi màn hình có trạng thái rỗng/đang tải/lỗi (`UI-STA-001`); vùng chạm hiệu dụng ≥ 44px (`UI-LAW-002`); biểu tượng SVG (Lucide), **không emoji làm icon** (`UI-GEN-001`); truy cập được bằng bàn phím và nhãn cho trình đọc màn hình (`UI-A11Y-001`).
 - **Văn bản:** tiếng Việt qua i18n; không tiêu đề viết hoa toàn bộ; chú thích dài trong tooltip "?"; ô nhập dạng "nhãn | điều khiển".
-- **ESLint:** `web/` dùng bản **sao** `D:\10-kantanda\tooling\eslint.config.mjs` đặt ở `web/tooling/kantanda-eslint.config.mjs` (có dòng đầu ghi nguồn và mã commit Kantanda), gọi với `styles: []` (TypeScript của Dandori không khai báo `hexagonal`). Sao thay vì import đường dẫn tuyệt đối để worktree sạch vẫn chạy. Cập nhật bản sao là một task riêng.
+- **ESLint:** `frontend/` dùng bản **sao** `D:\10-kantanda\tooling\eslint.config.mjs` đặt ở `frontend/tooling/kantanda-eslint.config.mjs` (có dòng đầu ghi nguồn và mã commit Kantanda), gọi với `styles: []` (TypeScript của Dandori không khai báo `hexagonal`). Sao thay vì import đường dẫn tuyệt đối để worktree sạch vẫn chạy. Cập nhật bản sao là một task riêng.
 - **Semgrep:** `D:\10-kantanda\tooling\semgrep.yml` có thể chạy nếu máy có Semgrep; không bắt buộc cho `verify`. Việc kiểm tương đương cho Rust là RS-SEC-005 và các script `check-*`.
 
 ## 5. Chuẩn kiểm ở `verify` (bảng ghép)
@@ -80,6 +80,7 @@ Hệ quả:
 | `cargo clippy ... -D warnings` | Rust | RS-LINT-*, RS-PANIC-002, RS-ASYNC-001/007, RS-API-001/002, RS-LOG-001, RS-ARCH-005, RS-SEC-001 |
 | `cargo test --workspace` | Rust | RS-TEST-*, RS-ERR-003, RS-SEC-003/006/007, RS-ASYNC-004 |
 | `cargo deny check` | Rust | RS-DEP-001 |
+| `cargo doc --workspace --no-deps` (`RUSTDOCFLAGS=-D warnings`) | Rust | RS-DOC-004/005 |
 | `scripts/check-architecture.mjs` | Rust | RS-ARCH-001/002/004, RS-ERR-002, RS-DEP-002 |
 | `scripts/check-lints.mjs` | Rust | RS-LINT-002/004, RS-DEP-004, RS-ERR-001 (anyhow) |
 | `scripts/check-sql.mjs` + `cargo sqlx prepare --check` | Rust | RS-SEC-005, RS-DB-001 |
@@ -94,17 +95,17 @@ Tên script cụ thể do T02 đặt; bảng này là **yêu cầu**, T02 phải
 
 **Agent không commit, không `git add`, không push.** Chủ dự án tự commit sau khi duyệt từng task. Để việc đó nhanh và đúng chuẩn Kantanda (`GIT-CMT-001`), mỗi báo cáo có mục **Đề xuất commit** gồm: (1) danh sách đường dẫn cụ thể để `git add`, (2) thông điệp commit theo mẫu dưới, (3) một dòng nhắc commit nên tách nếu task chạm hai mục đích khác nhau.
 
-Mẫu thông điệp (Conventional Commits; một thay đổi một mục đích):
+**Quy trình Git đầy đủ (nhánh theo giai đoạn, đặt tên nhánh, thông điệp commit, Pull Request) nằm ở `docs/quy-trinh-git.md`; mọi tên trong Git đều bằng tiếng Anh.** **Thông điệp commit viết bằng TIẾNG ANH, ngắn gọn, dễ hiểu** (quyết định của chủ dự án 2026-10-31): dòng đầu tối đa khoảng 72 ký tự, dùng động từ nguyên mẫu (`add`, `fix`, `rename`, `remove`), nói **làm gì** chứ không kể lể. Mẫu (Conventional Commits; một thay đổi một mục đích):
 
 ```text
-<type>(<phạm-vi>): <mô tả ngắn, chữ thường, không dấu chấm cuối>
+<type>(<scope>): <short English description, lowercase, no trailing period>
 
-<thân tùy chọn: vì sao, không phải cái gì>
+<optional body: why, not what>
 
 Task: <ID task>
 ```
 
-`type`: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`, `build`. Ví dụ: `feat(registry): tính trạng thái hiệu lực theo phạm vi`.
+`type`: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`, `build`. Ví dụ tốt: `feat(registry): compute effective feature state per scope`, `fix(db): correct typo in crate docs`, `chore(workspace): rename web to frontend`. Ví dụ không nên: câu dài, tiếng Việt, hoặc mơ hồ như `update stuff`.
 
 - Không đưa tên "Claude" hay "Antigravity" hay dòng "Co-Authored-By" của agent vào thông điệp (chủ dự án là tác giả).
 - Nên `git add <đường dẫn cụ thể>` thay vì `git add -A`, để không vô tình quét tệp ngoài phạm vi.
@@ -115,9 +116,10 @@ Task: <ID task>
 ```gitignore
 # build
 /target/
-/web/**/dist/
-/web/**/node_modules/
+/frontend/**/dist/
+/frontend/**/node_modules/
 /node_modules/
+/release/
 # dữ liệu và bí mật
 .env
 .env.*

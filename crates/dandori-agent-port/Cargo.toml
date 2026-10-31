@@ -1,0 +1,14 @@
+[package]
+name = "dandori-agent-port"
+description = "Cổng giao tiếp agent (trait AgentAdapter và kiểu liên quan)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+dandori-types = { workspace = true }
+thiserror = { workspace = true }

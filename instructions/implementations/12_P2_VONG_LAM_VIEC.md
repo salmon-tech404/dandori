@@ -14,7 +14,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** xem lại lịch sử từng lần chạy.
 - **Phụ thuộc:** P1-09.
-- **Chạm vào:** `crates/mod-run-history/**`, `web/app/src/features/run-history/**`, i18n.
+- **Chạm vào:** `crates/mod-run-history/**`, `frontend/app/src/features/run-history/**`, i18n.
 - **Việc phải làm:**
   1. API và giao diện: danh sách lần chạy (lọc theo task, agent, account, trạng thái, khoảng thời gian; phân trang), xem chi tiết và **phát lại log** (`run_event`) có phân trang theo thứ tự, thời lượng, mã thoát, nguyên nhân kết thúc.
   2. Ghi chú và nhãn của người dùng cho từng lần chạy (bảng `m_run_history_note`).
@@ -34,7 +34,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** xem diff trong giao diện và mở bản xem trước của kết quả.
 - **Phụ thuộc:** P1-04.
-- **Chạm vào:** `crates/mod-diff-preview/**`, `crates/dandori-git/**` (thêm hàm diff nếu chưa đủ), `web/app/src/features/diff-preview/**`, i18n.
+- **Chạm vào:** `crates/mod-diff-preview/**`, `crates/dandori-git/**` (thêm hàm diff nếu chưa đủ), `frontend/app/src/features/diff-preview/**`, i18n.
 - **Việc phải làm:**
   1. **Diff:** so sánh worktree của task với nhánh cơ sở (qua `dandori-git`): danh sách tệp (thêm/sửa/xóa/đổi tên), thống kê dòng, diff hợp nhất theo từng tệp. Giới hạn kích thước (tệp và tổng): vượt thì cắt có dấu hiệu rõ; tệp nhị phân chỉ ghi nhận. **Làm sạch** khi hiển thị (không chèn HTML thô; tên tệp/nội dung được thoát), không phụ thuộc tô màu cú pháp nặng.
   2. **Bản xem trước:** lệnh khởi chạy xem trước do **chủ dự án cấu hình**, dạng **mảng tham số** (không chuỗi shell), chạy trong worktree qua `dandori-process`; **mỗi lần bật phải xác nhận** và hiện đúng lệnh sẽ chạy; mỗi task tối đa một bản xem trước; dừng khi task xong/hủy/module tắt; log hiển thị; địa chỉ xem trước chỉ trên `127.0.0.1` (cổng cấu hình, kiểm cổng hợp lệ). Không tự phát hiện lệnh.
@@ -52,7 +52,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** cổng duyệt của con người; chặn chuyển trạng thái nhạy cảm cho đến khi được duyệt.
 - **Phụ thuộc:** P1-09.
-- **Chạm vào:** `crates/dandori-module-api/**`, `crates/dandori-registry/**`, `crates/dandori-server/**` (chỉ chỗ chuyển trạng thái task), `crates/mod-approval-gate/**`, `docs/adr/0005-transition-guard.md`, `web/app/src/features/approval-gate/**`, i18n.
+- **Chạm vào:** `crates/dandori-module-api/**`, `crates/dandori-registry/**`, `crates/dandori-server/**` (chỉ chỗ chuyển trạng thái task), `crates/mod-approval-gate/**`, `docs/adr/0005-transition-guard.md`, `frontend/app/src/features/approval-gate/**`, i18n.
 - **Việc phải làm:**
   1. **Lõi:** điểm mở rộng `TransitionGuard::check(task, from, to, actor) -> Allow | Deny { reason, retry_after? } | NeedsApproval(kind)`, trong đó `actor` là `User(id)` hoặc `System(source)` với `source` dạng `scheduler:<module-id>` hoặc `module:<module-id>` (P3 cần phân biệt chạy tay với lịch tự động; làm đủ ngay từ đây để P3-03 không phải đổi hợp đồng); bảng chuyển trạng thái của lõi gọi mọi guard đang đăng ký; `NeedsApproval` đặt task vào `needs_human` và phát `approval.requested`. Không guard nào = hành vi cũ. ADR 0005 mô tả mối nguy (guard làm treo task) và cách giảm (timeout, hạn hết hạn).
   2. **Module:** bảng `m_approval_gate_request` (loại, task, người yêu cầu, trạng thái `pending|approved|rejected|expired`, lý do, người quyết, thời điểm, hạn). Chính sách theo dự án: những chuyển nào cần duyệt (mặc định: `in_review → ready_to_merge`), ai được duyệt (chủ dự án/admin; tùy chọn **người yêu cầu không được tự duyệt**).
@@ -73,7 +73,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** agent test chuyên trách tự chạy sau khi worker xong.
 - **Phụ thuộc:** P1-09.
-- **Chạm vào:** `crates/mod-test-agent/**`, `web/app/src/features/test-agent/**`, i18n.
+- **Chạm vào:** `crates/mod-test-agent/**`, `frontend/app/src/features/test-agent/**`, i18n.
 - **Việc phải làm:**
   1. Lắng nghe `run.finished` thành công của vai **Worker**; theo cấu hình dự án (bật/tắt, lệnh gợi ý chạy test, mẫu đường dẫn được phép sửa như `tests/**`, `**/*.test.*`), tự gọi `RunService.start_run` với vai **Test** trong **cùng worktree**.
   2. **Chống vòng lặp:** không kích hoạt từ lần chạy của chính vai Test; tối đa N lần chạy test cho một lần chạy worker (mặc định 1); giới hạn thời gian.
@@ -93,7 +93,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** agent viết tài liệu tự chạy khi task xong.
 - **Phụ thuộc:** P1-09.
-- **Chạm vào:** `crates/mod-doc-agent/**`, `web/app/src/features/doc-agent/**`, i18n.
+- **Chạm vào:** `crates/mod-doc-agent/**`, `frontend/app/src/features/doc-agent/**`, i18n.
 - **Việc phải làm:**
   1. Kích hoạt khi task chuyển tới `ready_to_merge` (nghĩa "task xong" ở đây), chạy vai **Tài liệu** trong worktree của task. Cấu hình theo dự án: bật/tắt, mẫu đường dẫn được phép sửa (mặc định `docs/**`, `README*`, `CHANGELOG*`), mẫu prompt (dùng thư viện prompt nếu có, nhưng **không** phụ thuộc cứng).
   2. Chống vòng lặp: không kích hoạt từ lần chạy của chính vai Tài liệu; tối đa một lần cho mỗi lần task vào `ready_to_merge`.
@@ -111,7 +111,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** nối GitHub, GitLab, Linear.
 - **Phụ thuộc:** T14 (cần `auth-login`).
-- **Chạm vào:** `crates/dandori-module-api/**` (thêm điểm mở rộng), `crates/dandori-registry/**`, `crates/mod-integrations/**`, `docs/adr/0006-git-host-provider.md`, `docs/manual-test-checklist.md`, `web/app/src/features/integrations/**`, i18n.
+- **Chạm vào:** `crates/dandori-module-api/**` (thêm điểm mở rộng), `crates/dandori-registry/**`, `crates/mod-integrations/**`, `docs/adr/0006-git-host-provider.md`, `docs/manual-test-checklist.md`, `frontend/app/src/features/integrations/**`, i18n.
 - **Việc phải làm:**
   1. **Lõi:** điểm mở rộng `GitHostProvider` (tạo PR/MR, đọc trạng thái PR/MR và CI, merge, đọc thông tin repo) với kiểu dữ liệu độc lập nhà cung cấp.
   2. **Kết nối:** dùng **token truy cập cá nhân** do chủ dự án nhập, lưu qua kho khóa (không bao giờ hiện lại); kiểm tra kết nối; cấu hình tên miền: GitHub (`api.github.com`), GitLab (`gitlab.com` hoặc máy chủ **do chủ dự án khai báo tường minh**, chỉ `https`), Linear (API chính thức). **Danh sách tên miền cho phép** theo từng kết nối; chặn loopback, mạng nội bộ, địa chỉ metadata (SEC-SSRF-001) và **chuyển hướng** sang tên miền ngoài danh sách.
@@ -133,7 +133,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** tạo PR với mô tả do AI viết, merge khi đạt điều kiện.
 - **Phụ thuộc:** P1-04, P2-06; nên có P2-03.
-- **Chạm vào:** `crates/mod-pr-merge/**`, `web/app/src/features/pr-merge/**`, i18n, `docs/adr/0007-auto-merge.md`.
+- **Chạm vào:** `crates/mod-pr-merge/**`, `frontend/app/src/features/pr-merge/**`, i18n, `docs/adr/0007-auto-merge.md`.
 - **Việc phải làm:**
   1. Hành động **Tạo PR** (người dùng bấm, có hộp xác nhận hiện: remote, nhánh nguồn, nhánh đích): commit thay đổi trong worktree (một commit do Dandori tạo, tác giả/thông điệp theo cấu hình, **không** dòng "Co-Authored-By" của agent), **`git push` nhánh task** (chỉ nhánh `task/*`; không bao giờ đẩy lên nhánh mặc định, không bao giờ `--force`), rồi gọi `GitHostProvider.create_pr`. Đẩy dùng thông tin xác thực git sẵn có của người dùng; Dandori không giữ mật khẩu git.
   2. **Mô tả PR do AI viết:** chạy một lần agent vai PM với diff và mục tiêu task (đầu vào là **dữ liệu không đáng tin**, đặt trong ranh giới rõ ràng trong prompt); người dùng **xem và sửa** mô tả trước khi gửi. Không tự gửi mô tả chưa xem.
@@ -154,7 +154,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** nhiều tài khoản cùng một nhà cung cấp.
 - **Phụ thuộc:** P1-02.
-- **Chạm vào:** `crates/mod-multi-account/**`, `web/app/src/features/multi-account/**`, i18n.
+- **Chạm vào:** `crates/mod-multi-account/**`, `frontend/app/src/features/multi-account/**`, i18n.
 - **Việc phải làm:**
   1. Cho phép thêm nhiều `agent_account` cùng nhà cung cấp (nếu CLI đó hỗ trợ cô lập HOME, theo `docs/agents/*.md` của P1-02; nhà nào không hỗ trợ thì giao diện nói rõ và chặn).
   2. Quản lý **ưu tiên** (số nhỏ = ưu tiên cao), bật/tắt từng tài khoản, nhãn, "Đăng nhập lại" (hiển thị lệnh như P1-02), nhóm theo nhà cung cấp như mockup.
@@ -172,7 +172,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** theo dõi hạn mức từng tài khoản, **trung thực về nguồn số liệu**.
 - **Phụ thuộc:** P1-02.
-- **Chạm vào:** `crates/mod-quota-tracking/**`, `web/app/src/features/quota-tracking/**`, i18n.
+- **Chạm vào:** `crates/mod-quota-tracking/**`, `frontend/app/src/features/quota-tracking/**`, i18n.
 - **Việc phải làm:**
   1. Hai nguồn, luôn có nhãn nguồn trên giao diện: **`reported`** (nếu CLI/nhà cung cấp có cách báo hạn mức, theo `docs/agents/*.md` P1-02; nếu không có thì không có nguồn này) và **`estimated`** (ước từ lịch sử `run` trong cửa sổ 5 giờ và tuần, so với giới hạn **chủ dự án tự nhập** cho từng account, vì PDF nêu nhà cung cấp trả thông tin không đồng nhất).
   2. Khi một lần chạy kết thúc bằng `QuotaExhausted`: đặt `exhausted_until` của account (lõi) theo thời điểm reset nếu biết, nếu không thì **thời gian chờ cấu hình** (mặc định ghi rõ trên giao diện); phát `account.quota_updated`.
@@ -192,7 +192,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** tự chuyển tài khoản khi hết hạn mức.
 - **Phụ thuộc:** P2-08, P2-09.
-- **Chạm vào:** `crates/mod-auto-switch/**`, `web/app/src/features/auto-switch/**`, i18n.
+- **Chạm vào:** `crates/mod-auto-switch/**`, `frontend/app/src/features/auto-switch/**`, i18n.
 - **Việc phải làm:**
   1. Khi một lần chạy kết thúc vì `QuotaExhausted`, nếu có account **cùng nhà cung cấp**, bật, không hết hạn mức, thì gọi API lõi `start_run` lại cho cùng task **loại trừ** account đã hết; giữ nguyên worktree và prompt; ghi nhận chuyển (account cũ → mới, lý do).
   2. **Giới hạn chuyển** cho mỗi task (mặc định 2) chống vòng lặp; hết giới hạn hoặc không còn account → task `needs_human`.
@@ -211,7 +211,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** API key trả theo token làm dự phòng, có **trần chi tiêu bắt buộc**.
 - **Phụ thuộc:** T14 (cần `auth-login`, kho khóa lõi).
-- **Chạm vào:** `crates/mod-api-key-fallback/**`, `crates/dandori-agent-adapters/**` (chế độ khóa API; chỉ thêm), `web/app/src/features/api-key-fallback/**`, i18n, `docs/manual-test-checklist.md`.
+- **Chạm vào:** `crates/mod-api-key-fallback/**`, `crates/dandori-agent-adapters/**` (chế độ khóa API; chỉ thêm), `frontend/app/src/features/api-key-fallback/**`, i18n, `docs/manual-test-checklist.md`.
 - **Việc phải làm:**
   1. Thêm account loại `api_key`: nhà cung cấp, nhãn, khóa nhập **một lần**, lưu qua kho khóa (không bao giờ hiện lại, chỉ hiện 4 ký tự cuối đã che nếu nhà cung cấp cho phép; không lưu bản rõ).
   2. Adapter nhận khóa qua **biến môi trường** của tiến trình con (theo tài liệu CLI ở P1-02; không tham số dòng lệnh); biến không bị log; tiến trình con không kế thừa khóa của account khác.
@@ -231,7 +231,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** token và chi phí theo task, theo agent; không bịa số.
 - **Phụ thuộc:** P1-06.
-- **Chạm vào:** `crates/mod-cost-tracking/**`, `web/app/src/features/cost-tracking/**`, i18n.
+- **Chạm vào:** `crates/mod-cost-tracking/**`, `frontend/app/src/features/cost-tracking/**`, i18n.
 - **Việc phải làm:**
   1. Đọc số token do adapter **báo** trong `run_event` (nếu CLI báo; theo `docs/agents/*.md`); lần chạy không có số liệu thì ghi **"không có số liệu"**, tuyệt đối không ước đoán số token.
   2. Chi phí tiền = token × **bảng giá do chủ dự án nhập** (không có giá mặc định); account `cli` (subscription) không có chi phí theo token: hiển thị phần hạn mức đã dùng thay vì tiền (từ `quota-tracking` nếu bật, qua dữ liệu lõi/sự kiện, không gọi trực tiếp).
@@ -250,7 +250,7 @@ Quy ước và đọc trước: như `10_P0_LOI.md`, `11_P1_CHAY_MOT_TASK.md`. D
 
 - **Mục tiêu:** kịch bản tự động chứng minh vòng đầy đủ; chuẩn bị bài kiểm một tuần cho chủ dự án.
 - **Phụ thuộc:** P2-01…P2-12.
-- **Chạm vào:** `tests/e2e/p2-gate/**`, `docs/manual-test-checklist.md`, báo cáo.
+- **Chạm vào:** `crates/dandori-e2e/tests/p2_gate.rs` (kịch bản Rust), `frontend/app/e2e/**` (kịch bản trình duyệt, nếu có), `docs/manual-test-checklist.md`, báo cáo.
 - **Việc phải làm:** kịch bản từ DB rỗng: áp gói "Nhóm nhỏ"; hai account `fake` cùng nhà; giao task; worker xong → test-agent chạy → task `ready_to_merge` bị chặn bởi cổng duyệt → duyệt → doc-agent chạy → tạo PR tới **remote bare cục bộ** với `GitHostProvider` giả → CI giả xanh → merge theo chính sách; trong lúc đó account 1 `QuotaExhausted` → tự chuyển sang account 2; xem lịch sử và chi phí. Kèm `docs/manual-test-checklist.md` mục P2: **bài kiểm một tuần** (các bước làm hằng ngày, ghi số liệu: số task, số lần chuyển account, lỗi gặp), `DAN-VERIFY-006`.
 - **Không làm:** không sửa mã nguồn để kịch bản qua; không tuyên bố cổng một tuần đã đạt.
 - **Tiêu chí nghiệm thu:**

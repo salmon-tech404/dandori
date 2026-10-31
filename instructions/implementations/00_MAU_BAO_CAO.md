@@ -47,9 +47,10 @@ Lưu ở `instructions/implementations/reports/<ID>.md`. Giữ đúng thứ tự
 ## Đề xuất commit (cho chủ dự án)
 ```text
 git add <đường dẫn cụ thể 1> <đường dẫn cụ thể 2> ...
-git commit -m "<type>(<phạm-vi>): <mô tả>" -m "Task: <ID>"
+git commit -m "<type>(<scope>): <short English description>" -m "Task: <ID>"
 ```
 <nếu task nên tách thành nhiều commit thì ghi từng cặp git add / git commit>
+<thông điệp commit: TIẾNG ANH, ngắn gọn, động từ nguyên mẫu, theo 03 mục 6>
 
 ## Đề xuất (ngoài phạm vi, KHÔNG làm)
 <ý hay nhưng ngoài task>

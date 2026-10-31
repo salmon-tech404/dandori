@@ -1,0 +1,16 @@
+[package]
+name = "dandori-events"
+description = "Bus sự kiện trong tiến trình của Dandori"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+dandori-types = { workspace = true }
+tokio = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }

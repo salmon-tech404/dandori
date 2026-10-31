@@ -1,0 +1,21 @@
+[package]
+name = "dandori-module-api"
+description = "Giao diện hợp đồng module của Dandori (trait Module, Manifest, ModuleContext)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+dandori-types = { workspace = true }
+dandori-events = { workspace = true }
+dandori-db = { workspace = true }
+dandori-vault = { workspace = true }
+dandori-agent-port = { workspace = true }
+dandori-git = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }

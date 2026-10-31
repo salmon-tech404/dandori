@@ -1,0 +1,85 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+publish = false
+
+[workspace.lints.rust]
+unknown_lints = "deny"
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+dbg_macro = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+await_holding_lock = "deny"
+await_holding_refcell_ref = "deny"
+let_underscore_future = "deny"
+allow_attributes_without_reason = "deny"
+allow_attributes = "deny"
+enum_glob_use = "deny"
+wildcard_imports = "deny"
+too_many_lines = "warn"
+indexing_slicing = "warn"
+mod_module_files = "deny"
+
+[workspace.dependencies]
+# Crate nội bộ
+dandori-types = { path = "crates/dandori-types" }
+dandori-db = { path = "crates/dandori-db" }
+dandori-events = { path = "crates/dandori-events" }
+dandori-module-api = { path = "crates/dandori-module-api" }
+dandori-registry = { path = "crates/dandori-registry" }
+dandori-vault = { path = "crates/dandori-vault" }
+dandori-process = { path = "crates/dandori-process" }
+dandori-agent-port = { path = "crates/dandori-agent-port" }
+dandori-agent-adapters = { path = "crates/dandori-agent-adapters" }
+dandori-git = { path = "crates/dandori-git" }
+dandori-modules = { path = "crates/dandori-modules" }
+dandori-server = { path = "crates/dandori-server" }
+fake-agent = { path = "crates/fake-agent" }
+
+# Thư viện ngoài được duyệt (01_KIEN_TRUC.md mục 12)
+tokio = { version = "1.43", features = ["full"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+futures = "0.3"
+axum = { version = "0.8", features = ["macros"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["trace", "cors"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio", "macros", "migrate", "chrono", "uuid"] }
+thiserror = "2.0"
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+uuid = { version = "1.13", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+ts-rs = { version = "10.1", features = ["chrono-impl", "uuid-impl"] }
+argon2 = "0.5"
+rand = "0.8"
+secrecy = { version = "0.10", features = ["serde"] }
+zeroize = { version = "1.8", features = ["derive"] }
+aes-gcm = "0.10"
+keyring = { version = "3.6", features = ["windows-native"] }
+directories = "6.0"
+url = "2.5"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+croner = "2.1"
+tempfile = "3.17"
+
+[profile.release]
+strip = true
+# lto, codegen-units: chốt sau khi đo ở P5-01; panic giữ unwind (RS-PANIC-003)
+

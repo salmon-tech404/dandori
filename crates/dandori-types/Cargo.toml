@@ -1,0 +1,17 @@
+[package]
+name = "dandori-types"
+description = "Kiểu dữ liệu dùng chung và định danh newtype của Dandori"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+thiserror = { workspace = true }

@@ -20,7 +20,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** Calendar để lên lịch task định kỳ.
 - **Phụ thuộc:** P1-02 (`subscription-connect`), P2-13 xong.
-- **Chạm vào:** `crates/mod-calendar/**`, `web/app/src/features/calendar/**`, i18n.
+- **Chạm vào:** `crates/mod-calendar/**`, `frontend/app/src/features/calendar/**`, i18n.
 - **Việc phải làm:**
   1. Lịch định kỳ: biểu thức **cron** (thư viện `croner` đã duyệt) và/hoặc khoảng đều; múi giờ rõ ràng (mặc định múi giờ hệ thống, đổi được); xử lý chuyển giờ mùa hè (mỗi lần kích hoạt đúng một lần, không bỏ, không lặp).
   2. Mỗi lịch mô tả một **mẫu task** (tiêu đề, mô tả, dự án, vai trò agent) và tùy chọn "giao việc tự động"; khi tới giờ: tạo task `backlog` (+ giao việc nếu bật) bằng API lõi, nguồn kích hoạt `scheduler:calendar`.
@@ -42,7 +42,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** job viết bằng file Markdown.
 - **Phụ thuộc:** P3-01.
-- **Chạm vào:** `crates/mod-md-jobs/**`, `docs/adr/0008-yaml.md` (chọn thư viện YAML còn bảo trì), `web/app/src/features/md-jobs/**`, i18n.
+- **Chạm vào:** `crates/mod-md-jobs/**`, `docs/adr/0008-yaml.md` (chọn thư viện YAML còn bảo trì), `frontend/app/src/features/md-jobs/**`, i18n.
 - **Việc phải làm:**
   1. Định dạng (theo mockup): tệp `.cron/jobs/<tên>.md` trong repo dự án, phần đầu là **front matter** (`name`, `schedule` cron, `agent`, `account`), thân là prompt. Phân tích có giới hạn (kích thước, độ sâu, số trường), **từ chối trường lạ**.
   2. **Phát hiện tệp ≠ bật tệp.** Tệp nằm trong repo có thể đến từ người khác, nên job mới hoặc job bị sửa **phải được chủ dự án xem và duyệt** (lưu băm nội dung đã duyệt); đổi nội dung → quay về "chờ duyệt". Chỉ job đã duyệt mới được lập lịch (qua cùng cơ chế với `calendar`: tạo task + giao việc, nguồn `scheduler:md-jobs`).
@@ -63,7 +63,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** khung giờ cấm chạy.
 - **Phụ thuộc:** P3-01.
-- **Chạm vào:** `crates/dandori-module-api/**`, `crates/dandori-registry/**` (chỉ phần mở rộng `TransitionGuard`: `actor` có nguồn hệ thống và `retry_after`, nếu chưa có), `docs/adr/0005-transition-guard.md` (bổ sung), `crates/mod-quiet-hours/**`, `web/app/src/features/quiet-hours/**`, i18n.
+- **Chạm vào:** `crates/dandori-module-api/**`, `crates/dandori-registry/**` (chỉ phần mở rộng `TransitionGuard`: `actor` có nguồn hệ thống và `retry_after`, nếu chưa có), `docs/adr/0005-transition-guard.md` (bổ sung), `crates/mod-quiet-hours/**`, `frontend/app/src/features/quiet-hours/**`, i18n.
 - **Việc phải làm:**
   1. Cấu hình theo dự án hoặc hệ thống: các khung giờ (ngày trong tuần, giờ bắt đầu/kết thúc, múi giờ; mockup: "Giờ cấm: 09:00 đến 18:00"); khung vắt qua nửa đêm đúng.
   2. Hiện thực `TransitionGuard`: chuyển task sang `running` do nguồn **`scheduler:*`** trong khung cấm → `Deny` kèm `retry_after` là thời điểm hết khung; **chạy tay** do người dùng khởi động mặc định **không** bị chặn (cấu hình tùy chọn "chặn cả chạy tay", mặc định tắt).
@@ -82,7 +82,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** hàng đợi chạy qua đêm.
 - **Phụ thuộc:** P3-01.
-- **Chạm vào:** `crates/mod-overnight-queue/**`, `web/app/src/features/overnight-queue/**`, i18n.
+- **Chạm vào:** `crates/mod-overnight-queue/**`, `frontend/app/src/features/overnight-queue/**`, i18n.
 - **Việc phải làm:**
   1. Hàng đợi có thứ tự gồm các task `backlog`; **giờ bắt đầu** (mockup: 23:00); song song tối đa N (mặc định 1); tạm dừng/tiếp tục; kéo sắp xếp (có cách bàn phím).
   2. Chạy tuần tự theo thứ tự, mỗi task qua `RunService` với nguồn `scheduler:overnight-queue` (chịu `TransitionGuard`, tức chịu khung giờ cấm).
@@ -99,14 +99,14 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
   4. Test: tạm dừng/tiếp tục; xóa task khỏi hàng đợi.
   5. Test: trong khung giờ cấm, các task bị hoãn tới hết khung (liên hệ P3-03).
   6. Test: tóm tắt sáng có đúng số liệu; sự kiện thông báo được phát một lần.
-  7. Test: kiểm tra mã không chứa hành động tắt/ngủ/khởi động lại (tìm kiếm trong `crates/` và `web/` chuỗi `shutdown`, `Stop-Computer`, `Restart-Computer`, `rundll32`... ngoài tài liệu cấm và test của chính kiểm tra này).
+  7. Test: kiểm tra mã không chứa hành động tắt/ngủ/khởi động lại (tìm kiếm trong `crates/` và `frontend/` chuỗi `shutdown`, `Stop-Computer`, `Restart-Computer`, `rundll32`... ngoài tài liệu cấm và test của chính kiểm tra này).
   8. `verify` xanh trên worktree sạch.
 
 ## P3-05. Module `reports`
 
 - **Mục tiêu:** báo cáo tổng kết ngày và tuần.
 - **Phụ thuộc:** P1-05, P2-01.
-- **Chạm vào:** `crates/mod-reports/**`, `web/app/src/features/reports/**`, i18n.
+- **Chạm vào:** `crates/mod-reports/**`, `frontend/app/src/features/reports/**`, i18n.
 - **Việc phải làm:**
   1. Báo cáo **xác định** (không do AI viết; không số liệu bịa): theo ngày và tuần: số task đã xong/thất bại/cần bạn/đang chạy, thời lượng chạy tổng và trung vị, nhà cung cấp/account đã dùng, số lần chuyển account (nếu có sự kiện), chi phí/hạn mức (chỉ phần có số liệu, ghi rõ phần thiếu), danh sách task nổi bật. Dữ liệu từ bảng lõi (`task`, `run`) và sự kiện của module khác khi có; thiếu module thì bỏ mục đó, không báo "0".
   2. Giao diện (mockup: "Báo cáo tuần", "Xuất báo cáo", thẻ theo ngày): xem, chọn kỳ, **xuất Markdown**.
@@ -126,7 +126,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** đọc báo cáo bằng giọng nói.
 - **Phụ thuộc:** P3-05.
-- **Chạm vào:** `crates/mod-voice-report/**` (chỉ khai báo, không logic nếu không cần), `web/app/src/features/voice-report/**`, i18n.
+- **Chạm vào:** `crates/mod-voice-report/**` (chỉ khai báo, không logic nếu không cần), `frontend/app/src/features/voice-report/**`, i18n.
 - **Việc phải làm:**
   1. Dùng **API đọc văn bản có sẵn của trình duyệt** (không thêm thư viện, không gửi nội dung đi đâu); nút Đọc/Tạm dừng/Dừng, tốc độ, chọn giọng tiếng Việt nếu có; nếu trình duyệt không có giọng hoặc API thì hiện thông báo rõ và ẩn nút.
   2. Văn bản đọc được sinh từ báo cáo có cấu trúc (câu ngắn, số và đơn vị đọc rõ), **không** đọc chuỗi giống khóa/đường dẫn dài.
@@ -143,7 +143,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** dự tính thời điểm xong của task, **trung thực về độ tin cậy** (giả định A-03).
 - **Phụ thuộc:** P1-06, P2-01 (cần có `run-history` bật để có dữ liệu).
-- **Chạm vào:** `crates/mod-eta/**`, `web/app/src/features/eta/**`, i18n, `docs/adr/0009-eta-method.md`.
+- **Chạm vào:** `crates/mod-eta/**`, `frontend/app/src/features/eta/**`, i18n, `docs/adr/0009-eta-method.md`.
 - **Việc phải làm:**
   1. Phương pháp **đơn giản, giải thích được**: với một task đang chạy, lấy các lần chạy **đã hoàn tất** có cùng (dự án, vai trò, nhà cung cấp); tính trung vị và phân vị 80 của thời lượng; ETA = bắt đầu + khoảng (trung vị … P80). Chỉ hiển thị khi có **ít nhất N mẫu** (mặc định 5); ít hơn → "chưa đủ dữ liệu", không số. Nêu rõ cỡ mẫu và độ tin cậy ("thấp/vừa/cao" theo cỡ mẫu và độ phân tán).
   2. **Đo độ chính xác của chính nó:** lưu ETA đã đưa và thời lượng thực; hiển thị sai số trung vị tuyệt đối gần đây; nếu sai số lớn thì giảm độ tin cậy hiển thị.
@@ -162,7 +162,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** skill theo chuẩn `SKILL.md`.
 - **Phụ thuộc:** P1-07.
-- **Chạm vào:** `crates/mod-skills-md/**`, `docs/agents/skill-format.md`, `web/app/src/features/skills-md/**`, i18n.
+- **Chạm vào:** `crates/mod-skills-md/**`, `docs/agents/skill-format.md`, `frontend/app/src/features/skills-md/**`, i18n.
 - **Việc phải làm:**
   1. **Trước hết** đọc đặc tả chính thức của định dạng skill `SKILL.md` (tài liệu của nhà cung cấp định nghĩa chuẩn) và ghi vào `docs/agents/skill-format.md` các trường bắt buộc/tùy chọn **đúng như tài liệu**, kèm URL nguồn và ngày đọc. Không giả định trường nào ngoài tài liệu.
   2. Nhập skill từ **thư mục cục bộ** hoặc tệp nén do người dùng chọn (giới hạn `{{max_upload}}`; kiểm đường dẫn trong lưu trữ chống thoát khỏi thư mục (zip-slip), giới hạn số tệp và dung lượng giải nén). Lưu nội dung và băm.
@@ -183,7 +183,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** đồng bộ file hướng dẫn (ví dụ `AGENTS.md`, `CLAUDE.md`) từ **một nguồn** là hồ sơ kỹ thuật và skill.
 - **Phụ thuộc:** P1-08, P3-08.
-- **Chạm vào:** `crates/dandori-module-api/**`, `crates/dandori-registry/**`, `crates/dandori-server/**` (chỗ chuẩn bị worktree), `docs/adr/0010-workdir-decorator.md`, `docs/agents/instruction-files.md`, `crates/mod-instruction-sync/**`, `web/app/src/features/instruction-sync/**`, i18n.
+- **Chạm vào:** `crates/dandori-module-api/**`, `crates/dandori-registry/**`, `crates/dandori-server/**` (chỗ chuẩn bị worktree), `docs/adr/0010-workdir-decorator.md`, `docs/agents/instruction-files.md`, `crates/mod-instruction-sync/**`, `frontend/app/src/features/instruction-sync/**`, i18n.
 - **Việc phải làm:**
   1. **Lõi:** điểm mở rộng `WorkdirDecorator::decorate(workdir, task, role)` do lõi gọi **sau** `WorkdirProvider.prepare` và **trước** khi chạy agent; chỉ được ghi tệp ở **gốc worktree** theo danh sách tên tệp cho phép khai báo trong manifest; mọi tệp tạo ra được thêm vào tệp loại trừ cục bộ của worktree (`git rev-parse --git-path info/exclude`) để **không bị commit**. ADR 0010 nêu mối nguy (ghi đè tệp thật của dự án) và cách giảm.
   2. **Module:** tệp hướng dẫn mà từng CLI đọc là **thông tin phải lấy từ tài liệu chính thức của từng CLI** (`docs/agents/instruction-files.md` ghi tên tệp, nguồn, ngày); ánh xạ nhà cung cấp → tên tệp cấu hình được. Nội dung sinh từ hồ sơ kỹ thuật + skill đã duyệt, theo mẫu cố định, có dòng đầu "tệp sinh tự động bởi Dandori".
@@ -203,7 +203,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** bộ nhớ dùng chung giữa các agent, **chống nhiễm độc bộ nhớ**.
 - **Phụ thuộc:** P1-07.
-- **Chạm vào:** `crates/mod-shared-memory/**`, `web/app/src/features/shared-memory/**`, i18n, `docs/adr/0011-memory-safety.md`.
+- **Chạm vào:** `crates/mod-shared-memory/**`, `frontend/app/src/features/shared-memory/**`, i18n, `docs/adr/0011-memory-safety.md`.
 - **Việc phải làm:**
   1. Bảng mục nhớ: nội dung ngắn, loại (`fact`, `decision`, `convention`, `lesson`), phạm vi (dự án/workspace), **nguồn gốc** (người tạo, hay `agent:<vai>` + `run` + `task`), trạng thái `pending|approved|rejected`, thời điểm. Giới hạn kích thước mỗi mục và tổng.
   2. Người dùng thêm/sửa/xóa trực tiếp (mặc định `approved`). **Mục do agent đề xuất luôn `pending`** và chỉ vào prompt sau khi người dùng duyệt (mặc định; có thể cấu hình tự duyệt nhưng ADR ghi rõ rủi ro và mặc định tắt). Lý do: nội dung agent sinh ra có thể chứa chỉ thị độc hại (từ tệp trong repo) và sẽ **tồn tại lâu** (ADR 0011).
@@ -224,7 +224,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** tự ghi bài học sau mỗi task.
 - **Phụ thuộc:** P3-10.
-- **Chạm vào:** `crates/mod-auto-lessons/**`, `web/app/src/features/auto-lessons/**`, i18n.
+- **Chạm vào:** `crates/mod-auto-lessons/**`, `frontend/app/src/features/auto-lessons/**`, i18n.
 - **Việc phải làm:**
   1. Khi task tới `done`/`failed` (cấu hình), tạo **một** lần chạy ngắn vai PM với dữ liệu: tiêu đề, kết quả, lỗi chính (đã che bí mật), đưa kết quả vào `shared-memory` dưới dạng mục `lesson` **`pending`** (không tự duyệt).
   2. Giới hạn: tối đa một lần chạy bài học cho mỗi task; bỏ qua task rất ngắn hoặc không có thông tin; ngân sách token cấu hình; chống lặp (không kích hoạt từ lần chạy bài học).
@@ -241,7 +241,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** thông báo qua Telegram, Discord, Slack.
 - **Phụ thuộc:** T14.
-- **Chạm vào:** `crates/mod-notifications/**`, `docs/manual-test-checklist.md`, `web/app/src/features/notifications/**`, i18n.
+- **Chạm vào:** `crates/mod-notifications/**`, `docs/manual-test-checklist.md`, `frontend/app/src/features/notifications/**`, i18n.
 - **Việc phải làm:**
   1. Kênh: Telegram (bot token + chat id), Discord (webhook), Slack (webhook). **Mọi token/URL webhook là bí mật**, lưu qua kho khóa, không hiện lại. Tham số API lấy từ tài liệu chính thức của từng dịch vụ, ghi nguồn (điều cấm 11).
   2. Nhận sự kiện `notification.requested` và các loại sự kiện cấu hình được (task cần bạn, lỗi, yêu cầu duyệt, báo cáo, cảnh báo hạn mức/ngân sách); **lọc theo kênh**, giới hạn tần suất và **gộp trùng**.
@@ -262,7 +262,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** duyệt và theo dõi từ điện thoại, **không mở cổng ra Internet một cách ngầm**.
 - **Phụ thuộc:** P2-03, P1-06.
-- **Chạm vào:** `crates/mod-mobile/**`, `web/app/src/features/mobile/**` (giao diện gọn dạng trang riêng `/m`), i18n, `docs/adr/0012-mobile-access.md`, `docs/manual-test-checklist.md`.
+- **Chạm vào:** `crates/mod-mobile/**`, `frontend/app/src/features/mobile/**` (giao diện gọn dạng trang riêng `/m`), i18n, `docs/adr/0012-mobile-access.md`, `docs/manual-test-checklist.md`.
 - **Việc phải làm:**
   1. **Truy cập từ xa là việc của người dùng**, không phải của Dandori tự mở: server mặc định nghe `127.0.0.1` (RS-SEC-006). Điện thoại tới được bằng **kênh an toàn do chủ dự án tự thiết lập** (ví dụ mạng riêng ảo hay đường hầm), hoặc nhờ module `self-host` (P4-09). ADR 0012 mô tả các cách, mối nguy và khuyến nghị; module **không** tự bind `0.0.0.0` và không tự tạo đường hầm.
   2. **Ghép thiết bị:** tạo thiết bị với tên; token ghép hiển thị **một lần** (liên kết/mã QR do giao diện sinh cục bộ); token **phạm vi hẹp** (xem trạng thái + duyệt/từ chối; **không** tạo task, không đổi cấu hình, không xem bí mật); có hạn, thu hồi được, giới hạn tần suất; lưu băm.
@@ -284,7 +284,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** nhật ký kiểm toán có tính toàn vẹn.
 - **Phụ thuộc:** T14.
-- **Chạm vào:** `crates/mod-audit-log/**`, `web/app/src/features/audit-log/**`, i18n.
+- **Chạm vào:** `crates/mod-audit-log/**`, `frontend/app/src/features/audit-log/**`, i18n.
 - **Việc phải làm:**
   1. Ghi bản ghi **chỉ thêm** (append-only) cho các sự kiện nhạy cảm: đăng nhập thành công/thất bại, thay đổi tài khoản agent, **truy cập kho khóa** (ghi id, **không** ghi giá trị), phê duyệt/từ chối, push/PR/merge, bật/tắt module (hợp nhất với `feature_audit` khi hiển thị), ghép/thu hồi thiết bị, xóa dữ liệu. Mỗi bản ghi: ai, làm gì, trên đối tượng nào, khi nào, nguồn (`web`/`mobile`/`scheduler`).
   2. **Chuỗi băm:** mỗi bản ghi chứa băm của bản ghi trước; endpoint kiểm tra toàn vẹn trả lỗi nếu chuỗi đứt. Ghi chú hạn chế: người có quyền ghi DB cục bộ vẫn có thể ghi lại toàn bộ chuỗi (chuỗi băm chỉ phát hiện sửa/xóa **một phần**); ghi rõ trong giao diện và ADR/chú thích.
@@ -304,7 +304,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** kịch bản tự động mô phỏng "chạy qua đêm"; chuẩn bị bài kiểm thật.
 - **Phụ thuộc:** P3-01…P3-14.
-- **Chạm vào:** `tests/e2e/p3-gate/**`, `docs/manual-test-checklist.md`, báo cáo.
+- **Chạm vào:** `crates/dandori-e2e/tests/p3_gate.rs` (kịch bản Rust), `frontend/app/e2e/**` (kịch bản trình duyệt, nếu có), `docs/manual-test-checklist.md`, báo cáo.
 - **Việc phải làm:** kịch bản với **đồng hồ giả tăng tốc**, `fake-agent` và máy chủ HTTP giả: áp gói "Đầy đủ" các module P0–P3; đặt khung giờ cấm ban ngày; hàng đợi qua đêm 5 task lúc "23:00" (một task cố ý thất bại, một task báo hết hạn mức → tự chuyển account); lịch báo cáo cuối ngày; đến "sáng": kiểm bản tóm tắt, báo cáo ngày, thông báo gửi tới máy chủ giả đúng một lần/loại, các task ở `in_review`/`needs_human`, nhật ký kiểm toán có đủ bản ghi và chuỗi băm toàn vẹn, **không có** hành động tắt máy nào được yêu cầu. Kèm `docs/manual-test-checklist.md` mục P3: **bài kiểm qua đêm thật** (`DAN-VERIFY-011`: chủ dự án đặt hàng đợi thật với CLI thật, **tự** quyết định có tắt máy hay không; Dandori không làm việc đó).
 - **Không làm:** không sửa mã để kịch bản qua; không tuyên bố bài qua đêm thật đã đạt.
 - **Tiêu chí nghiệm thu:**

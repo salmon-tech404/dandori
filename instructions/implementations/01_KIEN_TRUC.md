@@ -14,15 +14,19 @@ Ba tiêu chí đạt (PDF): (a) người mới chạy được task đầu chỉ
 
 ## 2. Cây thư mục
 
+Chốt bởi **ADR 0020** (`docs/adr/0020-cau-truc-ma-nguon.md`), dựa trên Cargo Book và Rust Book; nguồn và độ tin cậy ở `docs/cong-nghe/cau-truc-rust-va-trien-khai.md`.
+
 ```
 D:\19-dandori\
-├── AGENTS.md                      điểm vào cho agent (T01)
-├── Cargo.toml                     workspace + [workspace.dependencies] + [workspace.lints]
+├── README.md                      bản đồ dự án cho người mới (và README ngắn ở crates/, frontend/, scripts/, docs/)
+├── Cargo.toml                     virtual manifest: members = ["crates/*"], resolver ghi rõ,
+│                                  [workspace.package|lints|dependencies], [profile.release]
+├── Cargo.lock
 ├── rust-toolchain.toml  rustfmt.toml  clippy.toml  deny.toml
-├── package.json  pnpm-workspace.yaml
-├── .gitignore                     (xem 03 mục 7)
-├── standards/profile.md           hồ sơ Kantanda của Dandori (T01)
-├── shared/types.ts                SINH RA bởi ts-rs, kiểm bằng generate-types --check
+├── package.json  pnpm-workspace.yaml  pnpm-lock.yaml     (ghim packageManager và engines)
+├── .gitignore  .env.example  AGENTS.md
+├── standards/profile.md           hồ sơ Kantanda của Dandori
+├── shared/types.ts                SINH bởi ts-rs, kiểm bằng generate-types --check
 ├── crates/                        PHẲNG: mọi crate là anh em, không lồng nhau
 │   ├── dandori-types/             kiểu dùng chung, ID newtype, sự kiện, derive ts-rs
 │   ├── dandori-db/                pool sqlx, migration lõi, repository của lõi
@@ -34,18 +38,50 @@ D:\19-dandori\
 │   ├── dandori-agent-port/        trait AgentAdapter + kiểu dữ liệu (port)
 │   ├── dandori-agent-adapters/    adapter Claude/Gemini/Codex + (adapter giả cho test)
 │   ├── dandori-git/               bọc lệnh `git` (worktree, diff, branch)
-│   ├── dandori-server/            axum, ghép nối (composition root), binary `dandori`
-│   ├── fake-agent/                binary giả CLI agent, chỉ dùng cho test
-│   └── mod-<id>/                  MỖI MODULE MỘT CRATE: module.json + src/lib.rs (xem mục 9)
-├── web/                           pnpm workspace
-│   └── app/                       Vite + React + TS; src/features/<module-id>/ (colocated)
-├── scripts/                       verify.mjs, check-*.mjs, gen-modules.mjs (đa nền tảng, Node)
-├── tests/tooling/                 test của chính các script kiểm
-├── docs/                          adr/, manual-test-checklist.md
-└── instructions/                  kế hoạch này và tài liệu thiết kế (CHỈ ĐỌC)
+│   ├── dandori-modules/           SINH TỰ ĐỘNG bởi gen-modules: gom mọi mod-* (Cargo.toml + lib.rs)
+│   ├── dandori-server/            axum, ghép nối (composition root); chương trình tên `dandori`
+│   ├── dandori-e2e/               (từ T14) test xuyên suốt viết bằng Rust; chỉ có tests/
+│   ├── fake-agent/                chương trình giả CLI agent, chỉ dùng cho test
+│   └── mod-<id>/                  MỖI MODULE MỘT CRATE: module.json + migrations/ + src/ + tests/
+├── frontend/                      pnpm workspace: phần giao diện
+│   ├── app/                       Vite + React + TS; src/{core,features,ui,i18n}/; e2e/ (Playwright)
+│   └── tooling/                   bản sao cấu hình ESLint của Kantanda
+├── scripts/                       Node .mjs: verify, check-*, gen-modules (chạy chung Windows/Linux)
+├── tests/tooling/                 test của chính các script (node --test); KHÔNG chứa test Rust
+├── docs/                          sổ tay, adr/, manual-test-checklist.md
+├── deploy/                        (P4-09, P5) Dockerfile, tệp dịch vụ mẫu
+├── release/                       (bị ignore) đầu ra đóng gói
+└── instructions/                  kế hoạch và tài liệu thiết kế (CHỈ ĐỌC)
 ```
 
-Crate lõi **không** có tiền tố `mod-`. Tên crate dùng `dandori-` hoặc `mod-`. Quy tắc phẳng theo M-CRATES-FLAT-FOLDER (Microsoft Pragmatic Rust Guidelines).
+Crate lõi **không** có tiền tố `mod-`. Tên crate dùng `dandori-` hoặc `mod-`. Quy tắc phẳng theo Cargo Book và M-CRATES-FLAT-FOLDER (Microsoft Pragmatic Rust Guidelines).
+
+### 2.1 Cấu trúc bên trong một crate
+
+```
+crates/<tên>/                      (thư viện lõi)
+├── Cargo.toml                     [lints] workspace = true; publish = false
+├── src/lib.rs                     //! tài liệu crate; #![warn(missing_docs)]; khai báo mod; pub use
+├── src/error.rs                   enum lỗi (thiserror)
+├── src/<khu_vực>.rs [+ <khu_vực>/]   kiểu foo.rs, KHÔNG dùng mod.rs
+└── tests/                         test tích hợp dùng API công khai
+
+crates/dandori-server/             (chương trình)
+├── src/main.rs                    MỎNG: cấu hình và gọi dandori_server::run()
+└── src/lib.rs                     logic (axum, tắt êm)
+
+crates/mod-<id>/                   (module)
+├── Cargo.toml  module.json        migrations/ (SQL chỉ tiến)
+├── src/{lib.rs, routes.rs, workers.rs, events.rs, model.rs}
+└── tests/
+
+frontend/app/src/
+├── main.tsx
+├── core/                          khung ứng dụng, client API, vùng chứa ô cắm, features_generated.ts
+├── features/<module-id>/          index.ts, components/, hooks/, api/, types.ts
+├── ui/                            tokens.css và thành phần dùng chung
+└── i18n/                          vi.json
+```
 
 ## 3. Luật phụ thuộc giữa crate (kiểm tự động bằng `scripts/check-architecture.mjs` đọc `cargo metadata`)
 
@@ -64,10 +100,14 @@ Mũi tên "→" nghĩa là "được phụ thuộc vào". Mọi cạnh khác **b
 | `dandori-module-api` | `dandori-types`, `dandori-events`, `dandori-db`, `dandori-vault`, `dandori-agent-port`, `dandori-git` |
 | `dandori-registry` | `dandori-types`, `dandori-events`, `dandori-db`, `dandori-module-api` |
 | `mod-<id>` | **chỉ** `dandori-types`, `dandori-module-api` (và thư viện ngoài được duyệt) |
-| `dandori-server` | mọi crate trên **và** mọi `mod-*` (composition root: nơi DUY NHẤT biết cả hai phía) |
+| `dandori-modules` | `dandori-types`, `dandori-module-api`, và **mọi `mod-*`** (crate sinh tự động; nơi DUY NHẤT ngoài `dandori-server` biết các module) |
+| `dandori-server` | mọi crate lõi ở trên **và `dandori-modules`** (composition root). **Không** phụ thuộc trực tiếp `mod-*` |
+| `dandori-e2e` | mọi crate (chỉ cho test; **không crate nào phụ thuộc vào nó**) |
 | `fake-agent` | không crate nội bộ nào |
 
 Hệ quả: `mod-A` **không thể** `use mod_b::...` (script sẽ thấy cạnh `mod-a → mod-b` và dừng). Hai module muốn phối hợp thì phát/nhận sự kiện hoặc gọi API lõi qua `ModuleContext`. Đây là kiểu **hexagonal** của Kantanda (`ARCH-DDD-005`): port (`dandori-agent-port`, `dandori-module-api`) do lõi sở hữu, adapter (`dandori-agent-adapters`, `dandori-git`, `dandori-vault`) cắm từ ngoài vào ở `dandori-server`.
+
+**Vì sao cần `dandori-modules`:** Rust chỉ dùng được crate đã khai báo trong `[dependencies]`. Nếu `dandori-server` phụ thuộc trực tiếp từng `mod-*` thì mỗi module mới lại phải sửa `Cargo.toml` của server, trái tiêu chí "thêm module không sửa lõi". Vì vậy `gen-modules` ghi cả `Cargo.toml` lẫn `src/lib.rs` của `dandori-modules`; server chỉ phụ thuộc đúng crate này.
 
 ## 4. Hợp đồng module
 
@@ -98,7 +138,7 @@ Hệ quả: `mod-A` **không thể** `use mod_b::...` (script sẽ thấy cạnh
 - `core: true` chỉ dành cho module không được tắt (hiện chỉ `auth-login`).
 - `settings`: JSON Schema đơn giản (`type`, `default`, `enum?`, `min?`, `max?`). Cấu hình lưu ở `feature_setting.config`, được kiểm theo schema này.
 - `ui.contributes`: danh sách **ô cắm giao diện** mà module đóng góp (`id`, `slot`, `label`, `order`); mã slot hợp lệ ở `04_GIAO_DIEN.md` mục 3.3. Module không có giao diện thì để mảng rỗng.
-- `scripts/gen-modules.mjs` đọc mọi `crates/mod-*/module.json`, kiểm hợp lệ (id khớp thư mục, `requires` trỏ tới module có thật, **không có chu trình** kể cả bắc cầu, `ui.contributes[].slot` thuộc danh mục slot), rồi sinh `crates/dandori-server/src/modules_generated.rs` **và** `web/app/src/core/features_generated.ts` (ánh xạ slot → ô cắm nạp lười). Thêm một module = thêm một thư mục + `module.json` + chạy `pnpm run gen:modules`. **Không sửa lõi.** `verify` kiểm file sinh ra không lệch (`--check`).
+- `scripts/gen-modules.mjs` đọc mọi `crates/mod-*/module.json`, kiểm hợp lệ (id khớp thư mục, `requires` trỏ tới module có thật, **không có chu trình** kể cả bắc cầu, `ui.contributes[].slot` thuộc danh mục slot), rồi sinh **`crates/dandori-modules/Cargo.toml` và `crates/dandori-modules/src/lib.rs`** (crate cầu nối, mục 3) **và** `frontend/app/src/core/features_generated.ts` (ánh xạ slot → ô cắm nạp lười). Thêm một module = thêm một thư mục + `module.json` + chạy `pnpm run gen:modules`. **Không sửa lõi** (nhờ `members = ["crates/*"]` và crate cầu nối). `verify` kiểm file sinh ra không lệch (`--check`).
 
 ### 4.2 Trait Rust (đặt trong `dandori-module-api`)
 
@@ -279,10 +319,10 @@ Nhóm: 6 + 6 + 5 + 9 + 4 + 7 + 3 + 3 = **43**. `[CỔNG CHỦ]` (đọc `00_QUY_
 
 Chi tiết bố cục, hệ thống ô cắm, token và ảnh tham chiếu: **`04_GIAO_DIEN.md`** (bắt buộc đọc với task giao diện).
 
-- `web/app`: Vite + React + TypeScript (strict). Cấu trúc **theo tính năng** `src/features/<module-id>/` (components, hooks, api, types colocated; `index.ts` xuất `contributions`); `src/core/` cho khung ứng dụng, vùng chứa ô cắm và client API; `src/ui/` cho thành phần dùng chung và token. Kantanda `FE-ARCH-002`, `FE-API-001` áp dụng.
+- `frontend/app`: Vite + React + TypeScript (strict). Cấu trúc **theo tính năng** `src/features/<module-id>/` (components, hooks, api, types colocated; `index.ts` xuất `contributions`); `src/core/` cho khung ứng dụng, vùng chứa ô cắm và client API; `src/ui/` cho thành phần dùng chung và token. Kantanda `FE-ARCH-002`, `FE-API-001` áp dụng.
 - **Menu theo 7 màn hình cố định** (thanh bên trái), mỗi màn hình dựng từ các **ô cắm** do module đang bật đóng góp (`ui.contributes` trong `module.json`). Module tắt thì ô cắm của nó biến mất; màn hình không còn ô cắm nào thì ẩn mục menu. Trạng thái bật/tắt lấy từ `GET /api/v1/features/effective`.
 - Kiểu dữ liệu API lấy từ `shared/types.ts` (sinh bởi ts-rs). **Cấm** viết tay kiểu trùng với kiểu Rust.
-- Token thiết kế (màu sáng/tối, cỡ chữ, khoảng cách, bo góc, chuyển động) khai báo một nơi (`web/app/src/ui/tokens.css`) theo `04` mục 5; cấm giá trị ngoài thang (Kantanda `UI-*`). Phông tự chứa, không tải từ mạng.
+- Token thiết kế (màu sáng/tối, cỡ chữ, khoảng cách, bo góc, chuyển động) khai báo một nơi (`frontend/app/src/ui/tokens.css`) theo `04` mục 5; cấm giá trị ngoài thang (Kantanda `UI-*`). Phông tự chứa, không tải từ mạng.
 - Chuỗi hiển thị tiếng Việt qua tệp i18n (không viết cứng trong JSX). Không chữ in hoa toàn bộ cho tiêu đề. Chú thích dài đặt trong tooltip "?".
 
 ## 12. Thư viện được duyệt
@@ -295,8 +335,18 @@ Thêm thư viện ngoài danh sách = ADR + hỏi chủ dự án (điều cấm 
 
 ## 13. Dữ liệu và thư mục chạy
 
-- Dữ liệu ứng dụng (SQLite, cấu hình, thư mục HOME riêng từng account, worktree) ở **thư mục dữ liệu của hệ điều hành** qua `directories` (W-03). **Không** nằm trong repo. Biến môi trường `DANDORI_DATA_DIR` ghi đè (dùng cho test).
-- Worktree của task nằm dưới `<data>/worktrees/<project>/<task>/`, không nằm trong cây repo của dự án người dùng.
+- Thư mục dữ liệu (`DANDORI_DATA_DIR`; mặc định theo hệ điều hành qua `directories`, W-03). **Không** nằm trong repo. Bố cục:
+
+```
+<data>/
+├── db/dandori.db                  SQLite
+├── accounts/<account-id>/home/    HOME riêng của từng account CLI
+├── worktrees/<project>/<task>/    git worktree của task
+└── backups/
+```
+
+- Worktree của task không nằm trong cây repo của dự án người dùng.
+- **Nhật ký không ghi tệp:** ghi ra stdout bằng `tracing` (12-factor, nguồn: 12factor.net/logs).
 - Backup/di trú dữ liệu: ngoài phạm vi, trừ khi một task nói rõ.
 
 ## 14. Bảo mật cốt lõi (chung cho mọi task)
@@ -307,3 +357,12 @@ Thêm thư viện ngoài danh sách = ADR + hỏi chủ dự án (điều cấm 
 4. HTTP ra ngoài (GitHub, Linear, Telegram...): chỉ tới tên miền trong danh sách cho phép của từng tích hợp, chặn địa chỉ mạng nội bộ/loopback/metadata (Kantanda `SEC-SSRF-001`).
 5. Đăng nhập: giới hạn thử sai, không phân biệt "sai tên" và "sai mật khẩu" trong thông điệp, phiên có hạn (Kantanda `SEC-AUTH-*`).
 6. Nhật ký: `tracing` có cấu trúc, che bí mật (Kantanda `SEC-LOG-001`); không `println!`.
+
+## 15. Vận hành
+
+Nguồn: Tokio "Graceful Shutdown", ví dụ chính thức của axum, 12-factor (xem `docs/cong-nghe/cau-truc-rust-va-trien-khai.md` Phần 3).
+
+- **Cấu hình** qua biến môi trường `DANDORI_*` (đã có `DANDORI_DATA_DIR`; thêm địa chỉ và cổng nghe). Mặc định nghe `127.0.0.1` (RS-SEC-006).
+- **Tắt êm:** xử lý **cả Ctrl+C lẫn SIGTERM** (Linux, Render và hầu hết hệ quản lý tiến trình gửi SIGTERM). `CancellationToken` báo cho mọi task, `TaskTracker` chờ chúng xong, có thời hạn tắt; axum dùng `with_graceful_shutdown`. Rule `RS-OPS-001`.
+- **Khởi động nhanh:** không làm việc nặng trước khi nghe cổng (12-factor "Disposability").
+- **Đóng gói và triển khai** (Docker nhiều giai đoạn, người dùng không phải root, cache BuildKit): làm ở P4-09 và P5-01; ghi chú nguồn ở tài liệu trên.

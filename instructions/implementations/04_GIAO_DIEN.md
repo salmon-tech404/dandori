@@ -43,11 +43,11 @@ Mockup là **đích về bố cục, nhãn và cảm giác**; không phải đ�
 ```
 
 - `id`: duy nhất trong module. `slot`: một mã ở bảng mục 3.3. `label`: chuỗi hiển thị (khóa i18n được phép). `order`: số nhỏ hiện trước.
-- `scripts/gen-modules.mjs` (T05) kiểm: `slot` tồn tại trong danh mục; `id` không trùng; sinh `web/app/src/core/features_generated.ts` ánh xạ `(slot) -> [{module, id, label, order, load: () => import("../features/<module>")}]`; `--check` so lệch.
+- `scripts/gen-modules.mjs` (T05) kiểm: `slot` tồn tại trong danh mục; `id` không trùng; sinh `frontend/app/src/core/features_generated.ts` ánh xạ `(slot) -> [{module, id, label, order, load: () => import("../features/<module>")}]`; `--check` so lệch.
 
 ### 3.2 Phía frontend
 
-- Mỗi module có thư mục `web/app/src/features/<module-id>/` với `index.ts` xuất `contributions: Record<contributionId, Component>` (nạp lười). Một thành phần ô cắm nhận **props có kiểu theo từng slot** (mục 3.3), **không** tự đọc trạng thái toàn cục ngoài API/hook của lõi.
+- Mỗi module có thư mục `frontend/app/src/features/<module-id>/` với `index.ts` xuất `contributions: Record<contributionId, Component>` (nạp lười). Một thành phần ô cắm nhận **props có kiểu theo từng slot** (mục 3.3), **không** tự đọc trạng thái toàn cục ngoài API/hook của lõi.
 - `src/core/` cung cấp các **vùng chứa** (`<Slot name="board.task-panel.tab" context={...} />`) để dựng màn hình: chỉ gọi các ô cắm của module **đang bật tại phạm vi hiện tại** (`features/effective`) và sắp theo `order`.
 - Module tắt → ô cắm biến mất khỏi màn hình; nếu màn hình không còn ô cắm nào (và không có phần lõi) thì mục menu ẩn. Truy cập thẳng URL của màn hình đó hiện "Tính năng này đang tắt" kèm liên kết tới Cài đặt (nếu đủ quyền).
 - Lỗi trong một ô cắm **không** làm hỏng cả màn hình: mỗi ô cắm nằm trong ranh giới lỗi và hiện thẻ "Không tải được <tên>".
@@ -99,7 +99,7 @@ Mockup là **đích về bố cục, nhãn và cảm giác**; không phải đ�
 
 ## 5. Token thiết kế (từ `mockup-tokens-and-components.css`)
 
-Khai báo **một nơi** `web/app/src/ui/tokens.css`; cấm giá trị màu/cỡ ngoài thang (script `check-tokens`).
+Khai báo **một nơi** `frontend/app/src/ui/tokens.css`; cấm giá trị màu/cỡ ngoài thang (script `check-tokens`).
 
 | Token | Sáng | Tối | Dùng cho |
 | :--- | :--- | :--- | :--- |

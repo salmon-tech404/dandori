@@ -10,7 +10,7 @@ Mỗi task có đủ: **Mục tiêu · Phụ thuộc · Chạm vào · Việc ph
 
 - **Mục tiêu:** repo build được, có cấu hình chất lượng, có hồ sơ Kantanda, có ADR nền.
 - **Phụ thuộc:** Bước 0 xong (Rust, git, baseline). Không có task trước.
-- **Chạm vào:** `Cargo.toml`, `rust-toolchain.toml`, `rustfmt.toml`, `clippy.toml`, `deny.toml`, `package.json`, `pnpm-workspace.yaml`, `.gitignore`, `.env.example`, `AGENTS.md`, `standards/profile.md`, `docs/adr/0001-dependencies.md`, `0002-rust-lints.md`, `0003-architecture-style.md`, `crates/*/Cargo.toml` + `src/lib.rs` (khung rỗng cho mọi crate lõi ở `01` mục 2, trừ `mod-*`), `crates/dandori-server/src/main.rs`, `web/app/**` (khung Vite+React+TS chạy được, một trang chào), `02_QUY_UOC_RUST.md` (chỉ mục "Đã chỉnh" theo `02` mục 6).
+- **Chạm vào:** `Cargo.toml`, `rust-toolchain.toml`, `rustfmt.toml`, `clippy.toml`, `deny.toml`, `package.json`, `pnpm-workspace.yaml`, `.gitignore`, `.env.example`, `AGENTS.md`, `standards/profile.md`, `docs/adr/0001-dependencies.md`, `0002-rust-lints.md`, `0003-architecture-style.md`, `crates/*/Cargo.toml` + `src/lib.rs` (khung rỗng cho mọi crate lõi ở `01` mục 2, trừ `mod-*`), `crates/dandori-server/src/main.rs`, `frontend/app/**` (khung Vite+React+TS chạy được, một trang chào), `02_QUY_UOC_RUST.md` (chỉ mục "Đã chỉnh" theo `02` mục 6).
 - **Việc phải làm:**
   1. Ghi vào `00_TRANG_THAI.md` mục Môi trường đầu ra: `rustc --version`, `cargo --version`, `rustup show`, `node -v`, `pnpm -v`, `git --version`, `cargo deny --version`, `sqlx --version`.
   2. Ghim phiên bản Rust ổn định đang cài vào `rust-toolchain.toml` (kênh `stable` + phiên bản cụ thể) với `clippy`, `rustfmt`; đặt `rust-version` và `edition` ở `Cargo.toml`.
@@ -33,11 +33,47 @@ Mỗi task có đủ: **Mục tiêu · Phụ thuộc · Chạm vào · Việc ph
   7. Test `git check-ignore` qua cả hai chiều (nên ignore / không được ignore).
   8. Không file nào ngoài "Chạm vào" bị đổi (`git diff --stat`).
 
+## T01B. Chỉnh khung theo cấu trúc chuẩn (sửa sau khi kiểm T01)
+
+- **Mục tiêu:** sửa các điểm Claude tìm thấy khi kiểm độc lập T01 và áp dụng **cấu trúc thư mục chuẩn** (ADR 0020), **trước khi** khóa cấu hình ở T02. Đây là task sửa, không thêm tính năng.
+- **Phụ thuộc:** T01 (đã DONE; báo cáo kiểm: `reports/REVIEW_T01.md`). **Đọc `docs/adr/0020-cau-truc-ma-nguon.md` trước.**
+- **Chạm vào:** `Cargo.toml`, `Cargo.lock`, `crates/dandori-server/**`, `crates/dandori-agent-adapters/**`, `crates/dandori-modules/**` (tạo mới), `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `.gitignore`, `frontend/**` (đổi tên từ `web/**`), `README.md` (gốc, tạo mới), `crates/README.md`, `frontend/README.md` (tạo mới), `crates/*/Cargo.toml` (**chỉ** thêm `description`), `crates/dandori-db/src/lib.rs` (sửa lỗi chính tả), `standards/profile.md`, `docs/adr/0001-dependencies.md` và `docs/adr/0003-architecture-style.md` (**chỉ** đổi đường dẫn `web/` thành `frontend/`), `docs/adr/0002-rust-lints.md` (chỉ thêm mục bổ sung cho lint mới), `instructions/implementations/reports/T01B.md`, `instructions/implementations/00_TRANG_THAI.md` (chỉ dòng T01B), `instructions/implementations/02_QUY_UOC_RUST.md` (chỉ dòng "Đã chỉnh").
+- **Việc phải làm:**
+  1. **Đổi tên `web/` thành `frontend/`** (dùng lệnh di chuyển của hệ điều hành, **không** dùng git). Cập nhật mọi tham chiếu: `pnpm-workspace.yaml` (`frontend/*`), `.gitignore` (`/frontend/**/dist/`, `/frontend/**/node_modules/`), `standards/profile.md`, ADR 0001 và 0003. Chạy `pnpm install` một lần để `pnpm-lock.yaml` cập nhật khóa dự án, rồi kiểm `pnpm install --frozen-lockfile` xanh.
+  2. **`package.json` gốc:** thêm `"packageManager": "pnpm@12.14.0"` và `"engines": { "node": ">=24" }`. Dán đầu ra `pnpm -v` và `node -v`. (Lý do: pnpm 12 tự đổi phiên bản theo trường `packageManager` của từng dự án; cần ghim để mọi người dùng chung một bản.)
+  3. **`Cargo.toml` gốc:** đổi `members` thành **`["crates/*"]`**. Với `resolver`: **đọc trang chính thức** https://doc.rust-lang.org/cargo/reference/resolver.html và Cargo Book (Workspaces), rồi đặt `resolver = "3"` nếu tài liệu xác nhận phù hợp với `edition = "2024"` và `rust-version`; **dán trích dẫn ngắn (tối đa 15 từ)** làm bằng chứng. Thêm `[profile.release]` chỉ với `strip = true` và chú thích: "lto, codegen-units: chốt sau khi đo ở P5-01; panic giữ unwind (RS-PANIC-003)". **Không** thêm gì khác vào profile.
+  4. **Lint `mod_module_files = "deny"`** (RS-ARCH-008): thêm vào `[workspace.lints.clippy]`, chạy clippy để **xác nhận tên lint có tồn tại và thuộc nhóm nào**; dán đầu ra. Nếu lint không tồn tại: không thêm, ghi vào ADR 0002 mục bổ sung kèm đầu ra.
+  5. **Crate cầu nối `crates/dandori-modules`** (khung, chưa có module nào): `Cargo.toml` (phụ thuộc `dandori-types` và `dandori-module-api`; dòng đầu ghi "TỆP SINH TỰ ĐỘNG bởi scripts/gen-modules.mjs (T05); không sửa tay"), `src/lib.rs` (`//!`, `#![warn(missing_docs)]`, một hằng `VERSION` như các crate khác). `dandori-server` thêm `dandori-modules` vào `[dependencies]`.
+  6. **`dandori-server`:** thêm `[[bin]] name = "dandori" path = "src/main.rs"`; tách `src/lib.rs` (hàm `pub fn run() -> anyhow::Result<()>`: khởi tạo `tracing` và ghi dòng "chưa có gì (khung)") và `src/main.rs` **mỏng** (gọi `run`). Chạy `cargo run -p dandori-server` và dán đầu ra; xác nhận có file `target\debug\dandori.exe`.
+  7. **`dandori-agent-adapters/src/lib.rs`:** bỏ hàm `init()` (do agent tự thêm, **không có trong thiết kế**); đưa về khung tối giản như các crate lõi khác (`//!`, `#![warn(missing_docs)]`, hằng `VERSION`).
+  8. **`frontend/app/src/App.tsx`:** thay các giá trị cứng (`2rem`, `1.5rem`, mã màu `#...`, v.v.) bằng biến trong `tokens.css` (thêm token còn thiếu, ví dụ `--color-on-primary`). Ghi trong báo cáo: bộ token hiện tại chỉ là **tạm**; T12 sẽ thay bằng bộ ở `04_GIAO_DIEN.md` mục 5.
+  9. **`.gitignore`:** thêm `/release/`.
+  10. **`standards/profile.md`:** sửa đường dẫn `frontend/app`; sửa dòng "Presubmit: GitHub Actions / Hook" cho đúng thực tế (chưa có CI; presubmit = chạy `pnpm run verify` trên bản sao sạch, có thể thêm hook cục bộ sau). Giữ nguyên các phần còn lại.
+  11. Ghi vào `02_QUY_UOC_RUST.md` các dòng "Đã chỉnh" nếu tên lint hoặc khóa cấu hình khác với mô tả.
+  12. **`README.md` gốc** (tiếng Việt, tối đa khoảng một trang): Dandori là gì (2 câu), cách chạy (`cargo run -p dandori-server`, `pnpm --filter app build`), **bản đồ thư mục** (lấy từ `docs/adr/0020-cau-truc-ma-nguon.md` mục 1, mỗi dòng một câu), "đọc gì tiếp" (`crates/README.md`, `docs/README.md`, `instructions/implementations/00_README.md`). Không sao chép dài dòng từ ADR; liên kết tới nó.
+  13. **`crates/README.md`**: bảng mọi crate **theo tầng** (tầng 0 `dandori-types`, tầng 1 `db/events/vault/process/agent-port`, tầng 2 `git/agent-adapters`, tầng 3 `module-api`, tầng 4 `registry`, `dandori-modules`, tầng 5 `dandori-server`, cùng `fake-agent` và `dandori-e2e` (sẽ có ở T14)) với cột: tên, nhiệm vụ một câu, phụ thuộc vào. Ghi dòng: "Nguồn sự thật là `description` trong `Cargo.toml` và `cargo doc`; bảng này chỉ là bản đồ." **`frontend/README.md`**: cách chạy, cấu trúc `src/{core,features,ui,i18n}`.
+  14. **`description`** (một dòng, tiếng Việt) trong `Cargo.toml` của **mọi** crate, khớp câu đầu của `//!`. Sửa lỗi chính tả "Cở sở dữ liệu" thành "Cơ sở dữ liệu" trong `dandori-db`.
+- **Không làm:** không viết logic nghiệp vụ; không tạo `scripts/` (T02); không thêm thư viện; không đổi nội dung `instructions/**` ngoài các ngoại lệ ở mục "Chạm vào" (Claude đã cập nhật kế hoạch); không dùng git để ghi.
+- **Tiêu chí nghiệm thu:**
+  1. `cargo fmt --all --check`, `cargo build --workspace --locked`, `cargo clippy --workspace --all-targets --locked -- -D warnings`, `cargo test --workspace --locked`, `cargo deny check` đều qua; dán đầu ra.
+  2. `cargo metadata --format-version 1 --no-deps` liệt kê **13** crate (12 cũ + `dandori-modules`); dán số đếm bằng lệnh.
+  3. **Chứng minh glob:** tạo tạm thư mục `crates/zz-temp/` với một `Cargo.toml` và `src/lib.rs` hợp lệ; `cargo metadata` thấy nó mà **không sửa `Cargo.toml` gốc**; rồi **xóa** thư mục tạm và xác nhận `cargo metadata` quay về 13 crate. Dán cả hai lần.
+  4. `cargo run -p dandori-server` chạy được; file chạy tên `dandori.exe`.
+  5. Sau khi đổi tên: `pnpm install --frozen-lockfile` và `pnpm --filter app build` qua; thư mục `web/` **không còn tồn tại**; lệnh tìm chuỗi `web/app` và `web/` trong `Cargo.toml`, `package.json`, `pnpm-workspace.yaml`, `.gitignore`, `standards/`, `docs/adr/` **không ra kết quả** (dán lệnh và đầu ra).
+  6. `package.json` có `packageManager` và `engines` (dán nội dung).
+  7. Lint `mod_module_files`: có bằng chứng tồn tại, hoặc đã ghi lý do bỏ ở ADR 0002.
+  8. `App.tsx` không còn mã màu `#...` hay giá trị `rem` cứng (dán kết quả tìm kiếm).
+  9. `dandori-agent-adapters` không còn hàm `init`.
+  10. QC2 trên **bản sao sạch** chạy lại toàn bộ mục 1 và 5; dán đầu ra.
+  11. `README.md` ở gốc, `crates/README.md`, `frontend/README.md` tồn tại; README gốc có bản đồ thư mục khớp cấu trúc thật (so bằng cách liệt kê thư mục gốc và dán).
+  12. Mọi crate có `description` (dán kết quả `cargo metadata --no-deps` lọc ra tên và `description`; **không** crate nào trống).
+  13. `RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps` qua (dán đầu ra); chưa cần thêm vào `verify` (T02 làm).
+
 ## T02. Cổng `verify` và các script kiểm
 
 - **Mục tiêu:** một lệnh `pnpm run verify` chạy mọi kiểm tra ở `03` mục 5; mỗi script kiểm có test xanh/đỏ riêng.
-- **Phụ thuộc:** T01.
-- **Chạm vào:** `scripts/**`, `tests/tooling/**`, `package.json` (scripts), `web/tooling/kantanda-eslint.config.mjs`, `web/app/eslint.config.js`, `web/app/vitest.config.ts`, `crates/dandori-types/**` và `crates/dandori-server/src/bin/generate_types.rs` (chỉ khung sinh kiểu), `shared/types.ts`, `docs/manual-test-checklist.md` (tạo khung).
+- **Phụ thuộc:** T01B.
+- **Chạm vào:** `scripts/**`, `tests/tooling/**`, `package.json` (scripts), `frontend/tooling/kantanda-eslint.config.mjs`, `frontend/app/eslint.config.js`, `frontend/app/vitest.config.ts`, `crates/dandori-types/**` và `crates/dandori-server/src/bin/generate_types.rs` (chỉ khung sinh kiểu), `shared/types.ts`, `docs/manual-test-checklist.md` (tạo khung).
 - **Việc phải làm:**
   1. `scripts/verify.mjs`: chạy các bước theo thứ tự `00_QUY_TAC_CHUNG` mục 4, dừng ở lỗi đầu tiên, in rõ bước nào đỏ, mã thoát khác 0 khi đỏ; chạy được Windows và Linux; mỗi bước có timeout.
   2. `scripts/check-architecture.mjs` (RS-ARCH-001/002/004, RS-ERR-002, RS-DEP-002): đọc `cargo metadata --format-version 1 --locked`, so với bảng luật `01` mục 3 (đặt thành **dữ liệu** trong file JSON, không rải trong code), so `Cargo.toml` với danh sách ở ADR 0001.
@@ -46,7 +82,7 @@ Mỗi task có đủ: **Mục tiêu · Phụ thuộc · Chạm vào · Việc ph
   5. `scripts/scan-secrets.mjs` (RS-SEC-003): quét mẫu khóa API/token/khóa riêng trong mọi tệp được git theo dõi; danh sách cho phép chỉ gồm `tests/fixtures/`; **không** dùng mẫu quá rộng gây báo nhầm trên tệp khóa băm của lockfile (lỗi đã gặp ở dự án trước).
   6. `scripts/gen-modules.mjs` chỉ cần **khung** (đọc `crates/mod-*/module.json`, báo "0 module") và chế độ `--check`; bản đầy đủ ở T05.
   7. `generate_types` binary và `shared/types.ts` (RS-TS-001) với chế độ `--check`; một kiểu mẫu để chứng minh vòng sinh/kiểm.
-  8. `web/tooling/kantanda-eslint.config.mjs`: bản sao của `D:\10-kantanda\tooling\eslint.config.mjs` kèm dòng đầu ghi nguồn và mã commit Kantanda (`git -C D:\10-kantanda rev-parse --short HEAD`); `web/app/eslint.config.js` dùng nó với `styles: []`. Máy phải đăng ký plugin `typescript-eslint` cho các rule nó nhắc (kiểm bằng chạy).
+  8. `frontend/tooling/kantanda-eslint.config.mjs`: bản sao của `D:\10-kantanda\tooling\eslint.config.mjs` kèm dòng đầu ghi nguồn và mã commit Kantanda (`git -C D:\10-kantanda rev-parse --short HEAD`); `frontend/app/eslint.config.js` dùng nó với `styles: []`. Máy phải đăng ký plugin `typescript-eslint` cho các rule nó nhắc (kiểm bằng chạy).
   9. `tests/tooling/**`: **mỗi script có ít nhất một ca đỏ** (fixture vi phạm làm script thất bại đúng thông điệp) và một ca xanh. Ví dụ: fixture có cạnh `mod-a → mod-b` làm `check-architecture` đỏ; `#![allow(...)]` làm `check-lints` đỏ; `format!` trong `sqlx::query` làm `check-sql` đỏ; chuỗi giống khóa làm `scan-secrets` đỏ.
   10. Kiểm `verify` trên worktree sạch.
 - **Không làm:** không viết mã nghiệp vụ; không nới `Cargo.toml`/`clippy.toml` của T01.
@@ -96,17 +132,17 @@ Mỗi task có đủ: **Mục tiêu · Phụ thuộc · Chạm vào · Việc ph
 
 - **Mục tiêu:** trait `Module`, `Manifest`, `ModuleContext`; script sinh danh sách module; chu trình phụ thuộc bị chặn **khi build**.
 - **Phụ thuộc:** T03, T04.
-- **Chạm vào:** `crates/dandori-module-api/**`, `scripts/gen-modules.mjs`, `crates/dandori-server/src/modules_generated.rs` (sinh), `web/app/src/core/features_generated.ts` (sinh), `tests/tooling/gen-modules/**`, `crates/mod-sample-hello/**` (module mẫu để thử cổng P0; xem T14).
+- **Chạm vào:** `crates/dandori-module-api/**`, `scripts/gen-modules.mjs`, `crates/dandori-modules/Cargo.toml` và `crates/dandori-modules/src/lib.rs` (sinh; crate cầu nối, xem `01` mục 3), `frontend/app/src/core/features_generated.ts` (sinh), `tests/tooling/gen-modules/**`, `crates/mod-sample-hello/**` (module mẫu để thử cổng P0; xem T14).
 - **Việc phải làm:**
   1. `Manifest` đọc/kiểm `module.json` theo `01` mục 4.1 (kiểu có kiểm tra, từ chối trường lạ, kiểm schema `settings`).
   2. Trait `Module` và `ModuleContext` theo `01` mục 4.2: tay cầm hẹp, **không** lộ pool thô của bảng lõi.
-  3. `scripts/gen-modules.mjs` đầy đủ: id khớp tên thư mục; `requires` trỏ tới module có thật; **phát hiện chu trình kể cả bắc cầu** và in đường đi chu trình; `core` hợp lệ; sinh `modules_generated.rs`; `--check` so file sinh với file đang có. **Đọc `ui.contributes`** (`04_GIAO_DIEN.md` mục 3.1): kiểm `slot` thuộc danh mục slot (đặt thành **dữ liệu** JSON, không rải trong code), `id` không trùng trong module; sinh thêm `web/app/src/core/features_generated.ts` (ánh xạ slot → danh sách ô cắm nạp lười).
+  3. `scripts/gen-modules.mjs` đầy đủ: id khớp tên thư mục; `requires` trỏ tới module có thật; **phát hiện chu trình kể cả bắc cầu** và in đường đi chu trình; `core` hợp lệ; sinh `crates/dandori-modules/Cargo.toml` (mỗi `mod-*` là một phụ thuộc dạng `path`) và `crates/dandori-modules/src/lib.rs`; `--check` so file sinh với file đang có. **Đọc `ui.contributes`** (`04_GIAO_DIEN.md` mục 3.1): kiểm `slot` thuộc danh mục slot (đặt thành **dữ liệu** JSON, không rải trong code), `id` không trùng trong module; sinh thêm `frontend/app/src/core/features_generated.ts` (ánh xạ slot → danh sách ô cắm nạp lười).
   4. Module mẫu `mod-sample-hello`: `module.json` (nhóm `safety` hay nhóm phù hợp, `risk: low`), một route `GET /ping`, một migration tạo bảng `m_sample_hello_note` (quy tắc đặt tên: tiền tố `m_`, rồi `id` module với gạch ngang đổi thành gạch dưới, rồi `_` và tên bảng; ghi quy tắc này vào chú thích của `dandori-module-api`), một worker đếm nhịp, một bộ nghe sự kiện. Mục đích: thử cổng P0. **Chỉ được đưa vào bản build khi cờ `sample-modules` bật** (cờ cargo cộng thêm, chỉ cho dev/test; đây không phải bật/tắt module, RS-ARCH-003).
 - **Không làm:** không registry (T06/T07); không module thật.
 - **Tiêu chí nghiệm thu:**
   1. Test của `Manifest`: hợp lệ, thiếu trường, trường lạ, `requires` rỗng, schema `settings` sai.
   2. Fixture hai module cần nhau: `gen-modules` **thất bại**, thông điệp nêu đường đi chu trình (ví dụ `a -> b -> a`). Fixture chu trình bắc cầu 3 module cũng thất bại.
-  3. Fixture `requires` tới module không tồn tại: thất bại. Fixture `ui.contributes` với `slot` không có trong danh mục: thất bại.
+  3. Fixture `requires` tới module không tồn tại: thất bại. **Thêm một thư mục `mod-zz` hợp lệ rồi chạy `gen-modules`: `dandori-modules/Cargo.toml` tự có thêm `mod-zz` mà `Cargo.toml` gốc và `Cargo.toml` của `dandori-server` KHÔNG phải sửa** (chứng minh tiêu chí "không sửa lõi"). Fixture `ui.contributes` với `slot` không có trong danh mục: thất bại.
   4. `gen-modules --check` xanh khi file sinh khớp; đỏ khi sửa tay.
   5. `check-architecture` xanh với `mod-sample-hello` (chỉ phụ thuộc `types` và `module-api`); và **đỏ** với fixture cho `mod-a → mod-b`.
   6. `verify` xanh trên worktree sạch.
@@ -117,7 +153,7 @@ Mỗi task có đủ: **Mục tiêu · Phụ thuộc · Chạm vào · Việc ph
 - **Phụ thuộc:** T05.
 - **Chạm vào:** `crates/dandori-registry/**`, `crates/dandori-db/**` (thêm truy vấn nếu cần), `crates/dandori-types/**`.
 - **Việc phải làm:**
-  1. Nạp danh mục từ `modules_generated` vào `feature_module` (upsert theo phiên bản).
+  1. Nạp danh mục từ crate `dandori-modules` (sinh tự động) vào `feature_module` (upsert theo phiên bản).
   2. Hàm `effective_state(module, workspace, project)` đúng 4 bước ở `01` mục 5; **không lưu** kết quả.
   3. `plan_enable(module, scope)` trả `{ will_enable_with: [...], needs_risk_ack: bool, risk_note }` (phụ thuộc bắc cầu, thứ tự topo); `plan_disable(module, scope)` trả `{ will_break: [...] }` (module đang bật cần nó, bắc cầu).
   4. Quyền đổi theo cấp (chủ hệ thống, quản trị viên workspace, chủ dự án); `locked` ở cấp trên làm cấp dưới **không đổi được**; trả lỗi có kiểu.
@@ -221,6 +257,7 @@ Mỗi task có đủ: **Mục tiêu · Phụ thuộc · Chạm vào · Việc ph
   6. Test: không route nào ngoài danh sách cho phép truy cập được khi chưa đăng nhập (liệt kê route bằng một test duyệt router).
   7. Test: mật khẩu không xuất hiện trong log (bắt đầu ra `tracing` trong test).
   8. Cấu hình mặc định **không** bind `0.0.0.0` (test cấu hình).
+  8b. **Tắt êm (RS-OPS-001):** gửi tín hiệu hủy (Ctrl+C giả lập qua `CancellationToken`; SIGTERM thật khi chạy trên Linux) → máy chủ ngừng nhận yêu cầu mới, chờ yêu cầu đang chạy, rồi thoát trong thời hạn; không còn task nền (đếm).
   9. `verify` xanh trên worktree sạch.
 
 ## T11. Workspace, dự án, task (API lõi)
@@ -242,15 +279,15 @@ Mỗi task có đủ: **Mục tiêu · Phụ thuộc · Chạm vào · Việc ph
   5. Test: API registry kiểm quyền 3 cấp (khớp T06).
   6. `verify` xanh trên worktree sạch.
 
-## T12. Kiểu chia sẻ và khung giao diện (`web/app`)
+## T12. Kiểu chia sẻ và khung giao diện (`frontend/app`)
 
 - **Mục tiêu:** frontend có khung ứng dụng (thanh bên 7 màn hình), đăng nhập, hệ thống ô cắm (slot) sinh từ registry, i18n, token thiết kế. **Đọc `04_GIAO_DIEN.md` và xem ảnh `ui-reference/` trước.**
 - **Phụ thuộc:** T11.
-- **Chạm vào:** `web/app/**`, `shared/types.ts` (sinh), `standards/profile.md` (điền `{{touch_target}}`), `web/app/src/ui/tokens.css`.
+- **Chạm vào:** `frontend/app/**`, `shared/types.ts` (sinh), `standards/profile.md` (điền `{{touch_target}}`), `frontend/app/src/ui/tokens.css`.
 - **Việc phải làm:**
   1. `src/core/`: client API có kiểu (chỉ dùng `shared/types.ts`), kiểm dữ liệu vào bằng `zod` ở biên, xử lý lỗi `{error:{code,message,request_id}}`, `react-query`, router, bố cục (thanh trên, bộ chọn dự án, trạng thái server), màn hình đăng nhập và khởi tạo lần đầu.
   2. **Khung và ô cắm** theo `04_GIAO_DIEN.md` mục 2–3: thanh bên trái (logo, bộ chọn dự án, 7 màn hình cố định, ô ghi chú đáy), thanh tiêu đề (chỉ nhãn "Server: đang chạy"; **không** nhãn "Dữ liệu minh họa"), vùng chứa `<Slot name=... context=.../>` gọi các ô cắm của module **đang bật** (từ `features/effective` và `features_generated.ts`), sắp theo `order`, mỗi ô cắm trong ranh giới lỗi. Màn hình không còn ô cắm nào → ẩn mục menu; truy cập thẳng URL của nó hiện "Tính năng này đang tắt" (có liên kết tới Cài đặt nếu đủ quyền). **Board khi `kanban` tắt** hiện danh sách task đơn giản do lõi dựng (không để trống). Màn hình đăng nhập/khởi tạo lần đầu dựng theo token (mockup không có).
-  3. `src/ui/tokens.css`: **đúng bộ token ở `04` mục 5** (màu sáng/tối, cỡ chữ, bo góc, khoảng cách), chế độ sáng/tối; phông DM Sans và JetBrains Mono **tự chứa** (lấy từ HTML gốc hoặc nguồn chính thức, kèm giấy phép OFL; thiếu tệp thì dùng dự phòng và ghi lại); cấm giá trị ngoài thang (kiểm bằng script `check-tokens` thêm vào `verify`).
+  3. `src/ui/tokens.css` (bộ token do T01 dựng chỉ là **tạm**, khác mockup; thay hoàn toàn): **đúng bộ token ở `04` mục 5** (màu sáng/tối, cỡ chữ, bo góc, khoảng cách), chế độ sáng/tối; phông DM Sans và JetBrains Mono **tự chứa** (lấy từ HTML gốc hoặc nguồn chính thức, kèm giấy phép OFL; thiếu tệp thì dùng dự phòng và ghi lại); cấm giá trị ngoài thang (kiểm bằng script `check-tokens` thêm vào `verify`).
   4. i18n tiếng Việt: mọi chuỗi giao diện trong tệp ngôn ngữ; script `check-i18n` kiểm không còn chuỗi cứng trong JSX và không khóa thừa.
   5. Thành phần dùng chung: nút, ô nhập "nhãn | điều khiển", hộp thoại xác nhận, tooltip "?", thẻ trạng thái, bảng; đều có trạng thái rỗng/đang tải/lỗi, thao tác bằng bàn phím, vùng chạm ≥ 44px, icon Lucide.
   6. Điền `{{touch_target}}` thật vào `standards/profile.md`.
@@ -268,7 +305,7 @@ Mỗi task có đủ: **Mục tiêu · Phụ thuộc · Chạm vào · Việc ph
 
 - **Mục tiêu:** màn hình bật/tắt module theo đúng mô tả của PDF, **bố cục theo mockup** (`ui-reference/07-cai-dat-tinh-nang.png`, `04_GIAO_DIEN.md` mục 4 phần Cài đặt): thẻ Gói mẫu, thẻ nhóm có chip "n/m đang bật", hàng module (công tắc, tên, mô tả, dòng "Cần bật trước: …", chip công sức bên phải), module lõi công tắc mờ vô hiệu. PDF thêm: phạm vi, tìm kiếm, bộ lọc, nhãn rủi ro, bánh răng, hộp thoại, hoàn tác.
 - **Phụ thuộc:** T12.
-- **Chạm vào:** `web/app/src/features/settings-features/**` (đây là màn hình của **lõi**, không phải module), i18n, `docs/manual-test-checklist.md`.
+- **Chạm vào:** `frontend/app/src/features/settings-features/**` (đây là màn hình của **lõi**, không phải module), i18n, `docs/manual-test-checklist.md`.
 - **Việc phải làm (theo PDF, "Bố cục" và "Hành vi khi bấm công tắc"):**
   1. Trên cùng: bộ chọn phạm vi (Hệ thống, Workspace, Dự án), ô tìm kiếm, bộ lọc "Đang bật"/"Đang tắt".
   2. Hàng **gói mẫu** (Solo nhẹ, Nhóm nhỏ, Đầy đủ): bấm áp cả bộ (qua `plan_enable`, có hộp xác nhận liệt kê).
@@ -293,7 +330,7 @@ Mỗi task có đủ: **Mục tiêu · Phụ thuộc · Chạm vào · Việc ph
 
 - **Mục tiêu:** chứng minh cổng sang P1 bằng một kiểm thử xuyên suốt; không thêm tính năng.
 - **Phụ thuộc:** T13.
-- **Chạm vào:** `tests/e2e/p0-gate/**`, `docs/manual-test-checklist.md`, báo cáo.
+- **Chạm vào:** `crates/dandori-e2e/**` (**tạo crate này ở T14**: chỉ có `Cargo.toml` và `tests/p0_gate.rs`; các cổng sau thêm tệp vào đó; không cần sửa `Cargo.toml` gốc nhờ `members = ["crates/*"]`), `frontend/app/e2e/**` (kịch bản trình duyệt, nếu có), `docs/manual-test-checklist.md`, báo cáo.
 - **Việc phải làm:** một kịch bản tự động từ DB rỗng: khởi tạo chủ → tạo workspace/dự án → bật `sample-hello` qua API quản trị → ping → ghi dữ liệu → tắt → ping bị `module_disabled` → dữ liệu còn → khởi động lại tiến trình → trạng thái khôi phục → bật lại → dữ liệu còn. Kèm kiểm: sau tắt **không còn** task nền của module (đếm), không còn mục menu của module (qua `features/effective`).
 - **Không làm:** không sửa mã nguồn lõi để cho kịch bản qua (phát hiện lỗi thì ghi `BLOCKED` kèm mô tả và sửa ở task phù hợp).
 - **Tiêu chí nghiệm thu:**

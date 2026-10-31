@@ -1,0 +1,22 @@
+# build
+/target/
+/frontend/**/dist/
+/frontend/**/node_modules/
+/node_modules/
+/release/
+*.tsbuildinfo
+# dữ liệu và bí mật
+.env
+.env.*
+!.env.example
+*.db
+*.db-journal
+*.sqlite*
+/.dandori-data/
+# công cụ
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+# báo cáo tạm của QC (KHÔNG ignore instructions/implementations/reports/)
+/tmp-qc/

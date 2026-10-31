@@ -10,7 +10,7 @@ Mục tiêu: đóng gói để chủ dự án cài và dùng được; rà soát
 - **Phụ thuộc:** P4-10.
 - **Chạm vào:** `crates/dandori-server/**` (nhúng/phục vụ tài sản web, tham số dòng lệnh), `scripts/package.mjs`, `docs/adr/0019-packaging.md`, `docs/install.md`, `release/**` (đầu ra, đã ignore), `package.json`.
 - **Việc phải làm:**
-  1. ADR 0019: cách phục vụ giao diện web trong bản phát hành (nhúng vào binary bằng thư viện đề xuất qua ADR, hay thư mục `web/` cạnh binary); chọn **cách ít phụ thuộc nhất** đáp ứng được; nêu lý do.
+  1. ADR 0019: cách phục vụ giao diện web trong bản phát hành (nhúng vào binary bằng thư viện đề xuất qua ADR, hay thư mục `frontend/` cạnh binary); chọn **cách ít phụ thuộc nhất** đáp ứng được; nêu lý do.
   2. Binary `dandori`: `--version`, `--help`, `--data-dir`, `--port`; **không** tự khởi động cùng hệ thống, **không** dịch vụ nền, **không** telemetry, **không** mở cổng ngoài loopback mặc định; in địa chỉ truy cập và hướng dẫn ngắn ở lần chạy đầu (tiếng Việt).
   3. `scripts/package.mjs`: build release (`cargo build --release --locked`, build web), tạo thư mục `release/dandori-<phiên bản>/` kèm tệp `THIRD_PARTY_LICENSES` sinh từ công cụ kiểm giấy phép của `cargo-deny` (hoặc công cụ khác đã duyệt qua ADR), `docs/install.md`, tệp băm SHA-256 của bản phát hành.
   4. `docs/install.md` (tiếng Việt, người không rành kỹ thuật): yêu cầu, cách chạy, bước đầu tiên (tạo chủ hệ thống), nơi dữ liệu nằm, cách gỡ, cách đăng nhập CLI cho một account, **việc cần làm tay** (cài và đăng nhập CLI).

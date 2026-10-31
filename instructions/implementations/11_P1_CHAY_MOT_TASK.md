@@ -43,7 +43,7 @@ Module của giai đoạn này (theo PDF): `subscription-connect`, `lead-worker`
 
 - **Mục tiêu:** kết nối subscription qua **CLI chính thức**, mỗi account một thư mục HOME riêng; adapter cho Claude, Gemini, Codex.
 - **Phụ thuộc:** P1-01.
-- **Chạm vào:** `crates/mod-subscription-connect/**`, `crates/dandori-agent-adapters/**`, `docs/agents/*.md`, `docs/manual-test-checklist.md`, `web/app/src/features/subscription-connect/**`, i18n.
+- **Chạm vào:** `crates/mod-subscription-connect/**`, `crates/dandori-agent-adapters/**`, `docs/agents/*.md`, `docs/manual-test-checklist.md`, `frontend/app/src/features/subscription-connect/**`, i18n.
 - **Việc phải làm:**
   1. **Trước tiên (spike có bằng chứng, giả định A-01):** với mỗi CLI (`claude`, `agy`, `codex`; Codex có thể chưa cài, khi đó ghi "chưa cài" và làm phần còn lại theo cùng khuôn), chạy `<cli> --version`, `<cli> --help` và các lệnh con liên quan đến đăng nhập/chạy không tương tác. **Dán đầu ra nguyên văn (che thông tin cá nhân)** vào `docs/agents/<provider>-cli.md`. Từ đó ghi: cách phát hiện đã cài; cách phát hiện đã đăng nhập (nếu CLI có lệnh trạng thái; nếu không thì "không xác định được tự động"); cách chạy không tương tác và định dạng đầu ra; cách đặt thư mục cấu hình/HOME; cách nhận biết hết hạn mức. **Không tham số nào được ghi nếu không có trong `--help` thật** (điều cấm 11).
   2. Quy ước **HOME riêng mỗi account**: thư mục `<data>/accounts/<account-id>/home/`; `dandori-process` đặt biến môi trường cần thiết (ghi các biến tìm được ở bước 1; Windows thường cần `USERPROFILE`, `HOME`, có thể cả `APPDATA`/`LOCALAPPDATA`, hãy kiểm từng CLI). Nếu một CLI **không** cho cách cô lập nào tin cậy, ghi rõ giới hạn trong tài liệu và trên giao diện ("chỉ hỗ trợ một account cho nhà cung cấp này"), **không** giả vờ.
@@ -66,7 +66,7 @@ Module của giai đoạn này (theo PDF): `subscription-connect`, `lead-worker`
 
 - **Mục tiêu:** chọn Lead (PM) và Worker cho từng task; mặc định theo vai trò, đổi được theo task.
 - **Phụ thuộc:** P1-02.
-- **Chạm vào:** `crates/mod-lead-worker/**`, `web/app/src/features/lead-worker/**`, i18n.
+- **Chạm vào:** `crates/mod-lead-worker/**`, `frontend/app/src/features/lead-worker/**`, i18n.
 - **Việc phải làm:**
   1. Bảng `m_lead_worker_default` (dự án, vai trò, thứ tự nhà cung cấp ưu tiên). Vai trò mặc định theo mockup: **PM** (giao việc và kiểm tra), **Worker** (code hàng loạt), **Agent test**, **Agent tài liệu**. Thứ tự gợi ý trong mockup: PM Claude>Gemini>Codex; Worker Gemini>Claude>Codex; Test Codex>Gemini>Claude; Tài liệu Claude>Gemini>Codex. Đây là **giá trị mặc định chỉnh được**, không phải luật.
   2. Gán theo task: ghi `lead_agent`/`worker_agent` của task qua API lõi; chỉ cho chọn nhà cung cấp có ít nhất một account `ready`; cảnh báo nếu không.
@@ -85,7 +85,7 @@ Module của giai đoạn này (theo PDF): `subscription-connect`, `lead-worker`
 
 - **Mục tiêu:** mỗi task một git worktree và branch riêng; hiện thực `WorkdirProvider`.
 - **Phụ thuộc:** P1-01.
-- **Chạm vào:** `crates/dandori-git/**`, `crates/mod-worktree/**`, `web/app/src/features/worktree/**`, i18n.
+- **Chạm vào:** `crates/dandori-git/**`, `crates/mod-worktree/**`, `frontend/app/src/features/worktree/**`, i18n.
 - **Việc phải làm:**
   1. `dandori-git`: bọc lệnh `git` **qua `dandori-process`** (mảng tham số, không shell, timeout): `worktree add`, `worktree remove`, `branch`, `status --porcelain`, `rev-parse`, `diff` (bản diff dùng ở P2-02). Đặt `GIT_CONFIG_GLOBAL`/`GIT_CONFIG_NOSYSTEM` và danh tính tác giả riêng để không phụ thuộc cấu hình git của người dùng khi test. Mọi tham số có phần do người dùng nhập được đặt sau `--` hoặc kiểm chặt (tên nhánh qua `check-ref-format`).
   2. Module `worktree` hiện thực `WorkdirProvider`: tạo `<data>/worktrees/<project>/<task>/` bằng `git worktree add` với nhánh mới `task/<slug>-<mã ngắn>` từ nhánh cơ sở của dự án; ghi `workdir_path` của task qua API lõi. **Không bao giờ** sửa cây làm việc chính của dự án người dùng.
@@ -108,7 +108,7 @@ Module của giai đoạn này (theo PDF): `subscription-connect`, `lead-worker`
 
 - **Mục tiêu:** bảng task dạng Kanban theo trạng thái.
 - **Phụ thuộc:** T14 (chỉ cần lõi).
-- **Chạm vào:** `crates/mod-kanban/**`, `web/app/src/features/kanban/**`, i18n.
+- **Chạm vào:** `crates/mod-kanban/**`, `frontend/app/src/features/kanban/**`, i18n.
 - **Việc phải làm:**
   1. Cột theo mockup: **Backlog**, **Đang chạy**, **Cần bạn**, **Đang review**, **Sẵn sàng merge** (+ cột ẩn mặc định cho `done`, `failed`, `cancelled`, bật bằng bộ lọc). Thẻ: tiêu đề, nhánh (nếu có), agent và account (nếu có), nhãn trạng thái; bấm mở chi tiết task ở bên phải.
   2. Kéo-thả đổi trạng thái qua API lõi (chỉ chuyển hợp lệ; chuyển bị từ chối trả thẻ về chỗ cũ và báo lý do). **Có cách thay thế bằng bàn phím** (menu "Chuyển tới…").
@@ -129,7 +129,7 @@ Module của giai đoạn này (theo PDF): `subscription-connect`, `lead-worker`
 
 - **Mục tiêu:** xem agent đang làm gì theo thời gian thực.
 - **Phụ thuộc:** P1-01.
-- **Chạm vào:** `crates/mod-live-status/**`, `crates/dandori-events/**` (chỉ nếu cần bộ lọc), `web/app/src/features/live-status/**`, i18n, `01_KIEN_TRUC.md` mục 10 (đồng bộ đường dẫn SSE, ghi "Đã chỉnh").
+- **Chạm vào:** `crates/mod-live-status/**`, `crates/dandori-events/**` (chỉ nếu cần bộ lọc), `frontend/app/src/features/live-status/**`, i18n, `01_KIEN_TRUC.md` mục 10 (đồng bộ đường dẫn SSE, ghi "Đã chỉnh").
 - **Việc phải làm:**
   1. Route `GET /api/v1/m/live-status/stream` (SSE): luồng sự kiện đã lọc theo phạm vi và **quyền** của người dùng; chỉ gửi loại sự kiện cho phép (`run.*`, `task.*`, `module.*`); kiểm tra lại quyền khi nối lại; heartbeat; `Last-Event-ID` để nối lại không mất; giới hạn số kết nối mỗi người dùng.
   2. Giao diện: bảng "Agent đang làm việc" (agent, task, ai giao, thời lượng đã chạy, trạng thái), cuộn log của lần chạy đang chọn (mở rộng được, giới hạn bộ nhớ trình duyệt), chỉ báo kết nối (đang kết nối/mất kết nối/đang nối lại).
@@ -149,7 +149,7 @@ Module của giai đoạn này (theo PDF): `subscription-connect`, `lead-worker`
 
 - **Mục tiêu:** thư viện prompt gắn theo agent và theo skill; đóng góp vào prompt của lần chạy.
 - **Phụ thuộc:** P1-03.
-- **Chạm vào:** `crates/mod-prompt-library/**`, `web/app/src/features/prompt-library/**`, i18n.
+- **Chạm vào:** `crates/mod-prompt-library/**`, `frontend/app/src/features/prompt-library/**`, i18n.
 - **Việc phải làm:**
   1. Bảng `m_prompt_library_prompt` và `m_prompt_library_version` (prompt có phiên bản: mockup hiển thị "v3"); trường: tên, nội dung, gắn với **vai trò agent** (PM/Worker/Test/Tài liệu) và/hoặc **nhãn skill** (chuỗi do người dùng đặt); phạm vi dự án hoặc workspace.
   2. Biến hợp lệ trong prompt: một **danh sách trắng** nhỏ (`{{task.title}}`, `{{task.description}}`, `{{project.name}}`, `{{role}}`); biến lạ bị từ chối khi lưu. **Không** có đánh giá biểu thức hay thực thi mã.
@@ -171,7 +171,7 @@ Module của giai đoạn này (theo PDF): `subscription-connect`, `lead-worker`
 
 - **Mục tiêu:** hồ sơ kỹ thuật dự án mà mọi agent đọc.
 - **Phụ thuộc:** P1-07.
-- **Chạm vào:** `crates/mod-tech-profile/**`, `web/app/src/features/tech-profile/**`, i18n.
+- **Chạm vào:** `crates/mod-tech-profile/**`, `frontend/app/src/features/tech-profile/**`, i18n.
 - **Việc phải làm:**
   1. Bảng `m_tech_profile_entry`: theo dự án, cặp khóa–giá trị có nhóm (ví dụ: ngôn ngữ/stack, lệnh verify/test/lint, quy ước đặt tên, đường dẫn **không được sửa**, ghi chú kiến trúc). Có phiên bản và người sửa.
   2. Hiện thực `PromptContributor` cho **mọi vai trò**: thêm một khối "Hồ sơ kỹ thuật dự án" (mockup: "Mọi agent đều đọc"), độ dài có giới hạn, thứ tự ổn định.
@@ -192,7 +192,7 @@ Module của giai đoạn này (theo PDF): `subscription-connect`, `lead-worker`
 
 - **Mục tiêu:** chứng minh vòng "giao một task → agent chạy → kết quả trên nhánh riêng" bằng kịch bản tự động.
 - **Phụ thuộc:** P1-02…P1-08.
-- **Chạm vào:** `tests/e2e/p1-gate/**`, `docs/manual-test-checklist.md`, báo cáo.
+- **Chạm vào:** `crates/dandori-e2e/tests/p1_gate.rs` (kịch bản Rust), `frontend/app/e2e/**` (kịch bản trình duyệt, nếu có), `docs/manual-test-checklist.md`, báo cáo.
 - **Việc phải làm:** kịch bản từ DB rỗng và **một repo git tạm có vài commit**: khởi tạo chủ; áp gói "Solo nhẹ" qua API; tạo dự án trỏ tới repo tạm; thêm account nhà cung cấp `fake`; thêm một prompt vai Worker và một mục hồ sơ kỹ thuật; tạo task; chọn Lead/Worker; **Giao việc**; theo dõi qua SSE; kiểm: worktree và nhánh được tạo; `fake-agent` ghi một tệp **trong worktree**; task đi `backlog → running → in_review`; prompt thực tế gửi cho agent chứa khối prompt thư viện và hồ sơ kỹ thuật; cây làm việc chính của repo tạm **không đổi**; thử thêm: hủy giữa chừng, và tắt `worktree` rồi giao việc → thông điệp hướng dẫn.
 - **Không làm:** không sửa mã nguồn để kịch bản qua; không dùng CLI thật.
 - **Tiêu chí nghiệm thu:**
