@@ -47,35 +47,61 @@ Người kiểm: Claude (không phải người viết code). Đối tượng: c
 - Giao diện (T12/T13) chỉ kiểm bằng vitest, token, i18n; chưa mở trên trình duyệt, chưa nối với máy chủ thật.
 - Chưa đọc kỹ từng dòng mã của `dandori-registry` (vòng đời bật/tắt), `dandori-events` và giao diện; kết luận về các phần này dựa vào test xanh và việc `e2e` chạy.
 
-## Commit đề xuất (tiếng Anh; 12 nhóm phủ đúng 245/245 tệp)
+## Kiểm lần 2: sau T14B (Claude, 2026-10-31)
 
-Chạy thử khô: tổng các nhóm bằng đúng tổng tệp thay đổi, không sót, không trùng.
+**Kết luận: Cổng P0 ĐẠT**, kèm 5 lỗi mới Claude đã tự sửa và 1 mục còn mở (biên dịch Linux/macOS).
+
+### Đã tự kiểm
+
+| Việc | Kết quả |
+| :--- | :--- |
+| Bản sao sạch 342 tệp (trạng thái Antigravity bàn giao), `verify` | exit 0, 18/18 bước, 160s, 88 test Rust |
+| Cây hiện tại **sau khi Claude sửa**, `verify` | exit 0, 18/18 bước, 85s, 93 test Rust, 28 vitest, tooling xanh |
+| **Chạy thật** `dandori.exe` với thư mục dữ liệu tạm | Mở cổng 3000. `GET /health` 200; `/me` và route module khi chưa đăng nhập: 401; `setup-owner` 200 (JSON không còn `token`); tắt tiến trình, chạy lại cùng dữ liệu: `setup-owner` lần hai 409, đăng nhập 200; sai mật khẩu và tên lạ cùng thân phản hồi; `Origin` lạ 403 |
+| Thử "phá có chủ ý" (mutation) các test mới | Bỏ kiểm phiên ở cổng module: 3 test đỏ. Bỏ AAD ở kho khóa: test hoán đổi bản mã đỏ. Bỏ `lifecycle.shutdown()` khi tắt: **không test nào đỏ** (xem lỗi A) |
+
+### Lỗi mới tìm thấy và đã sửa
+
+| # | Mức | Phát hiện | Xử lý (đều có bằng chứng ĐỎ rồi XANH) |
+| :-: | :--- | :--- | :--- |
+| A | Cao | **Test "tắt êm dừng worker" không có tác dụng**: không có module nào chạy worker trong test, nên bỏ hẳn bước dừng worker vẫn xanh | Thêm module thử có worker và test `graceful_shutdown_stops_running_module_workers`; bỏ `shutdown()` thì ĐỎ (`tắt êm phải dừng mọi worker đang chạy`) |
+| B | Cao | **Tắt máy chủ có thể treo mãi**: một kết nối treo (gửi dở yêu cầu) giữ máy chủ sống không giới hạn, trái yêu cầu "thoát trong thời hạn" (T10 8b) | Thêm thời hạn 10s (`SHUTDOWN_DEADLINE`, chỉnh được cho test) rồi đóng cưỡng bức; test `shutdown_deadline_closes_hung_connection` ĐỎ khi bỏ thời hạn (treo quá 3s) |
+| C | Vừa | Bộ bắt Ctrl+C nếu cài không được thì **tắt máy chủ ngay** (lỗi bị bỏ qua nên tương lai hoàn tất ngay); lỗi của `axum::serve` bị nuốt, tiến trình thoát mã 0 | Lỗi cài tín hiệu thì chờ vô hạn thay vì tắt; lỗi serve được trả về |
+| D | Vừa | **Khóa đăng nhập không tự đặt lại sau khi hết hạn**: hết 15 phút, chỉ một lần gõ sai là bị khóa thêm 15 phút | Sửa câu SQL: khóa đã hết hạn thì đếm lại từ 1. Test `failed_attempts_restart_after_lock_expires` ĐỎ rồi XANH |
+| E | Vừa | Chưa có bằng chứng máy chủ **thật** không tin `X-Forwarded-For` (chỉ test giả lập tin header). Nếu tin, kẻ tấn công đổi header là lách được khóa theo nguồn | Test mới qua TCP thật với 5 header khác nhau vẫn bị khóa (429); ĐỎ khi cho tin header |
+| F | Nhỏ | Mã băm token phiên bị lặp ở 3 nơi (server, registry, test registry): sai một chỗ là phiên hỏng âm thầm | Gom về `dandori_db::hash_session_token`; bỏ `sha2` khỏi server và registry; vẫn có test mẫu SHA-256 cố định |
+| G | Nhỏ | `#[cfg(unix)]` có `use std::os::unix::process::CommandExt` không dùng (`process_group` là hàm riêng của `tokio::process::Command`): trên Linux sẽ thành lỗi vì `-D warnings` | Bỏ dòng `use`. Chưa biên dịch Linux nên đây là sửa theo đọc mã và mã nguồn tokio |
+| H | Nhỏ | `.env.example` ghi `HOST`/`PORT` không ai đọc, trái RS-OPS-002 (`DANDORI_*`) | `ServerConfig::from_env` đọc `DANDORI_HOST` (chỉ loopback), `DANDORI_PORT`, `DANDORI_DATA_DIR`; `run()` dùng nó; cập nhật `.env.example`; test cấu hình |
+
+### Đã kiểm lại các mục T14B
+
+Máy chủ thật có lắng nghe và tắt êm (có test TCP thật); route module đòi phiên (401, kèm test duyệt toàn bộ route); khóa theo nguồn, bộ đếm nguyên tử, tạo chủ không trùng, AAD trong kho khóa, bỏ bản sao `auth.rs`: đạt (xem bằng chứng ĐỎ ở trên và trong `T14B.md`).
+
+### Còn mở / chưa kiểm
+
+- **Biên dịch và chạy trên Linux/macOS (DAN-VERIFY-008)**: chưa làm được vì chưa cài target. Cả `kill -KILL -- -<pid>` và `process_group(0)` chưa được thử. Chạy: `rustup target add x86_64-unknown-linux-gnu` rồi `cargo check -p dandori-process --target x86_64-unknown-linux-gnu`.
+- Khi tắt, ngưỡng chờ worker từng module chỉ 500 ms (có sẵn từ trước), quá hạn thì bỏ qua.
+- Giao diện vẫn chưa mở trên trình duyệt và chưa nối với máy chủ thật.
+- Kho khóa Windows thật (Credential Manager) chưa thử.
+- `dandori-registry` (logic vòng đời) chưa đọc từng dòng; kết luận dựa vào test và kịch bản e2e. `dandori-events` đã đọc phần bus (hàng đợi giới hạn, không chặn).
+
+## Commit đề xuất
+
+**Lượt 1 (P0, đã commit trước đó).** Xem lệnh đã dùng.
+
+**Lượt 2 (T14B + sửa của Claude), tiếng Anh, 5 nhóm phủ đúng 23/23 tệp:**
 
 ```powershell
-git add Cargo.toml Cargo.lock package.json
-git commit -m "build: add core dependencies for phase 0" -m "Task: T03"
-git add crates/dandori-types crates/dandori-db .sqlx shared
-git commit -m "feat(db): add core schema, repositories and shared types" -m "Task: T03"
-git add crates/dandori-events
-git commit -m "feat(events): add in-process event bus" -m "Task: T04"
-git add crates/dandori-module-api crates/dandori-modules crates/mod-sample-hello
-git commit -m "feat(modules): add module contract and sample module" -m "Task: T05"
-git add crates/dandori-registry
-git commit -m "feat(registry): add feature registry and module lifecycle" -m "Task: T06"
-git add crates/dandori-vault
-git commit -m "feat(vault): add encrypted secret vault" -m "Task: T08"
-git add crates/dandori-process crates/dandori-agent-port crates/dandori-agent-adapters crates/fake-agent
-git commit -m "feat(process): add safe process runner and agent port" -m "Task: T09"
+git add Cargo.lock .env.example
+git commit -m "build: refresh lockfile and env example" -m "Task: T14B"
+git add crates/dandori-db
+git commit -m "feat(db): add shared session token hash" -m "Task: T14B"
 git add crates/dandori-server crates/mod-auth-login
-git commit -m "feat(server): add http server, auth and core api" -m "Task: T10"
-git add frontend
-git commit -m "feat(frontend): add app shell and feature settings screen" -m "Task: T12"
-git add crates/dandori-e2e
-git commit -m "test(e2e): add phase 0 gate scenario" -m "Task: T14"
-git add scripts tests/tooling
-git commit -m "feat(tooling): extend verify gate for phase 0" -m "Task: T05"
+git commit -m "feat(server): serve over tcp, graceful shutdown and login hardening" -m "Task: T14B"
+git add crates/dandori-registry crates/dandori-vault crates/dandori-process crates/dandori-e2e
+git commit -m "fix: gate module routes by session, bind vault data to record, unix process group" -m "Task: T14B"
 git add docs instructions
-git commit -m "docs: add phase 0 reports, review and fix task" -m "Task: T14"
+git commit -m "docs: add T14B report and second P0 review" -m "Task: T14B"
 git status -sb
 git push
 ```

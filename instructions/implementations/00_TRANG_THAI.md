@@ -49,7 +49,7 @@ Chủ dự án (hoặc Claude thay mặt, theo lời chủ dự án) ghi `ĐỒN
 
 | Giai đoạn | Báo cáo | Kết quả |
 | :--- | :--- | :--- |
-| P0 | `reports/REVIEW_P0.md` | **CHƯA ĐẠT** (Claude kiểm 2026-10-31: xem `reports/REVIEW_P0.md`; cần T14B rồi kiểm lại) |
+| P0 | `reports/REVIEW_P0.md` | **ĐẠT** sau kiểm lần 2 (Claude, 2026-10-31, kèm các sửa của Claude); còn mở: biên dịch Linux/macOS (DAN-VERIFY-008) |
 | P1 | `reports/REVIEW_P1.md` | chưa |
 | P2 | `reports/REVIEW_P2.md` | chưa |
 | P3 | `reports/REVIEW_P3.md` | chưa |
@@ -79,7 +79,7 @@ Cột Phụ thuộc: task phải `DONE` (hoặc `DONE_WITH_GAPS` chấp nhận �
 | T12 | Kiểu chia sẻ và khung giao diện | T11 | ✅ DONE | | `reports/T12.md` |
 | T13 | Setting > Tính năng (bảng Option) | T12 | ✅ DONE | | `reports/T13.md` |
 | T14 | **Cổng P0** | T09, T13 | 🟡 DONE_WITH_GAPS (Claude: chưa đạt, xem T14B) | | `reports/T14.md` |
-| T14B | Sửa lỗi tìm thấy khi kiểm P0 (`10B_P0_SUA_LOI.md`) | T14 | ⏳ Todo | | |
+| T14B | Sửa lỗi tìm thấy khi kiểm P0 (`10B_P0_SUA_LOI.md`) | T14 | ✅ DONE | | `reports/T14B.md` |
 
 ### Giai đoạn 1: chạy được một task (`11_P1_CHAY_MOT_TASK.md`)
 
