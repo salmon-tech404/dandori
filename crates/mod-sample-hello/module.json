@@ -1,0 +1,29 @@
+{
+  "id": "sample-hello",
+  "group": "safety",
+  "name": "Module mẫu kiểm thử",
+  "description": "Module mẫu phục vụ kiểm thử và thử cổng P0",
+  "version": "0.1.0",
+  "requires": [],
+  "scopes": ["workspace", "project"],
+  "effort": "light",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {
+    "greeting": {
+      "type": "string",
+      "default": "Hello"
+    }
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "sample-badge",
+        "slot": "board.card.badge",
+        "label": "Mẫu",
+        "order": 99
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+[package]
+name = "mod-sample-hello"
+description = "Module mẫu phục vụ kiểm thử và thử cổng P0"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+dandori-types = { workspace = true }
+dandori-module-api = { workspace = true }
+axum = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
