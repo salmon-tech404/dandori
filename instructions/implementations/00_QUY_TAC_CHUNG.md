@@ -65,7 +65,7 @@ Remove-Item $qc -Recurse -Force
 ```
 
 - Bản sao **không** có `node_modules/`, `target/` hay thư mục `instructions/`; `pnpm install --frozen-lockfile` và `cargo build` phải chạy được từ đầu. Đoạn lệnh trên đã được thử trên repo này (chép đúng các file, repo chính không bị đụng).
-- `pnpm run verify` là **cổng duyệt duy nhất** (T01/T02 tạo). Nó chạy theo thứ tự: `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, `cargo deny check`, kiểm kiến trúc, kiểm `generate-types --check`, kiểm SQL offline, kiểm bí mật, rồi phần frontend (`tsc`, `eslint`, `vitest`). Thất bại một bước thì task chưa DONE.
+- `pnpm run verify` là **cổng duyệt duy nhất** (T01/T02 tạo). Nó chạy theo thứ tự: `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, `cargo deny check`, `cargo doc --workspace --no-deps` (với `RUSTDOCFLAGS=-D warnings`), kiểm kiến trúc, kiểm `generate-types --check`, kiểm SQL offline, kiểm bí mật, rồi phần frontend (`tsc`, `eslint`, `vitest`). Thất bại một bước thì task chưa DONE.
 - Mọi lệnh có `timeout` (tối đa 10 phút; lần build Rust đầu có thể lâu hơn, khi đó chạy nền và ghi rõ). Không để lệnh treo.
 
 ## 5. An toàn dữ liệu khi test

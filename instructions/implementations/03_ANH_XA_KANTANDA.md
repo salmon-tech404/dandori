@@ -80,6 +80,7 @@ Hệ quả:
 | `cargo clippy ... -D warnings` | Rust | RS-LINT-*, RS-PANIC-002, RS-ASYNC-001/007, RS-API-001/002, RS-LOG-001, RS-ARCH-005, RS-SEC-001 |
 | `cargo test --workspace` | Rust | RS-TEST-*, RS-ERR-003, RS-SEC-003/006/007, RS-ASYNC-004 |
 | `cargo deny check` | Rust | RS-DEP-001 |
+| `cargo doc --workspace --no-deps` (`RUSTDOCFLAGS=-D warnings`) | Rust | RS-DOC-004/005 |
 | `scripts/check-architecture.mjs` | Rust | RS-ARCH-001/002/004, RS-ERR-002, RS-DEP-002 |
 | `scripts/check-lints.mjs` | Rust | RS-LINT-002/004, RS-DEP-004, RS-ERR-001 (anyhow) |
 | `scripts/check-sql.mjs` + `cargo sqlx prepare --check` | Rust | RS-SEC-005, RS-DB-001 |

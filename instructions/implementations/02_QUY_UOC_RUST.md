@@ -95,6 +95,8 @@ Chuẩn này dựa trên các nguồn dưới đây. Cột "Đã đọc" cho bi�
 | RS-DOC-001 | Mục công khai của crate lõi có doc comment: câu đầu một dòng; mục `# Errors`, `# Panics`, `# Safety` khi áp dụng | T2 | API `C-FAILURE`; MS `M-CANONICAL-DOCS`, `M-FIRST-DOC-SENTENCE` (nguyên văn) | `#![warn(missing_docs)]` ở `dandori-module-api`, `dandori-types`; Review phần còn lại |
 | RS-DOC-002 | Doc comment mô tả **hành vi hiện tại**, không kể quá trình thiết kế/tác giả AI | T3 | MS `M-NO-META-DESIGN-DOCUMENTATION` (nguyên văn) | Review |
 | RS-DOC-003 | Hằng "magic" có tên và chú thích; không số/chuỗi lạ rải rác | T3 | MS `M-DOCUMENTED-MAGIC` (tóm tắt) | Review |
+| RS-DOC-004 | Mỗi crate có **`description`** trong `Cargo.toml`; câu đầu của `//!` là một dòng ngắn | T1 | API `C-METADATA`; MS `M-FIRST-DOC-SENTENCE` (nguyên văn) | `check-lints.mjs` kiểm `description` |
+| RS-DOC-005 | `cargo doc --workspace --no-deps` với `RUSTDOCFLAGS="-D warnings"` phải qua (không liên kết gãy) | T1 | API `C-CRATE-DOC`; quy ước Cargo | bước trong `verify` (T02) |
 
 ### 2.7 Nhật ký
 
@@ -117,6 +119,8 @@ Chuẩn này dựa trên các nguồn dưới đây. Cột "Đã đọc" cho bi�
 | RS-ARCH-008 | Chia module theo kiểu **`foo.rs`** (+ thư mục `foo/` cho module con), **không** dùng `mod.rs`; không trộn hai kiểu | T1 | RB ch07-05 (trộn hai kiểu cho cùng một module là lỗi biên dịch) | `clippy::mod_module_files = "deny"` (T01B xác nhận tên lint bằng cách chạy) |
 | RS-ARCH-009 | Crate chương trình: `main.rs` **mỏng** (cấu hình, gọi `lib.rs`), logic nằm trong `lib.rs` để test được. Test tích hợp ở `tests/` của chính crate; test xuyên suốt Rust ở `crates/dandori-e2e/tests/`; thư mục `tests/` ở gốc chỉ cho test script Node | T2 | CB (Layout: gốc virtual manifest không có package nên không biên dịch `tests/` ở gốc); MK (ý kiến) | Review; `check-architecture` cấm `tests/*.rs` ở gốc |
 | RS-ARCH-010 | Crate `dandori-modules` do `gen-modules` sinh; **không sửa tay**; `dandori-server` chỉ phụ thuộc crate này, không phụ thuộc trực tiếp `mod-*` | T1 | ADR 0020 | `gen-modules --check`; `check-architecture.mjs` |
+| RS-ARCH-011 | **Tên crate và thư mục mô tả mục đích**; **cấm** tên chung chung `utils`, `common`, `helpers`, `misc`, `base`, `lib`; nhóm theo tiền tố `dandori-*`, `mod-*` | T1 | MK (ý kiến), MS `M-WEASEL-WORDS`, `M-SHORT-NAMES` (tóm tắt) | `check-architecture.mjs` có danh sách tên bị cấm |
+| RS-ARCH-012 | Có `README.md` ở gốc và ở `crates/`, `frontend/`, `scripts/`, `docs/` | T1 | ADR 0020 mục 5 | `check-architecture.mjs` kiểm tồn tại |
 
 ### 2.9 Phụ thuộc và chuỗi cung ứng
 

@@ -37,7 +37,7 @@ Mỗi task có đủ: **Mục tiêu · Phụ thuộc · Chạm vào · Việc ph
 
 - **Mục tiêu:** sửa các điểm Claude tìm thấy khi kiểm độc lập T01 và áp dụng **cấu trúc thư mục chuẩn** (ADR 0020), **trước khi** khóa cấu hình ở T02. Đây là task sửa, không thêm tính năng.
 - **Phụ thuộc:** T01 (đã DONE; báo cáo kiểm: `reports/REVIEW_T01.md`). **Đọc `docs/adr/0020-cau-truc-ma-nguon.md` trước.**
-- **Chạm vào:** `Cargo.toml`, `Cargo.lock`, `crates/dandori-server/**`, `crates/dandori-agent-adapters/**`, `crates/dandori-modules/**` (tạo mới), `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `.gitignore`, `frontend/**` (đổi tên từ `web/**`), `standards/profile.md`, `docs/adr/0001-dependencies.md` và `docs/adr/0003-architecture-style.md` (**chỉ** đổi đường dẫn `web/` thành `frontend/`), `docs/adr/0002-rust-lints.md` (chỉ thêm mục bổ sung cho lint mới), `instructions/implementations/reports/T01B.md`, `instructions/implementations/00_TRANG_THAI.md` (chỉ dòng T01B), `instructions/implementations/02_QUY_UOC_RUST.md` (chỉ dòng "Đã chỉnh").
+- **Chạm vào:** `Cargo.toml`, `Cargo.lock`, `crates/dandori-server/**`, `crates/dandori-agent-adapters/**`, `crates/dandori-modules/**` (tạo mới), `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `.gitignore`, `frontend/**` (đổi tên từ `web/**`), `README.md` (gốc, tạo mới), `crates/README.md`, `frontend/README.md` (tạo mới), `crates/*/Cargo.toml` (**chỉ** thêm `description`), `crates/dandori-db/src/lib.rs` (sửa lỗi chính tả), `standards/profile.md`, `docs/adr/0001-dependencies.md` và `docs/adr/0003-architecture-style.md` (**chỉ** đổi đường dẫn `web/` thành `frontend/`), `docs/adr/0002-rust-lints.md` (chỉ thêm mục bổ sung cho lint mới), `instructions/implementations/reports/T01B.md`, `instructions/implementations/00_TRANG_THAI.md` (chỉ dòng T01B), `instructions/implementations/02_QUY_UOC_RUST.md` (chỉ dòng "Đã chỉnh").
 - **Việc phải làm:**
   1. **Đổi tên `web/` thành `frontend/`** (dùng lệnh di chuyển của hệ điều hành, **không** dùng git). Cập nhật mọi tham chiếu: `pnpm-workspace.yaml` (`frontend/*`), `.gitignore` (`/frontend/**/dist/`, `/frontend/**/node_modules/`), `standards/profile.md`, ADR 0001 và 0003. Chạy `pnpm install` một lần để `pnpm-lock.yaml` cập nhật khóa dự án, rồi kiểm `pnpm install --frozen-lockfile` xanh.
   2. **`package.json` gốc:** thêm `"packageManager": "pnpm@12.14.0"` và `"engines": { "node": ">=24" }`. Dán đầu ra `pnpm -v` và `node -v`. (Lý do: pnpm 12 tự đổi phiên bản theo trường `packageManager` của từng dự án; cần ghim để mọi người dùng chung một bản.)
@@ -50,6 +50,9 @@ Mỗi task có đủ: **Mục tiêu · Phụ thuộc · Chạm vào · Việc ph
   9. **`.gitignore`:** thêm `/release/`.
   10. **`standards/profile.md`:** sửa đường dẫn `frontend/app`; sửa dòng "Presubmit: GitHub Actions / Hook" cho đúng thực tế (chưa có CI; presubmit = chạy `pnpm run verify` trên bản sao sạch, có thể thêm hook cục bộ sau). Giữ nguyên các phần còn lại.
   11. Ghi vào `02_QUY_UOC_RUST.md` các dòng "Đã chỉnh" nếu tên lint hoặc khóa cấu hình khác với mô tả.
+  12. **`README.md` gốc** (tiếng Việt, tối đa khoảng một trang): Dandori là gì (2 câu), cách chạy (`cargo run -p dandori-server`, `pnpm --filter app build`), **bản đồ thư mục** (lấy từ `docs/adr/0020-cau-truc-ma-nguon.md` mục 1, mỗi dòng một câu), "đọc gì tiếp" (`crates/README.md`, `docs/README.md`, `instructions/implementations/00_README.md`). Không sao chép dài dòng từ ADR; liên kết tới nó.
+  13. **`crates/README.md`**: bảng mọi crate **theo tầng** (tầng 0 `dandori-types`, tầng 1 `db/events/vault/process/agent-port`, tầng 2 `git/agent-adapters`, tầng 3 `module-api`, tầng 4 `registry`, `dandori-modules`, tầng 5 `dandori-server`, cùng `fake-agent` và `dandori-e2e` (sẽ có ở T14)) với cột: tên, nhiệm vụ một câu, phụ thuộc vào. Ghi dòng: "Nguồn sự thật là `description` trong `Cargo.toml` và `cargo doc`; bảng này chỉ là bản đồ." **`frontend/README.md`**: cách chạy, cấu trúc `src/{core,features,ui,i18n}`.
+  14. **`description`** (một dòng, tiếng Việt) trong `Cargo.toml` của **mọi** crate, khớp câu đầu của `//!`. Sửa lỗi chính tả "Cở sở dữ liệu" thành "Cơ sở dữ liệu" trong `dandori-db`.
 - **Không làm:** không viết logic nghiệp vụ; không tạo `scripts/` (T02); không thêm thư viện; không đổi nội dung `instructions/**` ngoài các ngoại lệ ở mục "Chạm vào" (Claude đã cập nhật kế hoạch); không dùng git để ghi.
 - **Tiêu chí nghiệm thu:**
   1. `cargo fmt --all --check`, `cargo build --workspace --locked`, `cargo clippy --workspace --all-targets --locked -- -D warnings`, `cargo test --workspace --locked`, `cargo deny check` đều qua; dán đầu ra.
@@ -62,6 +65,9 @@ Mỗi task có đủ: **Mục tiêu · Phụ thuộc · Chạm vào · Việc ph
   8. `App.tsx` không còn mã màu `#...` hay giá trị `rem` cứng (dán kết quả tìm kiếm).
   9. `dandori-agent-adapters` không còn hàm `init`.
   10. QC2 trên **bản sao sạch** chạy lại toàn bộ mục 1 và 5; dán đầu ra.
+  11. `README.md` ở gốc, `crates/README.md`, `frontend/README.md` tồn tại; README gốc có bản đồ thư mục khớp cấu trúc thật (so bằng cách liệt kê thư mục gốc và dán).
+  12. Mọi crate có `description` (dán kết quả `cargo metadata --no-deps` lọc ra tên và `description`; **không** crate nào trống).
+  13. `RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps` qua (dán đầu ra); chưa cần thêm vào `verify` (T02 làm).
 
 ## T02. Cổng `verify` và các script kiểm
 

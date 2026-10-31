@@ -15,6 +15,7 @@ Task T01 dựng khung workspace. Khi kiểm độc lập và đối chiếu vớ
 
 ```
 D:\19-dandori\
+├── README.md                   (T01B) bản đồ dự án cho người mới
 ├── Cargo.toml                  Virtual manifest: members = ["crates/*"], resolver ghi rõ,
 │                               [workspace.package|lints|dependencies], [profile.release]
 ├── Cargo.lock                  (commit)
@@ -64,6 +65,21 @@ D:\19-dandori\
 | 10 | Ghim `packageManager` (pnpm) và `engines` (Node) trong `package.json` | Thực tế: pnpm 12 tự đổi phiên bản theo `packageManager` của từng dự án | Cùng một lệnh `pnpm -v` báo khác nhau tùy thư mục đứng; cần ghim để mọi người dùng chung |
 | 11 | `[profile.*]` chỉ khai báo ở gốc; `[profile.release]` hiện chỉ đặt `strip = true`; `lto` và `codegen-units` chốt sau khi **đo** ở P5-01; `panic` giữ mặc định `unwind` | Cargo Book (Profiles); RS-PANIC-003 | `abort` sẽ làm một worker panic sập cả chương trình |
 | 12 | Giao diện đặt trong **`frontend/`** (không phải `web/` như kế hoạch ban đầu) | Quyết định của chủ dự án (rõ nghĩa hơn); không rule kỹ thuật nào ép tên | Người đọc lần đầu hiểu ngay |
+
+### 5. Dễ tìm kiếm và đọc hiểu
+
+Chủ dự án yêu cầu cấu trúc **đúng chuẩn, dễ tìm và dễ đọc hiểu** (2026-10-31); tên thư mục cụ thể (`frontend/` hay `web/`) không quan trọng bằng điều này.
+
+| # | Quy tắc | Nguồn | Cách kiểm |
+| :--- | :--- | :--- | :--- |
+| 13 | Có **`README.md` ở gốc** (dự án là gì, cách chạy, bản đồ thư mục, đọc gì tiếp) và README ngắn ở các thư mục chính (`crates/`, `frontend/`, `scripts/`, `docs/`) | Quy ước chung; GitHub hiển thị README của từng thư mục | `check-architecture` kiểm tồn tại |
+| 14 | Mỗi crate có **`description`** trong `Cargo.toml` và **câu đầu của `//!`** ở `lib.rs`/`main.rs` (một dòng, khoảng 15 từ) | Rust API Guidelines `C-METADATA`; Microsoft `M-FIRST-DOC-SENTENCE`, `M-CANONICAL-DOCS` (nguyên văn) | `check-lints.mjs` kiểm có `description`; `missing_docs` |
+| 15 | `cargo doc --workspace --no-deps` chạy được với `RUSTDOCFLAGS="-D warnings"`: tài liệu duyệt được bằng trình duyệt và không có liên kết gãy | Quy ước Cargo; `C-CRATE-DOC` | thêm vào `verify` ở T02 |
+| 16 | **Tên mô tả mục đích**, kebab-case; nhóm theo **tiền tố**: `dandori-*` (lõi), `mod-*` (module), còn lại là công cụ/test. **Cấm tên chung chung** cho crate và thư mục: `utils`, `common`, `helpers`, `misc`, `base`, `lib` | matklad (ý kiến: tên chung chung thành "thùng rác"); Microsoft `M-WEASEL-WORDS`, `M-SHORT-NAMES` (tóm tắt) | `check-architecture` có danh sách tên bị cấm |
+| 17 | **Một thư mục một mục đích**; nội dung do công cụ sinh có dòng đầu "TỆP SINH TỰ ĐỘNG" và nằm cạnh tệp nguồn sinh ra nó | Quy ước | review |
+| 18 | Tài liệu viết cho người **tiếng Việt**, mã (tên biến, hàm, crate, tệp) bằng **tiếng Anh** | Quy ước dự án (`00_QUY_TAC_CHUNG` mục 7) | review |
+
+Cách một người mới tìm đường: mở `README.md` gốc → `crates/README.md` (bảng crate theo tầng) → `cargo doc --open` hoặc đọc `description` → `docs/README.md` để hiểu lý do thiết kế.
 
 ### 3. Cấu trúc bên trong một crate
 

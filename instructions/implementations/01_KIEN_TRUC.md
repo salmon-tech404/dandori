@@ -18,6 +18,7 @@ Chốt bởi **ADR 0020** (`docs/adr/0020-cau-truc-ma-nguon.md`), dựa trên Ca
 
 ```
 D:\19-dandori\
+├── README.md                      bản đồ dự án cho người mới (và README ngắn ở crates/, frontend/, scripts/, docs/)
 ├── Cargo.toml                     virtual manifest: members = ["crates/*"], resolver ghi rõ,
 │                                  [workspace.package|lints|dependencies], [profile.release]
 ├── Cargo.lock
