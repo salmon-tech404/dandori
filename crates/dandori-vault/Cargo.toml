@@ -1,5 +1,6 @@
 [package]
 name = "dandori-vault"
+description = "Kho khóa mã hóa và quản lý bí mật của Dandori"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

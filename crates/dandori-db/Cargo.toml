@@ -1,5 +1,6 @@
 [package]
 name = "dandori-db"
+description = "Cơ sở dữ liệu SQLite và migrations lõi của Dandori"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

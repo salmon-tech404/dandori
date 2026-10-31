@@ -1,5 +1,6 @@
 [package]
 name = "dandori-events"
+description = "Bus sự kiện trong tiến trình của Dandori"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

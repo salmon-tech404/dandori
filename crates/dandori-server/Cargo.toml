@@ -1,9 +1,14 @@
 [package]
 name = "dandori-server"
+description = "Điểm khởi động máy chủ và composition root của ứng dụng Dandori"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 publish = false
+
+[[bin]]
+name = "dandori"
+path = "src/main.rs"
 
 [lints]
 workspace = true
@@ -19,6 +24,7 @@ dandori-agent-adapters = { workspace = true }
 dandori-git = { workspace = true }
 dandori-module-api = { workspace = true }
 dandori-registry = { workspace = true }
+dandori-modules = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }

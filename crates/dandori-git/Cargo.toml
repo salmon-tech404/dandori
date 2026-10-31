@@ -1,5 +1,6 @@
 [package]
 name = "dandori-git"
+description = "Thao tác git (worktree, diff, branch) của Dandori"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

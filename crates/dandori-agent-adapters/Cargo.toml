@@ -1,5 +1,6 @@
 [package]
 name = "dandori-agent-adapters"
+description = "Các adapter cụ thể cho CLI agent (Claude, Gemini, Codex, fake-agent)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

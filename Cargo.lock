@@ -307,6 +307,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "dandori-modules"
+version = "0.1.0"
+dependencies = [
+ "dandori-module-api",
+ "dandori-types",
+]
+
+[[package]]
 name = "dandori-process"
 version = "0.1.0"
 dependencies = [
@@ -340,6 +348,7 @@ dependencies = [
  "dandori-events",
  "dandori-git",
  "dandori-module-api",
+ "dandori-modules",
  "dandori-process",
  "dandori-registry",
  "dandori-types",

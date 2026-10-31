@@ -1,5 +1,6 @@
 [package]
 name = "dandori-module-api"
+description = "Giao diện hợp đồng module của Dandori (trait Module, Manifest, ModuleContext)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

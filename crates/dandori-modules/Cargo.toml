@@ -1,0 +1,15 @@
+# TỆP SINH TỰ ĐỘNG bởi scripts/gen-modules.mjs (T05); không sửa tay
+[package]
+name = "dandori-modules"
+description = "Crate cầu nối gom mọi module tự động (sinh bởi gen-modules)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+dandori-types = { workspace = true }
+dandori-module-api = { workspace = true }
