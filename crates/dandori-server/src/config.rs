@@ -54,6 +54,36 @@ impl ServerConfig {
         })
     }
 
+    /// Đọc cấu hình từ biến môi trường `DANDORI_HOST`, `DANDORI_PORT`, `DANDORI_DATA_DIR` (RS-OPS-002).
+    ///
+    /// # Errors
+    /// Trả về lỗi nếu host không phải loopback hoặc cổng không hợp lệ.
+    pub fn from_env() -> Result<Self, String> {
+        Self::from_lookup(|key| std::env::var(key).ok())
+    }
+
+    /// Như [`ServerConfig::from_env`] nhưng đọc qua hàm tra cứu (dùng cho test, không đụng môi trường thật).
+    ///
+    /// # Errors
+    /// Trả về lỗi nếu host không phải loopback hoặc cổng không hợp lệ.
+    pub fn from_lookup(get: impl Fn(&str) -> Option<String>) -> Result<Self, String> {
+        let mut config = Self::default();
+        if let Some(host) = get("DANDORI_HOST") {
+            Self::validate_host(&host)?;
+            config.host = host;
+        }
+        if let Some(port) = get("DANDORI_PORT") {
+            config.port = port
+                .trim()
+                .parse::<u16>()
+                .map_err(|_| format!("DANDORI_PORT không hợp lệ: {port}"))?;
+        }
+        if let Some(dir) = get("DANDORI_DATA_DIR") {
+            config.data_dir = PathBuf::from(dir);
+        }
+        Ok(config)
+    }
+
     /// Kiểm tra địa chỉ host bắt buộc phải là loopback 127.0.0.1.
     pub fn validate_host(host: &str) -> Result<(), String> {
         if host == "0.0.0.0" {

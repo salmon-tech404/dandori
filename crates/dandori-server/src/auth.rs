@@ -5,7 +5,6 @@ use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 use chrono::{DateTime, Duration, Utc};
 use dandori_types::{Session, SessionId, UserId};
-use sha2::{Digest, Sha256};
 use sqlx::{Row, SqlitePool};
 use std::sync::OnceLock;
 
@@ -25,17 +24,10 @@ pub const MAX_FAILED_ATTEMPTS: i64 = 5;
 /// Thời gian khóa tạm tính bằng phút.
 pub const LOCKOUT_MINUTES: i64 = 15;
 
-/// Băm token phiên bằng SHA-256 (hex). Token có entropy cao nên không cần băm chậm; DB chỉ giữ bản băm
-/// để lộ DB không đồng nghĩa với chiếm được phiên.
+/// Băm token phiên (SHA-256 hex). Dùng chung với các crate khác qua `dandori_db`.
 #[must_use]
 pub fn hash_token(token: &str) -> String {
-    use std::fmt::Write;
-    let digest = Sha256::digest(token.as_bytes());
-    let mut out = String::with_capacity(digest.len() * 2);
-    for b in digest {
-        let _ = write!(out, "{b:02x}");
-    }
-    out
+    dandori_db::hash_session_token(token)
 }
 
 /// Băm mật khẩu bằng thuật toán Argon2id.
@@ -96,7 +88,7 @@ pub async fn check_lockout(
     Ok(None)
 }
 
-/// Ghi nhận một lần thử đăng nhập thất bại và khóa tạm thời nếu vượt quá số lần tối đa.
+/// Ghi nhận một lần thử đăng nhập thất bại một cách nguyên tử và khóa tạm thời nếu vượt quá số lần tối đa.
 ///
 /// # Errors
 /// Trả về lỗi nếu ghi cơ sở dữ liệu thất bại.
@@ -105,42 +97,59 @@ pub async fn record_failed_attempt(
     key: &str,
 ) -> Result<Option<DateTime<Utc>>, sqlx::Error> {
     let now_str = Utc::now().to_rfc3339();
+    let lock_time = Utc::now() + Duration::minutes(LOCKOUT_MINUTES);
+    let lock_time_str = lock_time.to_rfc3339();
 
+    let row = sqlx::query(
+        "INSERT INTO m_auth_login_attempt (key, failed_count, locked_until, updated_at) \
+         VALUES (?1, 1, CASE WHEN 1 >= ?3 THEN ?4 ELSE NULL END, ?2) \
+         ON CONFLICT(key) DO UPDATE SET \
+             failed_count = CASE \
+                 WHEN m_auth_login_attempt.locked_until IS NOT NULL \
+                      AND m_auth_login_attempt.locked_until <= ?2 THEN 1 \
+                 ELSE m_auth_login_attempt.failed_count + 1 \
+             END, \
+             locked_until = CASE \
+                 WHEN (CASE \
+                     WHEN m_auth_login_attempt.locked_until IS NOT NULL \
+                          AND m_auth_login_attempt.locked_until <= ?2 THEN 1 \
+                     ELSE m_auth_login_attempt.failed_count + 1 \
+                 END) >= ?3 THEN ?4 \
+                 WHEN m_auth_login_attempt.locked_until IS NOT NULL \
+                      AND m_auth_login_attempt.locked_until <= ?2 THEN NULL \
+                 ELSE m_auth_login_attempt.locked_until \
+             END, \
+             updated_at = ?2 \
+         RETURNING failed_count, locked_until",
+    )
+    .bind(key)
+    .bind(&now_str)
+    .bind(MAX_FAILED_ATTEMPTS)
+    .bind(&lock_time_str)
+    .fetch_one(pool)
+    .await?;
+
+    let locked_str: Option<String> = row.try_get("locked_until")?;
+    if let Some(s) = locked_str
+        && let Ok(dt) = DateTime::parse_from_rfc3339(&s)
+    {
+        return Ok(Some(dt.with_timezone(&Utc)));
+    }
+
+    Ok(None)
+}
+
+/// Lấy số lần thử đăng nhập thất bại hiện tại của một khóa.
+///
+/// # Errors
+/// Trả về lỗi nếu truy vấn cơ sở dữ liệu thất bại.
+pub async fn get_failed_count(pool: &SqlitePool, key: &str) -> Result<i64, sqlx::Error> {
     let row = sqlx::query("SELECT failed_count FROM m_auth_login_attempt WHERE key = ?")
         .bind(key)
         .fetch_optional(pool)
         .await?;
 
-    let current_count: i64 = match row {
-        Some(r) => r.try_get("failed_count").unwrap_or(0),
-        None => 0,
-    };
-    let new_count = current_count + 1;
-    let mut locked_until_res: Option<DateTime<Utc>> = None;
-    let locked_until_str: Option<String> = if new_count >= MAX_FAILED_ATTEMPTS {
-        let lock_time = Utc::now() + Duration::minutes(LOCKOUT_MINUTES);
-        locked_until_res = Some(lock_time);
-        Some(lock_time.to_rfc3339())
-    } else {
-        None
-    };
-
-    sqlx::query(
-        "INSERT INTO m_auth_login_attempt (key, failed_count, locked_until, updated_at) \
-         VALUES (?, ?, ?, ?) \
-         ON CONFLICT(key) DO UPDATE SET \
-             failed_count = excluded.failed_count, \
-             locked_until = excluded.locked_until, \
-             updated_at = excluded.updated_at",
-    )
-    .bind(key)
-    .bind(new_count)
-    .bind(locked_until_str)
-    .bind(now_str)
-    .execute(pool)
-    .await?;
-
-    Ok(locked_until_res)
+    Ok(row.map_or(0, |r| r.try_get("failed_count").unwrap_or(0)))
 }
 
 /// Xóa bản ghi thử sai khi đăng nhập thành công.

@@ -1,7 +1,5 @@
 //! Module xác thực và đăng nhập hệ thống của Dandori (01_KIEN_TRUC.md mục 4 & T10).
 
-pub mod auth;
-
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::{Json, Router};

@@ -80,6 +80,52 @@ fn attach_cookie(headers: &mut HeaderMap, cookie_str: &str) {
     }
 }
 
+fn get_client_source(
+    headers: &HeaderMap,
+    connect_info: Option<&axum::extract::ConnectInfo<std::net::SocketAddr>>,
+) -> String {
+    if let Some(ci) = connect_info {
+        return ci.0.ip().to_string();
+    }
+    if let Some(xff) = headers.get("x-forwarded-for").and_then(|v| v.to_str().ok())
+        && let Some(ip) = xff.split(',').next()
+    {
+        let trimmed = ip.trim();
+        if !trimmed.is_empty() {
+            return trimmed.to_string();
+        }
+    }
+    if let Some(xrip) = headers.get("x-real-ip").and_then(|v| v.to_str().ok()) {
+        let trimmed = xrip.trim();
+        if !trimmed.is_empty() {
+            return trimmed.to_string();
+        }
+    }
+    "127.0.0.1".to_string()
+}
+
+async fn insert_owner_if_none_exists(
+    pool: &sqlx::SqlitePool,
+    user_id: &UserId,
+    username: &str,
+    password_hash: &str,
+    created_at: &chrono::DateTime<Utc>,
+) -> Result<bool, sqlx::Error> {
+    let res = sqlx::query(
+        "INSERT INTO user (id, username, password_hash, system_role, created_at) \
+         SELECT ?1, ?2, ?3, 'admin', ?4 \
+         WHERE NOT EXISTS (SELECT 1 FROM user)",
+    )
+    .bind(user_id.to_string())
+    .bind(username)
+    .bind(password_hash)
+    .bind(created_at.to_rfc3339())
+    .execute(pool)
+    .await?;
+
+    Ok(res.rows_affected() > 0)
+}
+
 /// Handler cho `POST /api/v1/auth/setup-owner`.
 pub async fn setup_owner(
     State(state): State<AppState>,
@@ -94,40 +140,31 @@ pub async fn setup_owner(
         .into_response_with_id(&req_id.0);
     }
 
-    let count_res = sqlx::query("SELECT COUNT(*) as count FROM user")
-        .fetch_one(&state.db)
-        .await;
-
-    let count_row = match count_res {
-        Ok(r) => r,
-        Err(e) => return ApiError::Internal(e.to_string()).into_response_with_id(&req_id.0),
-    };
-
-    let count: i64 = sqlx::Row::try_get(&count_row, "count").unwrap_or(0);
-    if count > 0 {
-        return ApiError::OwnerAlreadyExists.into_response_with_id(&req_id.0);
-    }
-
     let password_hash = match hash_password(&payload.password) {
         Ok(h) => h,
         Err(e) => return ApiError::Internal(e).into_response_with_id(&req_id.0),
     };
 
     let user_id = UserId::new();
+    let created_at = Utc::now();
+
+    match insert_owner_if_none_exists(&state.db, &user_id, username, &password_hash, &created_at)
+        .await
+    {
+        Ok(false) => return ApiError::OwnerAlreadyExists.into_response_with_id(&req_id.0),
+        Ok(true) => {}
+        Err(e) => return ApiError::Internal(e.to_string()).into_response_with_id(&req_id.0),
+    }
+
     let new_user = User {
         id: user_id,
         username: username.to_string(),
         password_hash,
         system_role: "admin".to_string(),
-        created_at: Utc::now(),
+        created_at,
     };
 
-    let user_repo = UserRepo::new(&state.db);
-    if let Err(e) = user_repo.create_user(&new_user).await {
-        return ApiError::Internal(e.to_string()).into_response_with_id(&req_id.0);
-    }
-
-    let (token, cookie_header) = match create_session_for_user(&state.db, user_id).await {
+    let (_token, cookie_header) = match create_session_for_user(&state.db, user_id).await {
         Ok(res) => res,
         Err(e) => return ApiError::Internal(e.to_string()).into_response_with_id(&req_id.0),
     };
@@ -135,26 +172,47 @@ pub async fn setup_owner(
     let mut headers = HeaderMap::new();
     attach_cookie(&mut headers, &cookie_header);
 
+    // Không trả về "token" trong JSON body để đảm bảo HttpOnly cookie không bị lộ cho JS
     (
         headers,
-        Json(json!({ "user": UserResponse::from(new_user), "token": token })),
+        Json(json!({ "user": UserResponse::from(new_user) })),
     )
         .into_response()
+}
+
+async fn check_auth_lockout(
+    pool: &sqlx::SqlitePool,
+    source_key: &str,
+    user_key: &str,
+) -> Result<(), ApiError> {
+    if let Some(t) = check_lockout(pool, source_key)
+        .await
+        .map_err(|e| ApiError::Internal(e.to_string()))?
+    {
+        return Err(ApiError::AccountLocked {
+            until: t.to_rfc3339(),
+        });
+    }
+    if let Some(t) = check_lockout(pool, user_key)
+        .await
+        .map_err(|e| ApiError::Internal(e.to_string()))?
+    {
+        return Err(ApiError::AccountLocked {
+            until: t.to_rfc3339(),
+        });
+    }
+    Ok(())
 }
 
 async fn authenticate_user(
     state: &AppState,
     username: &str,
     password: &str,
+    source: &str,
 ) -> Result<User, ApiError> {
-    if let Some(locked_time) = check_lockout(&state.db, username)
-        .await
-        .map_err(|e| ApiError::Internal(e.to_string()))?
-    {
-        return Err(ApiError::AccountLocked {
-            until: locked_time.to_rfc3339(),
-        });
-    }
+    let source_key = format!("ip:{source}");
+    let user_key = format!("user:{username}");
+    check_auth_lockout(&state.db, &source_key, &user_key).await?;
 
     let user_repo = UserRepo::new(&state.db);
     let user_opt = user_repo
@@ -166,7 +224,8 @@ async fn authenticate_user(
         Some(u) => u,
         None => {
             dummy_verify(password);
-            let lock_res = record_failed_attempt(&state.db, username)
+            // Chỉ ghi nhận thất bại theo nguồn IP, không tạo bản ghi cho tên lạ để chống tràn DB
+            let lock_res = record_failed_attempt(&state.db, &source_key)
                 .await
                 .map_err(|e| ApiError::Internal(e.to_string()))?;
             if let Some(until) = lock_res {
@@ -179,10 +238,14 @@ async fn authenticate_user(
     };
 
     if !verify_password(password, &user.password_hash) {
-        let lock_res = record_failed_attempt(&state.db, username)
+        let lock_source = record_failed_attempt(&state.db, &source_key)
             .await
             .map_err(|e| ApiError::Internal(e.to_string()))?;
-        if let Some(until) = lock_res {
+        let lock_user = record_failed_attempt(&state.db, &user_key)
+            .await
+            .map_err(|e| ApiError::Internal(e.to_string()))?;
+
+        if let Some(until) = lock_source.or(lock_user) {
             return Err(ApiError::AccountLocked {
                 until: until.to_rfc3339(),
             });
@@ -190,7 +253,8 @@ async fn authenticate_user(
         return Err(ApiError::InvalidCredentials);
     }
 
-    let _ = reset_failed_attempts(&state.db, username).await;
+    let _ = reset_failed_attempts(&state.db, &source_key).await;
+    let _ = reset_failed_attempts(&state.db, &user_key).await;
     Ok(user)
 }
 
@@ -198,25 +262,30 @@ async fn authenticate_user(
 pub async fn login(
     State(state): State<AppState>,
     Extension(req_id): Extension<RequestId>,
+    headers: HeaderMap,
+    connect_info: Option<Extension<axum::extract::ConnectInfo<std::net::SocketAddr>>>,
     Json(payload): Json<LoginRequest>,
 ) -> Response {
+    let ci_ref = connect_info.as_ref().map(|Extension(ci)| ci);
+    let source = get_client_source(&headers, ci_ref);
     let username = payload.username.trim();
-    let user = match authenticate_user(&state, username, &payload.password).await {
+    let user = match authenticate_user(&state, username, &payload.password, &source).await {
         Ok(u) => u,
         Err(err) => return err.into_response_with_id(&req_id.0),
     };
 
-    let (token, cookie_header) = match create_session_for_user(&state.db, user.id).await {
+    let (_token, cookie_header) = match create_session_for_user(&state.db, user.id).await {
         Ok(res) => res,
         Err(e) => return ApiError::Internal(e.to_string()).into_response_with_id(&req_id.0),
     };
 
-    let mut headers = HeaderMap::new();
-    attach_cookie(&mut headers, &cookie_header);
+    let mut headers_out = HeaderMap::new();
+    attach_cookie(&mut headers_out, &cookie_header);
 
+    // Không trả về "token" trong JSON body
     (
-        headers,
-        Json(json!({ "user": UserResponse::from(user), "token": token })),
+        headers_out,
+        Json(json!({ "user": UserResponse::from(user) })),
     )
         .into_response()
 }
