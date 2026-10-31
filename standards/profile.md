@@ -32,7 +32,7 @@ updated: 2026-10-30
 | Package / path | Partitioning | Dependency style | Other |
 |---|---|---|---|
 | crates/ (Rust) | domain-partitioned | hexagonal | domain-model không áp dụng (CRUD là chính) |
-| web/app/ (TypeScript) | domain-partitioned | không áp dụng | feature-slice (src/features/module-id/) |
+| frontend/app/ (TypeScript) | domain-partitioned | không áp dụng | feature-slice (src/features/module-id/) |
 
 ## 4. Parameters
 
@@ -62,7 +62,7 @@ Không có override nào tại thời điểm khởi tạo.
 
 | Type | Source of Truth |
 |---|---|
-| Colors, fonts, spacing, radius, shadow, motion | web/app/src/ui/tokens.css |
+| Colors, fonts, spacing, radius, shadow, motion | frontend/app/src/ui/tokens.css |
 | Tiers per scale | 04_GIAO_DIEN.md mục 5 |
 
 ## 8. Enforcement
@@ -70,7 +70,7 @@ Không có override nào tại thời điểm khởi tạo.
 | Tier | Tool | Command |
 |---|---|---|
 | T1 Block | pnpm verify | pnpm run verify (cargo fmt, clippy, test, deny, scripts kiểm tra, tsc, eslint, vitest) |
-| Presubmit | GitHub Actions / Hook | pnpm run verify trên bản sao sạch |
+| Presubmit | Bản sao sạch | pnpm run verify trên bản sao sạch (chưa có CI; có thể thêm hook cục bộ sau) |
 | Agent Hook | Antigravity QC | Đối chiếu diff và kiểm tra trên bản sao sạch |
 
 ## 9. Domain Invariants

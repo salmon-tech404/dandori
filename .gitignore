@@ -1,8 +1,9 @@
 # build
 /target/
-/web/**/dist/
-/web/**/node_modules/
+/frontend/**/dist/
+/frontend/**/node_modules/
 /node_modules/
+/release/
 *.tsbuildinfo
 # dữ liệu và bí mật
 .env
