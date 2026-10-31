@@ -23,7 +23,7 @@ Nguồn thiết kế gốc của chủ dự án (chỉ đọc):
 | `02_QUY_UOC_RUST.md` | **Chuẩn code Rust** (rule ID, tier T1/T2/T3, nguồn, công cụ kiểm) |
 | `03_ANH_XA_KANTANDA.md` | Quy ước TypeScript/frontend và ánh xạ Kantanda, hồ sơ dự án |
 | `04_GIAO_DIEN.md` + `ui-reference/` | **Giao diện:** bố cục theo mockup, hệ thống ô cắm (slot) cho module, token thiết kế, ảnh tham chiếu 7 màn hình. Đọc trước mọi task có giao diện |
-| `10_P0_LOI.md` | Giai đoạn 0: lõi + Option (T01–T14) |
+| `10_P0_LOI.md` | Giai đoạn 0: lõi + Option (T01–T14, kèm T01B) |
 | `11_P1_CHAY_MOT_TASK.md` | Giai đoạn 1: chạy được một task (P1-01…P1-09) |
 | `12_P2_VONG_LAM_VIEC.md` | Giai đoạn 2: vòng làm việc đầy đủ (P2-01…P2-13) |
 | `13_P3_TU_DONG_TRI_THUC.md` | Giai đoạn 3: tự động và tri thức (P3-01…P3-15) |
@@ -103,6 +103,6 @@ Cổng P2 và P3 cần người dùng thật nên agent **chỉ chuẩn bị** (
 
 ## Thứ tự chạy tự động (tuần tự)
 
-`T01 → T02 → … → T14 → P1-01 → … → P1-09 → P2-01 → … → P2-13 → P3-01 → … → P3-15 → P4-01 → … → P4-10 → P5-01 → P5-02`
+`T01 → T01B → T02 → … → T14 → P1-01 → … → P1-09 → P2-01 → … → P2-13 → P3-01 → … → P3-15 → P4-01 → … → P4-10 → P5-01 → P5-02`
 
 Thứ tự trong từng file giai đoạn đã được sắp theo phụ thuộc. Giai đoạn 4 gồm module rủi ro cao: mỗi module có **cổng chủ dự án** riêng (`00_QUY_TAC_CHUNG.md` mục 9) và không được chạy tự động khi chưa có xác nhận.

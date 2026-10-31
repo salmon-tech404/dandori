@@ -15,18 +15,23 @@ Trạng thái: **Đã kiểm** = đã chạy lệnh và thấy kết quả · **
 | **clippy** | "Người soát lỗi": cảnh báo code Rust dễ sai hoặc không chuẩn | `clippy 0.1.99` | Đã kiểm | Là cách kiểm chuẩn code Rust; kế hoạch yêu cầu chạy với `-D warnings` (xem `02_QUY_UOC_RUST.md`) | — |
 | **rustfmt** | Tự động căn chỉnh định dạng code | `rustfmt 1.10.0-stable` | Đã kiểm | Mọi người dùng chung một định dạng, khỏi tranh cãi | Tùy chọn chỉ có ở nightly (xem dòng Rust) |
 | **Node.js** | Chạy các script kiểm tra và phần frontend | `v24.19.0` | Đã kiểm | Cần cho frontend và `scripts/*.mjs` | — |
-| **pnpm** | Quản lý thư viện JavaScript | `10.13.1` | Đã kiểm | Dùng workspace nhiều gói; Vibe Kanban cũng dùng (D-13) | `npm` (làm được nhưng ta theo hướng pnpm) |
+| **pnpm** | Quản lý thư viện JavaScript | `12.14.0` (toàn cục; mỗi dự án ghim bằng `packageManager`) | Đã kiểm | Dùng workspace nhiều gói; Vibe Kanban cũng dùng (D-13) | `npm` (làm được nhưng ta theo hướng pnpm) |
 | **Git** | Lưu lịch sử thay đổi | `2.55.0.windows.5` | Đã kiểm | Chuẩn của ngành | — |
 | **CLI agent `claude`, `agy`** | Các "nhân viên" AI mà Dandori điều phối | _(có trên máy)_ | Đã kiểm là có mặt (chưa chạy thử) | Dandori chỉ dùng CLI chính thức đã đăng nhập (D-06) | Dùng token OAuth bên ngoài CLI (có thể vi phạm điều khoản nhà cung cấp) |
 
-## Cần cài tiếp (chưa có trên máy)
+## Công cụ Rust cài thêm (đã cài 2026-10-30)
 
-| Công nghệ | Để làm gì | Trạng thái | Vì sao cần | Đã loại / không chọn |
-| :--- | :--- | :--- | :--- | :--- |
-| **cargo-deny** | Kiểm thư viện phụ thuộc: lỗ hổng bảo mật, giấy phép, nguồn lạ | Chưa cài | Rule `RS-DEP-001`; T01 phải chạy nó | **cargo-audit** chỉ kiểm lỗ hổng; `cargo-deny` kiểm rộng hơn *(theo hướng dẫn cộng đồng, chưa đối chiếu tài liệu chính thức)* |
-| **sqlx-cli** | Tạo "bộ nhớ đệm" truy vấn để build không cần mở cơ sở dữ liệu | Chưa cài | Rule `RS-DB-001`; T01 ghi phiên bản của nó | — |
-| **cargo-nextest** | Chạy test nhanh và dễ đọc hơn | Chưa cài | Tùy chọn, giúp tiện | `cargo test` có sẵn vẫn dùng được; kế hoạch không bắt buộc nextest |
-| **Codex CLI** | Nhà cung cấp AI thứ ba để kiểm Dandori | Chưa cài | Chỉ cần nếu muốn kiểm với OpenAI | Có thể bỏ qua giai đoạn đầu |
+| Công nghệ | Để làm gì | Phiên bản | Trạng thái | Vì sao cần | Đã loại / không chọn |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **cargo-deny** | Kiểm thư viện phụ thuộc: lỗ hổng, giấy phép, nguồn lạ | `0.20.2` | Đã kiểm | Rule `RS-DEP-001`; T01 phải chạy nó | **cargo-audit** chỉ kiểm lỗ hổng; `cargo-deny` kiểm rộng hơn *(theo hướng dẫn cộng đồng, chưa đối chiếu tài liệu chính thức)* |
+| **sqlx-cli** | Tạo "bộ nhớ đệm" truy vấn để build không cần mở cơ sở dữ liệu | `0.9.0` | Đã kiểm | Rule `RS-DB-001`; T01 ghi phiên bản của nó | — |
+| **cargo-nextest** | Chạy test nhanh và dễ đọc hơn | `0.9.150` | Đã kiểm | Tùy chọn, giúp tiện | `cargo test` có sẵn vẫn dùng được; kế hoạch không bắt buộc nextest |
+
+## Chưa cài
+
+| Công nghệ | Để làm gì | Trạng thái | Ghi chú |
+| :--- | :--- | :--- | :--- |
+| **Codex CLI** | Nhà cung cấp AI thứ ba để kiểm Dandori | Chưa cài | Chỉ cần nếu muốn kiểm với OpenAI; có thể bỏ qua giai đoạn đầu |
 
 ## Công nghệ dự kiến cho chính sản phẩm Dandori (chưa cài, đã chọn trong kế hoạch)
 

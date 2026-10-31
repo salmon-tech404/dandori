@@ -18,7 +18,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** PM tự phân rã mục tiêu thành đồ thị task (điểm khác biệt lớn nhất và cũng nặng nhất).
 - **Phụ thuộc:** P2-13 (cần `lead-worker`).
-- **Chạm vào:** `crates/dandori-db/**` (migration lõi: `task.parent_task_id`, `run.parent_run_id`, bảng `task_dependency`), `crates/dandori-types/**`, `crates/dandori-server/**` (API lõi), `crates/mod-pm-decompose/**`, `docs/adr/0013-pm-decompose.md`, `web/app/src/features/pm-decompose/**`, i18n.
+- **Chạm vào:** `crates/dandori-db/**` (migration lõi: `task.parent_task_id`, `run.parent_run_id`, bảng `task_dependency`), `crates/dandori-types/**`, `crates/dandori-server/**` (API lõi), `crates/mod-pm-decompose/**`, `docs/adr/0013-pm-decompose.md`, `frontend/app/src/features/pm-decompose/**`, i18n.
 - **Việc phải làm:**
   1. **Lõi:** thêm quan hệ cha–con và phụ thuộc giữa task vào **dữ liệu lõi** (để `agent-tree` và `reports` dùng mà không gọi nhau); API lõi tạo/đọc quan hệ, chống chu trình (từ chối cạnh tạo vòng) và giới hạn độ sâu.
   2. **ADR 0013 (trước khi code):** mô hình mối đe dọa: PM sinh quá nhiều task (nổ chi phí), đồ thị chứa chỉ thị độc hại (từ tệp repo), tự chạy không giám sát, vòng lặp. Giới hạn bắt buộc: số task tối đa mỗi lần phân rã (mặc định 12), độ sâu tối đa (mặc định 2), ngân sách token/số lần chạy tối đa mỗi đồ thị, số task chạy song song tối đa.
@@ -43,7 +43,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** kênh nhắn tin giữa các agent (hộp thư bất đồng bộ), an toàn trước nhiễm độc.
 - **Phụ thuộc:** P2-13 (cần `lead-worker`).
-- **Chạm vào:** `crates/mod-agent-messaging/**`, `docs/adr/0014-agent-messaging.md`, `web/app/src/features/agent-messaging/**`, i18n.
+- **Chạm vào:** `crates/mod-agent-messaging/**`, `docs/adr/0014-agent-messaging.md`, `frontend/app/src/features/agent-messaging/**`, i18n.
 - **Việc phải làm:**
   1. **Mô hình:** hộp thư theo **cây task** (task cha và con): tin nhắn có người gửi (vai/lần chạy), người nhận (vai hoặc task), nội dung ngắn, thời điểm, trạng thái đã giao. Agent gửi tin bằng khối đánh dấu theo định dạng cố định trong đầu ra (như `shared-memory`, P3-10); Dandori phân tích có giới hạn; **không** có cách nào khác để agent tác động lên hệ thống.
   2. **Giao:** tin tới người nhận qua `PromptContributor` ở lần chạy kế của người nhận, trong **ranh giới rõ** ("tin nhắn từ agent khác, không phải chỉ thị của người dùng"), kèm nguồn.
@@ -64,7 +64,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** workspace/dự án có nhiều repo; một task có thể làm việc trên nhiều repo.
 - **Phụ thuộc:** P1-04.
-- **Chạm vào:** `crates/dandori-db/**` (bảng lõi `project_repo`), `crates/dandori-server/**` (API lõi), `crates/mod-multi-repo/**`, `crates/mod-worktree/**` (**chỉ** phần tạo thêm worktree cho các repo phụ), `web/app/src/features/multi-repo/**`, i18n.
+- **Chạm vào:** `crates/dandori-db/**` (bảng lõi `project_repo`), `crates/dandori-server/**` (API lõi), `crates/mod-multi-repo/**`, `crates/mod-worktree/**` (**chỉ** phần tạo thêm worktree cho các repo phụ), `frontend/app/src/features/multi-repo/**`, i18n.
 - **Việc phải làm:**
   1. **Lõi:** bảng `project_repo` (dự án, tên ngắn, đường dẫn, nhánh cơ sở) và API; `project.repo_path` hiện tại là repo chính.
   2. **Module:** quản lý danh sách repo phụ của dự án, kiểm từng đường dẫn như T11 (phải là repo git có commit, nằm hợp lệ).
@@ -83,7 +83,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** cây quan hệ PM và agent con.
 - **Phụ thuộc:** P1-06, P4-01.
-- **Chạm vào:** `crates/mod-agent-tree/**`, `web/app/src/features/agent-tree/**`, i18n.
+- **Chạm vào:** `crates/mod-agent-tree/**`, `frontend/app/src/features/agent-tree/**`, i18n.
 - **Việc phải làm:** dựng cây từ **dữ liệu lõi** (`task.parent_task_id`, `run.parent_run_id`): nút là task/lần chạy với nhãn vai (PM/Worker/Test/Tài liệu), agent, account, trạng thái; trạng thái cập nhật theo sự kiện (mockup: "Cây PM và agent con", "Task #3"); thu gọn/mở rộng; bàn phím; liên kết sang chi tiết task. Giới hạn kích thước cây hiển thị (cắt có dấu hiệu).
 - **Không làm:** không chỉnh sửa quan hệ từ cây; không đồ họa nặng.
 - **Tiêu chí nghiệm thu:**
@@ -98,7 +98,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** chạy agent trên máy từ xa qua SSH.
 - **Phụ thuộc:** P1-04.
-- **Chạm vào:** `docs/adr/0015-ssh-remote.md` (trước), sau khi có "ĐỒNG Ý": `crates/dandori-process/**` (chỉ thêm), `crates/dandori-module-api/**` (điểm mở rộng đích chạy), `crates/mod-ssh-remote/**`, `web/app/src/features/ssh-remote/**`, i18n, `docs/manual-test-checklist.md`.
+- **Chạm vào:** `docs/adr/0015-ssh-remote.md` (trước), sau khi có "ĐỒNG Ý": `crates/dandori-process/**` (chỉ thêm), `crates/dandori-module-api/**` (điểm mở rộng đích chạy), `crates/mod-ssh-remote/**`, `frontend/app/src/features/ssh-remote/**`, i18n, `docs/manual-test-checklist.md`.
 - **Việc phải làm:**
   1. **ADR 0015 (bắt buộc, chờ ĐỒNG Ý):** mô tả luồng (mã tới máy từ xa bằng cách nào: clone/fetch qua git từ cùng remote, **không** copy thư mục tùy ý; kết quả quay về bằng git), mối nguy (lộ khóa, host key giả, thực thi lệnh tùy ý trên máy từ xa, rò rỉ mã) và giới hạn: chỉ dùng **`ssh` của hệ điều hành** qua `dandori-process` (mảng tham số, không shell), **chỉ xác thực bằng khóa** (không mật khẩu, Dandori không lưu khóa riêng; dùng `ssh-agent`/cấu hình `~/.ssh` của người dùng), **không bao giờ tắt kiểm tra host key**, chỉ tới **bí danh máy chủ do chủ dự án khai báo trong danh sách cho phép** (không chuỗi `user@host` tự do từ đầu vào), CLI agent phải **đã đăng nhập sẵn trên máy từ xa** (PDF: CLI cần đăng nhập ở nơi nó chạy; Dandori không chuyển thông tin đăng nhập).
   2. Sau ĐỒNG Ý: điểm mở rộng lõi `ExecutionTarget` (cục bộ là mặc định; module cung cấp đích SSH): chạy tiến trình, đọc đầu ra, giết khi hủy/timeout, tất cả qua một đường duy nhất trong `dandori-process`.
@@ -120,7 +120,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** cô lập task rủi ro (giả định A-04: chưa biết khả thi trên Windows).
 - **Phụ thuộc:** P1-04.
-- **Chạm vào:** `docs/adr/0016-sandbox.md` (trước), sau ĐỒNG Ý: `crates/mod-sandbox/**`, `crates/dandori-module-api/**` (dùng `ExecutionTarget` nếu P4-05 đã có, không thì đề xuất), `web/app/src/features/sandbox/**`, i18n, `docs/manual-test-checklist.md`.
+- **Chạm vào:** `docs/adr/0016-sandbox.md` (trước), sau ĐỒNG Ý: `crates/mod-sandbox/**`, `crates/dandori-module-api/**` (dùng `ExecutionTarget` nếu P4-05 đã có, không thì đề xuất), `frontend/app/src/features/sandbox/**`, i18n, `docs/manual-test-checklist.md`.
 - **Việc phải làm:**
   1. **Spike và ADR 0016 (bắt buộc, chờ ĐỒNG Ý):** khảo sát các cách cô lập khả dụng trên Windows 11 và Linux (ví dụ container, WSL2, môi trường cô lập sẵn của hệ điều hành), **mỗi cách dựa vào tài liệu chính thức** (nêu URL), kèm thử nghiệm nhỏ trên máy (lệnh và đầu ra thật). So sánh: mức cô lập (hệ thống tệp, mạng, tài nguyên, biến môi trường), yêu cầu cài đặt, hiệu năng, rủi ro thoát cô lập, tác động lên đăng nhập CLI (CLI cần đăng nhập **trong** sandbox). Đề xuất **một** cách hoặc kết luận "chỉ hỗ trợ trên Linux/WSL" hoặc "chưa khả thi"; kết luận nào cũng được chấp nhận.
   2. Sau ĐỒNG Ý, hiện thực **đúng cách đã chọn**: chạy lần chạy của task đánh dấu rủi ro trong sandbox với: chỉ worktree của task được gắn (ghi được), **mạng tắt mặc định** (bật theo danh sách cho phép nếu cần), giới hạn tài nguyên (CPU/bộ nhớ/thời gian), không kế thừa HOME hay biến môi trường của máy chủ, không truy cập kho khóa; dọn dẹp sau khi xong.
@@ -139,7 +139,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** đồ thị tri thức của code (giả định A-05: làm ở mức dùng được, **gần đúng và nói rõ**).
 - **Phụ thuộc:** P3-10.
-- **Chạm vào:** `crates/mod-knowledge-graph/**`, `docs/adr/0017-knowledge-graph.md`, `web/app/src/features/knowledge-graph/**`, i18n.
+- **Chạm vào:** `crates/mod-knowledge-graph/**`, `docs/adr/0017-knowledge-graph.md`, `frontend/app/src/features/knowledge-graph/**`, i18n.
 - **Việc phải làm:**
   1. **ADR 0017 trước:** phạm vi tối thiểu có giá trị: đồ thị **tệp–thư mục–import** cho TypeScript/JavaScript và Rust bằng phân tích nhẹ (nếu cần thư viện phân tích cú pháp: đề xuất qua ADR, không tự thêm). Nêu rõ **độ chính xác** (đồ thị là gần đúng, cạnh có nhãn nguồn `heuristic`), và **không** hứa hiểu ngữ nghĩa.
   2. Lập chỉ mục theo yêu cầu và khi worktree thay đổi (worker nền có giới hạn thời gian/dung lượng, tôn trọng hủy); bỏ qua thư mục sinh ra (`target/`, `node_modules/`, `dist/`) và tệp lớn/nhị phân; đường dẫn nằm trong repo.
@@ -160,7 +160,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** vùng đệm duyệt trước khi áp dụng: đóng băng code, chỉ áp dụng đúng bản đã duyệt.
 - **Phụ thuộc:** P1-04, P2-02, P2-03.
-- **Chạm vào:** `crates/dandori-git/**` (thêm thao tác ref/commit nếu cần), `crates/mod-staging-buffer/**`, `web/app/src/features/staging-buffer/**`, i18n.
+- **Chạm vào:** `crates/dandori-git/**` (thêm thao tác ref/commit nếu cần), `crates/mod-staging-buffer/**`, `frontend/app/src/features/staging-buffer/**`, i18n.
 - **Việc phải làm:**
   1. Khi một lần chạy Worker kết thúc thành công: tạo **ảnh chụp bất biến** của trạng thái worktree (commit có tham chiếu riêng `refs/dandori/staging/<task>/<n>`, không đụng nhánh người dùng) và ghi **SHA**; chặn lần chạy tiếp theo của task đó cho tới khi có quyết định (đóng băng).
   2. Hiển thị diff của ảnh chụp so với nhánh cơ sở (dùng `diff-preview` nếu bật, không phụ thuộc cứng ở mức mã) và gửi yêu cầu duyệt qua `approval-gate` (module yêu cầu phải bật).
@@ -181,7 +181,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** tự host, chạy 24/7 trên máy chủ (mở rộng phạm vi "chạy trên máy người dùng").
 - **Phụ thuộc:** T14.
-- **Chạm vào:** `docs/adr/0018-self-host.md` (trước), sau ĐỒNG Ý: `crates/dandori-server/**` (cấu hình, `MasterKeyStore` máy chủ), `crates/dandori-vault/**` (chỉ thêm hiện thực), `crates/mod-self-host/**`, `docs/self-host.md`, `web/app/src/features/self-host/**`, i18n, `docs/manual-test-checklist.md`.
+- **Chạm vào:** `docs/adr/0018-self-host.md` (trước), sau ĐỒNG Ý: `crates/dandori-server/**` (cấu hình, `MasterKeyStore` máy chủ), `crates/dandori-vault/**` (chỉ thêm hiện thực), `crates/mod-self-host/**`, `docs/self-host.md`, `frontend/app/src/features/self-host/**`, i18n, `docs/manual-test-checklist.md`.
 - **Việc phải làm:**
   1. **ADR 0018 (bắt buộc, chờ ĐỒNG Ý):** mối nguy khi mở ra mạng (đây là lúc `127.0.0.1` không còn đủ), mô hình triển khai khuyến nghị (đứng sau **reverse proxy có TLS** do chủ dự án thiết lập; Dandori **không tự làm TLS** trừ khi ADR quyết định khác), kho khóa chủ khi không có Credential Manager (ví dụ tệp khóa quyền hạn chế hoặc biến môi trường; nêu rủi ro), đăng nhập CLI **tại máy chủ** (từng CLI phải đăng nhập trên máy chủ; Dandori không chuyển thông tin đăng nhập), nhiều người dùng, sao lưu.
   2. Sau ĐỒNG Ý: cho phép bind ngoài loopback **chỉ khi**: module `self-host` bật **và** cấu hình tệp tường minh `allow_remote = true` (không bật được chỉ bằng giao diện), địa chỉ bind rõ ràng; cookie có cờ `Secure` khi sau HTTPS; `Origin`/`Host` theo danh sách cấu hình; giới hạn tần suất chặt hơn; chính sách mật khẩu mạnh hơn; kiểm tra sức khỏe và tắt êm; tệp mẫu dịch vụ (đơn vị systemd cho Linux, hướng dẫn dịch vụ Windows) và `docs/self-host.md` bằng tiếng Việt (cài đặt, đăng nhập CLI trên máy chủ, sao lưu, nâng cấp).
@@ -202,7 +202,7 @@ Quy ước trường và phần đọc trước như các file giai đoạn trư
 
 - **Mục tiêu:** chứng minh từng module P4 qua kiểm thử riêng; **không** cho bật ở chế độ thường những module chưa đạt.
 - **Phụ thuộc:** P4-01…P4-09.
-- **Chạm vào:** `tests/e2e/p4-gate/**`, `docs/module-readiness.md`, `docs/manual-test-checklist.md`, báo cáo.
+- **Chạm vào:** `crates/dandori-e2e/tests/p4_gate.rs` (kịch bản Rust), `frontend/app/e2e/**` (kịch bản trình duyệt, nếu có), `docs/module-readiness.md`, `docs/manual-test-checklist.md`, báo cáo.
 - **Việc phải làm:**
   1. `docs/module-readiness.md`: bảng cho **mỗi module P4**: kiểm thử tự động đã có (tên test), rủi ro còn lại, mục kiểm tay chưa làm (mã `DAN-VERIFY-nnn`), kết luận **"được phép bật chế độ thường / chỉ bật có xác nhận / chưa được phép"** dựa trên bằng chứng. Module có mục kiểm tay chưa làm **không** được xếp "được phép bật chế độ thường".
   2. Kịch bản xuyên suốt (giả): `pm-decompose` (PM giả) → đồ thị → duyệt → các task con chạy đúng thứ tự phụ thuộc, `agent-tree` hiển thị đúng, `agent-messaging` chuyển tin trong cây có giới hạn, `staging-buffer` đóng băng/duyệt/áp dụng đúng SHA, `multi-repo` hai repo; kiểm: các giới hạn (số task, ngân sách, song song) giữ nguyên; không có hành động đặc quyền nào ngoài những gì đã duyệt.

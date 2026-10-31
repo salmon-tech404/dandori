@@ -52,10 +52,13 @@ Ngoài ra: **liên kết thay vì chép lại**. Nếu một nội dung đã n�
 ## Mục lục hiện có
 
 - `cong-nghe/README.md` · bảng công nghệ
+- `cong-nghe/cau-truc-rust.md` · cấu trúc code Rust giải thích cho người mới
+- `cong-nghe/cau-truc-rust-va-trien-khai.md` · nghiên cứu có nguồn: cấu trúc Rust chuẩn, triển khai Vercel/Render/Docker
 - `moi-truong/cai-dat.md` · nhật ký cài đặt máy
 - `moi-truong/lenh-hay-dung.md` · sổ lệnh
 - `nhat-ky/2026-10-30.md` · nhật ký ngày đầu
+- `nhat-ky/2026-10-31.md` · nhật ký: kiểm T01, chốt cấu trúc
 - `su-co/2026-10-30-cargo-khong-nhan-ra.md` · sự cố đầu tiên
 - `thuat-ngu.md` · từ điển
 - `_mau/` · bốn mẫu để sao chép
-- `adr/` · *chưa có; task T01 sẽ tạo thư mục này cùng ba ADR đầu tiên*
+- `adr/` · quyết định kiến trúc: 0001 thư viện, 0002 lint, 0003 kiểu kiến trúc, **0020 cấu trúc mã nguồn**

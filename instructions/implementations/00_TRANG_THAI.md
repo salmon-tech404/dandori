@@ -6,11 +6,11 @@ Agent chỉ được sửa **dòng của task đang làm** (cột Trạng thái 
 
 | Mục | Giá trị |
 | :--- | :--- |
-| `rustc --version` | _(điền)_ |
-| `cargo --version` | _(điền)_ |
-| `rustup show` | _(điền)_ |
-| `node -v` / `pnpm -v` / `git --version` | _(điền)_ |
-| `cargo deny --version` / `sqlx --version` | _(điền)_ |
+| `rustc --version` | `rustc 1.99.1 (58cf8f9c3 2026-10-13)` |
+| `cargo --version` | `cargo 1.99.1 (5f94df478 2026-08-27)` |
+| `rustup show` | `stable-x86_64-pc-windows-msvc (active, default), host x86_64-pc-windows-msvc` |
+| `node -v` / `pnpm -v` / `git --version` | `v24.19.0` / `12.14.0` / `git version 2.55.0.windows.5` |
+| `cargo deny --version` / `sqlx --version` | `cargo-deny 0.20.2` / `sqlx-cli 0.9.0` |
 | CLI có trên máy | `claude`: có · `agy`: có · `codex`: **chưa cài** (đã kiểm 2026-10-30, kế hoạch viết) |
 | Kantanda | `D:\10-kantanda`, nhánh `main`, commit `aa01465` khi viết kế hoạch |
 
@@ -18,7 +18,7 @@ Agent chỉ được sửa **dòng của task đang làm** (cột Trạng thái 
 
 | Mục | Giá trị |
 | :--- | :--- |
-| Baseline (Bước 0c) | _(chủ dự án tự commit rồi điền mã)_ |
+| Baseline (Bước 0c) | `f1532bc` ("first commit", nhánh `main`, đã đẩy lên GitHub; kiểm 2026-10-30) |
 | Mốc khóa cấu hình (sau khi chủ dự án duyệt và commit T01, T02) | _(chủ dự án điền mã commit)_ |
 
 ## Cổng chủ dự án (`00_QUY_TAC_CHUNG` mục 9)
@@ -45,7 +45,7 @@ Chủ dự án (hoặc Claude thay mặt, theo lời chủ dự án) ghi `ĐỒN
 | P4 | `reports/REVIEW_P4.md` | chưa |
 | P5 | `reports/REVIEW_P5.md` | chưa |
 
-## Task (63)
+## Task (64)
 
 Cột Phụ thuộc: task phải `DONE` (hoặc `DONE_WITH_GAPS` chấp nhận được) trước. `[CỔNG]` = cổng chủ dự án. **Cổng GĐ** = điểm dừng bắt buộc chờ Claude kiểm.
 
@@ -53,8 +53,9 @@ Cột Phụ thuộc: task phải `DONE` (hoặc `DONE_WITH_GAPS` chấp nhận �
 
 | # | Task | Phụ thuộc | Trạng thái | Commit (chủ dự án) | Báo cáo |
 | :-: | :--- | :--- | :--- | :--- | :--- |
-| T01 | Khung workspace, chuỗi công cụ, hồ sơ | Bước 0 | ⏳ Todo | | |
-| T02 | Cổng `verify` và các script kiểm | T01 | ⏳ Todo | | |
+| T01 | Khung workspace, chuỗi công cụ, hồ sơ | Bước 0 | ✅ DONE | | `reports/T01.md` |
+| T01B | Chỉnh khung theo cấu trúc chuẩn (sau kiểm T01) | T01 | ⏳ Todo | | |
+| T02 | Cổng `verify` và các script kiểm | T01B | ⏳ Todo | | |
 | T03 | Cơ sở dữ liệu lõi | T02 | ⏳ Todo | | |
 | T04 | Bus sự kiện | T03 | ⏳ Todo | | |
 | T05 | Hợp đồng module và `gen-modules` | T03, T04 | ⏳ Todo | | |

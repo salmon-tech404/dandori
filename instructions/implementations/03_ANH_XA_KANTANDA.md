@@ -11,7 +11,7 @@ Theo `D:\10-kantanda\rules\architecture\styles.md`, khai báo **theo gói**:
 | Gói / đường dẫn | Partitioning | Dependency style | Khác |
 | :--- | :--- | :--- | :--- |
 | `crates/` (Rust) | domain-partitioned (mỗi module một crate) | hexagonal (port do lõi sở hữu: `dandori-module-api`, `dandori-agent-port`; adapter cắm ở `dandori-server`) | `domain-model` không áp dụng (CRUD là chính) |
-| `web/app/` (TypeScript) | domain-partitioned | — | `feature-slice` (`src/features/<module-id>/`) |
+| `frontend/app/` (TypeScript) | domain-partitioned | — | `feature-slice` (`src/features/<module-id>/`) |
 
 Hệ quả:
 
@@ -69,7 +69,7 @@ Hệ quả:
 - **Trạng thái:** dữ liệu máy chủ qua `@tanstack/react-query`; trạng thái UI toàn cục qua `zustand`; trạng thái lọc/phân trang trong URL (`FE-STA-002`).
 - **Giao diện:** bố cục, ô cắm (slot) và token theo `04_GIAO_DIEN.md`. Mọi màn hình có trạng thái rỗng/đang tải/lỗi (`UI-STA-001`); vùng chạm hiệu dụng ≥ 44px (`UI-LAW-002`); biểu tượng SVG (Lucide), **không emoji làm icon** (`UI-GEN-001`); truy cập được bằng bàn phím và nhãn cho trình đọc màn hình (`UI-A11Y-001`).
 - **Văn bản:** tiếng Việt qua i18n; không tiêu đề viết hoa toàn bộ; chú thích dài trong tooltip "?"; ô nhập dạng "nhãn | điều khiển".
-- **ESLint:** `web/` dùng bản **sao** `D:\10-kantanda\tooling\eslint.config.mjs` đặt ở `web/tooling/kantanda-eslint.config.mjs` (có dòng đầu ghi nguồn và mã commit Kantanda), gọi với `styles: []` (TypeScript của Dandori không khai báo `hexagonal`). Sao thay vì import đường dẫn tuyệt đối để worktree sạch vẫn chạy. Cập nhật bản sao là một task riêng.
+- **ESLint:** `frontend/` dùng bản **sao** `D:\10-kantanda\tooling\eslint.config.mjs` đặt ở `frontend/tooling/kantanda-eslint.config.mjs` (có dòng đầu ghi nguồn và mã commit Kantanda), gọi với `styles: []` (TypeScript của Dandori không khai báo `hexagonal`). Sao thay vì import đường dẫn tuyệt đối để worktree sạch vẫn chạy. Cập nhật bản sao là một task riêng.
 - **Semgrep:** `D:\10-kantanda\tooling\semgrep.yml` có thể chạy nếu máy có Semgrep; không bắt buộc cho `verify`. Việc kiểm tương đương cho Rust là RS-SEC-005 và các script `check-*`.
 
 ## 5. Chuẩn kiểm ở `verify` (bảng ghép)
@@ -115,9 +115,10 @@ Task: <ID task>
 ```gitignore
 # build
 /target/
-/web/**/dist/
-/web/**/node_modules/
+/frontend/**/dist/
+/frontend/**/node_modules/
 /node_modules/
+/release/
 # dữ liệu và bí mật
 .env
 .env.*
