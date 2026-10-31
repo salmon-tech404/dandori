@@ -1,0 +1,25 @@
+{
+  "packages": [
+    {
+      "name": "mod-cost",
+      "version": "0.1.0",
+      "dependencies": [
+        { "name": "dandori-types" },
+        { "name": "dandori-module-api" },
+        { "name": "mod-status" }
+      ]
+    },
+    {
+      "name": "mod-status",
+      "version": "0.1.0",
+      "dependencies": [
+        { "name": "dandori-types" },
+        { "name": "dandori-module-api" }
+      ]
+    }
+  ],
+  "workspace_members": [
+    "mod-cost 0.1.0 (path+file:///crates/mod-cost)",
+    "mod-status 0.1.0 (path+file:///crates/mod-status)"
+  ]
+}

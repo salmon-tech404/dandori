@@ -1,0 +1,15 @@
+{
+  "packages": [
+    {
+      "name": "dandori-server",
+      "version": "0.1.0",
+      "dependencies": [
+        { "name": "dandori-types" },
+        { "name": "unapproved-random-crate" }
+      ]
+    }
+  ],
+  "workspace_members": [
+    "dandori-server 0.1.0 (path+file:///crates/dandori-server)"
+  ]
+}
