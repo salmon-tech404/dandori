@@ -1,41 +1,124 @@
+/**
+ * Design Tokens — Dandori Agent Hub (04_GIAO_DIEN.md mục 5)
+ * Khai báo tập trung duy nhất cho màu sắc, khoảng cách, bo góc và phông chữ.
+ */
+
 :root {
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f8fafc;
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #64748b;
-  --color-border: #e2e8f0;
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
-  --color-on-primary: #ffffff;
+  /* Bảng màu chuẩn chế độ sáng (Light Mode) */
+  --bg: #F5F6F8;
+  --sf: #FFFFFF;
+  --sf2: #EDEFF3;
+  --ln: #DADFE6;
+  --fg: #151A21;
+  --mu: #566170;
+  --ac: #151A21;
+  --acf: #FFFFFF;
+  --bl: #1D4ED8;
+  --blb: #E6EEFF;
+  --or: #9A4A00;
+  --orb: #FFEBD6;
+  --tl: #0B6B63;
+  --tlb: #DAF3EF;
+  --gr: #166534;
+  --grb: #DEF2E4;
+  --gy: #4B5563;
+  --gyb: #E9ECF0;
+  --rd: #B42318;
+  --rdb: #FDE8E6;
 
-  --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-size-base: 1rem;
-  --font-size-sm: 0.875rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 2rem;
+  /* Phông chữ (DM Sans và JetBrains Mono tự chứa với system fallback) */
+  --font-sans: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  --spacing-1: 0.25rem;
-  --spacing-2: 0.5rem;
-  --spacing-4: 1rem;
-  --spacing-6: 1.5rem;
-  --spacing-8: 2rem;
+  /* Cỡ chữ theo thang chuẩn */
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-18: 18px;
+  --fs-26: 26px;
 
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
+  /* Bo góc (Radius) */
+  --radius-8: 8px;
+  --radius-10: 10px;
+  --radius-pill: 9999px;
 
-  --max-width-card: 600px;
-  --touch-target-min: 44px;
+  /* Khoảng cách (Spacing) */
+  --sp-4: 4px;
+  --sp-8: 8px;
+  --sp-12: 12px;
+  --sp-16: 16px;
+  --sp-24: 24px;
+  --sp-32: 32px;
+
+  /* Kích thước thành phần */
+  --btn-height: 36px;
+  --menu-height: 36px;
+  --chip-height: 22px;
+  --sidebar-width: 232px;
+  --touch-target: 44px;
 }
 
+/* Chế độ tối (Dark Mode) theo thuộc tính data-theme hoặc prefers-color-scheme */
 [data-theme="dark"] {
-  --color-bg-primary: #0f172a;
-  --color-bg-secondary: #1e293b;
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-border: #334155;
-  --color-primary: #3b82f6;
-  --color-primary-hover: #60a5fa;
-  --color-on-primary: #ffffff;
+  --bg: #0F1318;
+  --sf: #171C23;
+  --sf2: #1F252E;
+  --ln: #2C3440;
+  --fg: #E8ECF1;
+  --mu: #9AA6B4;
+  --ac: #E8ECF1;
+  --acf: #0F1318;
+  --bl: #8DB1FF;
+  --blb: #1B2A4D;
+  --or: #FFB35C;
+  --orb: #3B2A12;
+  --tl: #5FD6C8;
+  --tlb: #12332F;
+  --gr: #7ADC9C;
+  --grb: #14301F;
+  --gy: #B4BDC9;
+  --gyb: #262D37;
+  --rd: #FF9B90;
+  --rdb: #3E1A17;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1318;
+    --sf: #171C23;
+    --sf2: #1F252E;
+    --ln: #2C3440;
+    --fg: #E8ECF1;
+    --mu: #9AA6B4;
+    --ac: #E8ECF1;
+    --acf: #0F1318;
+    --bl: #8DB1FF;
+    --blb: #1B2A4D;
+    --or: #FFB35C;
+    --orb: #3B2A12;
+    --tl: #5FD6C8;
+    --tlb: #12332F;
+    --gr: #7ADC9C;
+    --grb: #14301F;
+    --gy: #B4BDC9;
+    --gyb: #262D37;
+    --rd: #FF9B90;
+    --rdb: #3E1A17;
+  }
+}
+
+/* Áp dụng mặc định */
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: var(--fs-14);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
 }
