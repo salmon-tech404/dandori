@@ -87,6 +87,20 @@ impl FeatureLifecycleManager {
         count
     }
 
+    /// Dừng êm toàn bộ các module đang hoạt động, hủy bỏ các tác vụ nền (worker & subscription).
+    pub async fn shutdown(&self) {
+        let mut lock = self.active_modules.write().await;
+        for (_, instance) in lock.drain() {
+            instance.cancel_token.cancel();
+            for handle in instance.worker_handles {
+                let _ = tokio::time::timeout(Duration::from_millis(500), handle).await;
+            }
+            for handle in instance.subscription_handles {
+                let _ = tokio::time::timeout(Duration::from_millis(500), handle).await;
+            }
+        }
+    }
+
     /// Bật module và các module phụ thuộc theo thứ tự topo.
     ///
     /// # Errors
@@ -413,6 +427,24 @@ impl FeatureLifecycleManager {
     }
 
     async fn handle_gated_request(&self, req: axum::extract::Request) -> axum::response::Response {
+        let req_id = uuid::Uuid::new_v4().to_string();
+        let session_token = extract_session_token(&req);
+
+        // 1. Kiểm tra xác thực phiên trước khi kiểm tra trạng thái module (T10 AC4 / T14B mục 2)
+        if !verify_token_session(&self.pool, session_token.as_deref()).await {
+            return (
+                StatusCode::UNAUTHORIZED,
+                axum::Json(serde_json::json!({
+                    "error": {
+                        "code": "unauthorized",
+                        "message": "Phiên đăng nhập không hợp lệ hoặc đã hết hạn",
+                        "request_id": req_id
+                    }
+                })),
+            )
+                .into_response();
+        }
+
         let path = req.uri().path().to_string();
         let rest = path
             .strip_prefix("/api/v1/m/")
@@ -425,7 +457,6 @@ impl FeatureLifecycleManager {
         };
 
         if !self.is_module_active(module_id).await {
-            let req_id = uuid::Uuid::new_v4().to_string();
             return (
                 StatusCode::FORBIDDEN,
                 axum::Json(serde_json::json!({
@@ -482,4 +513,36 @@ impl FeatureLifecycleManager {
             Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Internal module error").into_response(),
         }
     }
+}
+
+fn extract_session_token(req: &axum::extract::Request) -> Option<String> {
+    let cookie_header = req
+        .headers()
+        .get(axum::http::header::COOKIE)?
+        .to_str()
+        .ok()?;
+    for pair in cookie_header.split(';') {
+        let mut parts = pair.trim().splitn(2, '=');
+        let key = parts.next()?.trim();
+        let val = parts.next()?.trim();
+        if key == "dandori_session" && !val.is_empty() {
+            return Some(val.to_string());
+        }
+    }
+    None
+}
+
+async fn verify_token_session(pool: &SqlitePool, token: Option<&str>) -> bool {
+    let Some(token) = token else {
+        return false;
+    };
+    let token_hash = dandori_db::hash_session_token(token);
+    let now_str = Utc::now().to_rfc3339();
+    let row = sqlx::query("SELECT id FROM session WHERE token_hash = ? AND expires_at > ?")
+        .bind(token_hash)
+        .bind(now_str)
+        .fetch_optional(pool)
+        .await;
+
+    matches!(row, Ok(Some(_)))
 }

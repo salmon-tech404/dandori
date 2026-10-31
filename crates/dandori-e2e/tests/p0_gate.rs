@@ -149,6 +149,12 @@ async fn test_p0_gate_full_lifecycle_and_data_preservation()
     let proj_id = proj_body["project"]["id"].as_str().unwrap().to_string();
 
     // 5. Kiểm tra ban đầu: sample-hello đang tắt
+    // Yêu cầu không có cookie phải bị từ chối 401 unauthorized (T10 AC4 / T14B mục 2)
+    let (status_no_auth, _, _) =
+        send_req(&app, "GET", "/api/v1/m/sample-hello/ping", None, None).await;
+    assert_eq!(status_no_auth, StatusCode::UNAUTHORIZED);
+
+    // Có cookie hợp lệ nhưng module tắt -> trả về 403 module_disabled
     let (status, ping_body, _) = send_req(
         &app,
         "GET",
@@ -200,7 +206,12 @@ async fn test_p0_gate_full_lifecycle_and_data_preservation()
         "Worker của sample-hello phải đang hoạt động (đếm: {active_tasks})"
     );
 
-    // 8. Ping thành công module sample-hello
+    // 8. Ping module sample-hello: không cookie phải trả về 401 ngay cả khi module đã bật
+    let (status_no_auth, _, _) =
+        send_req(&app, "GET", "/api/v1/m/sample-hello/ping", None, None).await;
+    assert_eq!(status_no_auth, StatusCode::UNAUTHORIZED);
+
+    // Có cookie hợp lệ -> Ping thành công
     let (status, ping_body, _) = send_req(
         &app,
         "GET",

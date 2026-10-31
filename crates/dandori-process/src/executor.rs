@@ -35,6 +35,10 @@ fn build_command(spec: &ProcessSpec) -> Result<tokio::process::Command, ProcessE
     cmd.stderr(std::process::Stdio::piped());
     cmd.kill_on_drop(true);
 
+    // `process_group` là hàm riêng của tokio::process::Command (không cần trait CommandExt của std).
+    #[cfg(unix)]
+    cmd.process_group(0);
+
     setup_environment(&mut cmd, spec);
     Ok(cmd)
 }
@@ -235,11 +239,15 @@ async fn kill_process_tree(pid: u32, child: &mut tokio::process::Child) {
 
     #[cfg(unix)]
     {
-        // Trên Unix gửi SIGKILL cho nhóm tiến trình
-        let _ = nix::sys::signal::kill(
-            nix::unistd::Pid::from_raw(-(pid as i32)),
-            nix::sys::signal::Signal::SIGKILL,
-        );
+        #[expect(
+            clippy::disallowed_methods,
+            reason = "dandori-process gọi lệnh kill của hệ thống để gửi SIGKILL tới nhóm tiến trình trên Unix"
+        )]
+        let mut kill_cmd = tokio::process::Command::new("kill");
+        kill_cmd.args(["-KILL", "--", &format!("-{pid}")]);
+        if let Err(err) = kill_cmd.output().await {
+            warn!(pid, ?err, "Không thể chạy kill trên Unix");
+        }
     }
 
     let _ = child.kill().await;

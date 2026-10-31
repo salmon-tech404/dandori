@@ -182,6 +182,27 @@ async fn setup_lifecycle_env()
     Ok((lifecycle, pool, event_bus))
 }
 
+async fn create_test_session(pool: &sqlx::SqlitePool) -> Result<String, Box<dyn Error>> {
+    let token = "test_token_123456";
+    let token_hash = dandori_db::hash_session_token(token);
+    let expires = (chrono::Utc::now() + chrono::Duration::hours(8)).to_rfc3339();
+    sqlx::query(
+        "INSERT OR IGNORE INTO user (id, username, password_hash, system_role, created_at) \
+         VALUES ('usr_1', 'user1', 'hash', 'admin', datetime('now'))",
+    )
+    .execute(pool)
+    .await?;
+
+    sqlx::query("INSERT INTO session (id, user_id, expires_at, token_hash) VALUES (?, ?, ?, ?)")
+        .bind(uuid::Uuid::new_v4().to_string())
+        .bind("usr_1")
+        .bind(expires)
+        .bind(token_hash)
+        .execute(pool)
+        .await?;
+    Ok(format!("dandori_session={token}"))
+}
+
 #[tokio::test]
 async fn test_enable_lifecycle_success() -> Result<(), Box<dyn Error>> {
     let (lifecycle, pool, event_bus) = setup_lifecycle_env().await?;
@@ -214,8 +235,10 @@ async fn test_enable_lifecycle_success() -> Result<(), Box<dyn Error>> {
     assert!(sample.tick_count() > 0);
 
     let router = lifecycle.create_router();
+    let cookie = create_test_session(pool.inner()).await?;
     let req = Request::builder()
         .uri("/api/v1/m/sample-hello/ping")
+        .header(axum::http::header::COOKIE, &cookie)
         .body(Body::empty())?;
     let res = router.oneshot(req).await?;
     assert_eq!(res.status(), StatusCode::OK);
@@ -229,7 +252,7 @@ async fn test_enable_lifecycle_success() -> Result<(), Box<dyn Error>> {
 
 #[tokio::test]
 async fn test_disable_lifecycle_success() -> Result<(), Box<dyn Error>> {
-    let (lifecycle, _pool, event_bus) = setup_lifecycle_env().await?;
+    let (lifecycle, pool, event_bus) = setup_lifecycle_env().await?;
     let sample = Arc::new(SampleHelloModule::new());
     lifecycle.register_module(sample.clone()).await;
 
@@ -266,8 +289,10 @@ async fn test_disable_lifecycle_success() -> Result<(), Box<dyn Error>> {
     assert_eq!(sample.tick_count(), ticks_at_stop);
 
     let router = lifecycle.create_router();
+    let cookie = create_test_session(pool.inner()).await?;
     let req = Request::builder()
         .uri("/api/v1/m/sample-hello/ping")
+        .header(axum::http::header::COOKIE, &cookie)
         .body(Body::empty())?;
     let res = router.oneshot(req).await?;
     assert_eq!(res.status(), StatusCode::FORBIDDEN);

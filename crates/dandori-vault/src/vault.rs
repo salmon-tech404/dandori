@@ -1,6 +1,6 @@
 //! Khối xử lý mã hóa AEAD và điều phối lưu trữ bí mật (01_KIEN_TRUC.md mục 6.2).
 
-use aes_gcm::aead::{Aead, KeyInit};
+use aes_gcm::aead::{Aead, KeyInit, Payload};
 use aes_gcm::{Aes256Gcm, Nonce};
 use chrono::Utc;
 use dandori_types::{SecretId, SecretRecord};
@@ -43,13 +43,18 @@ where
         let cipher = Aes256Gcm::new_from_slice(&master_key)
             .map_err(|e| VaultError::EncryptionFailed(e.to_string()))?;
 
+        let id = SecretId::new();
+        let payload = Payload {
+            msg: secret.as_bytes(),
+            aad: id.as_uuid().as_bytes(),
+        };
+
         let ciphertext = cipher
-            .encrypt(nonce, secret.as_bytes())
+            .encrypt(nonce, payload)
             .map_err(|e| VaultError::EncryptionFailed(e.to_string()))?;
 
         master_key.zeroize();
 
-        let id = SecretId::new();
         let record = SecretRecord {
             id,
             label: label.to_string(),
@@ -86,15 +91,16 @@ where
         let cipher = Aes256Gcm::new_from_slice(&master_key)
             .map_err(|e| VaultError::DecryptionFailed(e.to_string()))?;
 
-        let mut decrypted_bytes =
-            cipher
-                .decrypt(nonce, record.ciphertext.as_ref())
-                .map_err(|_| {
-                    VaultError::DecryptionFailed(
-                        "Giải mã thất bại: phát hiện dữ liệu mã hóa bị giả mạo hoặc sai khóa chủ"
-                            .into(),
-                    )
-                })?;
+        let payload = Payload {
+            msg: record.ciphertext.as_ref(),
+            aad: id.as_uuid().as_bytes(),
+        };
+
+        let mut decrypted_bytes = cipher.decrypt(nonce, payload).map_err(|_| {
+            VaultError::DecryptionFailed(
+                "Giải mã thất bại: phát hiện dữ liệu mã hóa bị giả mạo hoặc sai khóa chủ".into(),
+            )
+        })?;
 
         master_key.zeroize();
 

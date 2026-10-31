@@ -210,3 +210,27 @@ async fn test_dropping_key_store_clone_keeps_shared_key() -> Result<(), Box<dyn 
     assert_eq!(original.get_master_key()?, [7u8; 32]);
     Ok(())
 }
+
+#[tokio::test]
+async fn test_ciphertext_swap_between_records_fails() -> Result<(), Box<dyn Error>> {
+    let key_store = Arc::new(MemoryKeyStore::new());
+    let storage = Arc::new(MemorySecretStorage::new());
+    let vault = Vault::new(storage.clone(), key_store);
+
+    let id1 = vault.put("token1", SecretBox::from("secret_one")).await?;
+    let id2 = vault.put("token2", SecretBox::from("secret_two")).await?;
+
+    // Hoán đổi ciphertext và nonce từ record 1 sang record 2
+    let rec1 = storage.get(&id1).await?.ok_or("rec1 tồn tại")?;
+    let mut rec2 = storage.get(&id2).await?.ok_or("rec2 tồn tại")?;
+    rec2.ciphertext = rec1.ciphertext;
+    rec2.nonce = rec1.nonce;
+    storage.save(&rec2).await?;
+
+    // Nhờ có AAD (ràng buộc ciphertext với record id), việc hoán đổi phải thất bại
+    let res = vault.reveal(&id2).await;
+    match res {
+        Err(VaultError::DecryptionFailed(_)) => Ok(()),
+        other => panic!("Kỳ vọng DecryptionFailed khi hoán đổi ciphertext, nhận được: {other:?}"),
+    }
+}
