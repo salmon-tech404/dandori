@@ -21,6 +21,17 @@ Agent chỉ được sửa **dòng của task đang làm** (cột Trạng thái 
 | Baseline (Bước 0c) | `f1532bc` ("first commit", nhánh `main`, đã đẩy lên GitHub; kiểm 2026-10-30) |
 | Mốc khóa cấu hình (sau khi chủ dự án duyệt và commit T01, T02) | _(chủ dự án điền mã commit)_ |
 
+## Nhánh theo giai đoạn (`docs/quy-trinh-git.md`)
+
+| Giai đoạn | Nhánh | Trạng thái |
+| :--- | :--- | :--- |
+| P0 | `phase/p0-core` | đang làm |
+| P1 | `phase/p1-run-one-task` | chưa tạo (tạo từ `main` sau khi gộp P0) |
+| P2 | `phase/p2-full-workflow` | chưa tạo |
+| P3 | `phase/p3-automation-knowledge` | chưa tạo |
+| P4 | `phase/p4-heavy-risky` | chưa tạo |
+| P5 | `phase/p5-release` | chưa tạo |
+
 ## Cổng chủ dự án (`00_QUY_TAC_CHUNG` mục 9)
 
 Chủ dự án (hoặc Claude thay mặt, theo lời chủ dự án) ghi `ĐỒNG Ý <ngày>` sau khi đọc ADR tương ứng. Chưa có dòng này thì chế độ tự động **dừng** trước task.

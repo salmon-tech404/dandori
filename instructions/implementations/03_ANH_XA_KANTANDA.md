@@ -95,17 +95,17 @@ Tên script cụ thể do T02 đặt; bảng này là **yêu cầu**, T02 phải
 
 **Agent không commit, không `git add`, không push.** Chủ dự án tự commit sau khi duyệt từng task. Để việc đó nhanh và đúng chuẩn Kantanda (`GIT-CMT-001`), mỗi báo cáo có mục **Đề xuất commit** gồm: (1) danh sách đường dẫn cụ thể để `git add`, (2) thông điệp commit theo mẫu dưới, (3) một dòng nhắc commit nên tách nếu task chạm hai mục đích khác nhau.
 
-Mẫu thông điệp (Conventional Commits; một thay đổi một mục đích):
+**Quy trình Git đầy đủ (nhánh theo giai đoạn, đặt tên nhánh, thông điệp commit, Pull Request) nằm ở `docs/quy-trinh-git.md`; mọi tên trong Git đều bằng tiếng Anh.** **Thông điệp commit viết bằng TIẾNG ANH, ngắn gọn, dễ hiểu** (quyết định của chủ dự án 2026-10-31): dòng đầu tối đa khoảng 72 ký tự, dùng động từ nguyên mẫu (`add`, `fix`, `rename`, `remove`), nói **làm gì** chứ không kể lể. Mẫu (Conventional Commits; một thay đổi một mục đích):
 
 ```text
-<type>(<phạm-vi>): <mô tả ngắn, chữ thường, không dấu chấm cuối>
+<type>(<scope>): <short English description, lowercase, no trailing period>
 
-<thân tùy chọn: vì sao, không phải cái gì>
+<optional body: why, not what>
 
 Task: <ID task>
 ```
 
-`type`: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`, `build`. Ví dụ: `feat(registry): tính trạng thái hiệu lực theo phạm vi`.
+`type`: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`, `build`. Ví dụ tốt: `feat(registry): compute effective feature state per scope`, `fix(db): correct typo in crate docs`, `chore(workspace): rename web to frontend`. Ví dụ không nên: câu dài, tiếng Việt, hoặc mơ hồ như `update stuff`.
 
 - Không đưa tên "Claude" hay "Antigravity" hay dòng "Co-Authored-By" của agent vào thông điệp (chủ dự án là tác giả).
 - Nên `git add <đường dẫn cụ thể>` thay vì `git add -A`, để không vô tình quét tệp ngoài phạm vi.

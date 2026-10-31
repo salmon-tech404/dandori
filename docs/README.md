@@ -59,6 +59,7 @@ Ngoài ra: **liên kết thay vì chép lại**. Nếu một nội dung đã n�
 - `nhat-ky/2026-10-30.md` · nhật ký ngày đầu
 - `nhat-ky/2026-10-31.md` · nhật ký: kiểm T01, chốt cấu trúc
 - `su-co/2026-10-30-cargo-khong-nhan-ra.md` · sự cố đầu tiên
+- `quy-trinh-git.md` · quy trình Git: nhánh theo giai đoạn, đặt tên, commit bằng tiếng Anh
 - `thuat-ngu.md` · từ điển
 - `_mau/` · bốn mẫu để sao chép
 - `adr/` · quyết định kiến trúc: 0001 thư viện, 0002 lint, 0003 kiểu kiến trúc, **0020 cấu trúc mã nguồn**
