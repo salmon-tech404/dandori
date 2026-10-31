@@ -1,0 +1,11 @@
+{
+  "id": "x",
+  "group": "safety",
+  "name": "Module X",
+  "description": "Desc X",
+  "version": "0.1.0",
+  "requires": ["missing-mod"],
+  "scopes": ["project"],
+  "effort": "light",
+  "risk": "low"
+}

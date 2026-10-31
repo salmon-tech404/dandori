@@ -155,6 +155,18 @@ export async function validateLints(options = {}) {
         `RS-SEC-001: Phát hiện chuỗi gọi shell trực tiếp tại ${path.relative(repoRoot, filePath)}`
       );
     }
+
+    // RS-SEC-001: Chỉ dandori-process và fake-agent được phép gọi Command::new
+    const rel = path.relative(repoRoot, filePath).replace(/\\/g, "/");
+    const isAllowedCommand =
+      rel.startsWith("crates/dandori-process/") ||
+      rel.startsWith("crates/fake-agent/") ||
+      rel.includes("/tests/");
+    if (!isAllowedCommand && /Command::new\s*\(/.test(content)) {
+      errors.push(
+        `RS-SEC-001: Chỉ dandori-process được phép gọi Command::new (phát hiện tại ${rel})`
+      );
+    }
   }
 
   return {

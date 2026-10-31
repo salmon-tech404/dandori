@@ -40,3 +40,13 @@ test("check-lints: ca đỏ khi crate có [lints] riêng thay vì workspace = tr
     /RS-LINT-002: Crate bad-lints phải khai báo \[lints\] workspace = true/
   );
 });
+
+test("check-lints: ca đỏ khi gọi Command::new ngoài dandori-process (RS-SEC-001)", async () => {
+  const fixturePath = path.join(__dirname, "fixtures/lints/invalid-command-new.rs");
+  const result = await validateLints({ extraRsFiles: [fixturePath] });
+  assert.equal(result.ok, false);
+  assert.match(
+    result.errors.join("\n"),
+    /RS-SEC-001: Chỉ dandori-process được phép gọi Command::new/
+  );
+});

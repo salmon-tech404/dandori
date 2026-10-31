@@ -8,6 +8,7 @@ Thư mục `scripts/` chứa các kịch bản thực thi tự động (viết b
 - `check-architecture.mjs`: Kiểm tra luật phụ thuộc giữa các crate, quy tắc hexagonal, danh mục thư viện được duyệt và tên crate cấm.
 - `check-lints.mjs`: Kiểm tra cấu hình lints tập trung, cấm `#![allow]`, cấm panic abort và kiểm tra MSRV.
 - `check-sql.mjs`: Chặn `format!` và ghép chuỗi trong lời gọi truy vấn SQLx (phòng chống SQL injection).
+- `check-sqlx-prepare.mjs`: Kiểm tra tính toàn vẹn của cache truy vấn `.sqlx/` bằng `cargo sqlx prepare --check`.
 - `scan-secrets.mjs`: Quét mẫu khóa bí mật, token và private key trên toàn bộ tệp được git theo dõi.
 - `gen-modules.mjs`: Thu thập cấu hình `module.json` và đồng bộ crate cầu nối `dandori-modules`.
 

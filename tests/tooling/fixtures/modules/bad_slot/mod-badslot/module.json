@@ -1,0 +1,21 @@
+{
+  "id": "badslot",
+  "group": "safety",
+  "name": "Module Bad Slot",
+  "description": "Desc",
+  "version": "0.1.0",
+  "requires": [],
+  "scopes": ["project"],
+  "effort": "light",
+  "risk": "low",
+  "ui": {
+    "contributes": [
+      {
+        "id": "bad",
+        "slot": "nonexistent.fake.slot",
+        "label": "Bad",
+        "order": 1
+      }
+    ]
+  }
+}

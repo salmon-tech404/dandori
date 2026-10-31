@@ -68,6 +68,7 @@
     "chrono",
     "ts-rs",
     "argon2",
+    "sha2",
     "rand",
     "secrecy",
     "zeroize",
