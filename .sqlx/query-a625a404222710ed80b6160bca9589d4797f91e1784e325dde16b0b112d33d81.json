@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT\n                module_id, scope_kind, scope_id, enabled, locked,\n                config, changed_by, changed_at\n            FROM feature_setting\n            WHERE module_id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "module_id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "scope_kind",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "scope_id",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "enabled",
+        "ordinal": 3,
+        "type_info": "Integer"
+      },
+      {
+        "name": "locked",
+        "ordinal": 4,
+        "type_info": "Integer"
+      },
+      {
+        "name": "config",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "changed_by",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "changed_at",
+        "ordinal": 7,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a625a404222710ed80b6160bca9589d4797f91e1784e325dde16b0b112d33d81"
+}

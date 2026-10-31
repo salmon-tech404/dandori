@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            INSERT INTO feature_audit (\n                id, module_id, scope_kind, scope_id,\n                action, performed_by, reason, created_at\n            )\n            VALUES (?, ?, ?, ?, ?, ?, ?, ?)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "45cdc0debb86ef9f6f62479242203e0d45cda452f13a6243c3bf6462a2084a37"
+}

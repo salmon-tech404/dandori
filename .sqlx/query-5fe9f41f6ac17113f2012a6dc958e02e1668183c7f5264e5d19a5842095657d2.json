@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            DELETE FROM project\n            WHERE id = ? AND workspace_id = ?\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "5fe9f41f6ac17113f2012a6dc958e02e1668183c7f5264e5d19a5842095657d2"
+}

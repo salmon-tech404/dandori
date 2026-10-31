@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT id, task_id, agent, account, status, started_at, finished_at, exit_code\n            FROM run\n            WHERE id = ? AND task_id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "task_id",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "agent",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "account",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "status",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "started_at",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "finished_at",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "exit_code",
+        "ordinal": 7,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "4e9d72a2e91a46df9bc21429142250f3fa1cbc46a763cbaeb82dc2a156c1d7a4"
+}

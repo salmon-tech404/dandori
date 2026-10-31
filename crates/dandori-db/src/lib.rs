@@ -2,8 +2,16 @@
 
 #![warn(missing_docs)]
 
-/// Khởi tạo module cơ sở dữ liệu.
-#[must_use]
-pub fn init() -> &'static str {
-    "dandori-db initialized"
-}
+pub mod error;
+pub mod pool;
+pub mod repo;
+
+pub use error::DbError;
+pub use pool::DbPool;
+pub use repo::{
+    AgentAccountRepo, FeatureRepo, ProjectRepo, RunEventRepo, RunRepo, SecretRepo, SessionRepo,
+    TaskRepo, UserRepo, WorkspaceRepo,
+};
+
+/// Phiên bản của crate `dandori-db`.
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");

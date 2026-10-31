@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT w.id, w.name, w.created_at\n            FROM workspace w\n            INNER JOIN workspace_member wm ON w.id = wm.workspace_id\n            WHERE wm.user_id = ?\n            ORDER BY w.created_at ASC\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a7d16bbb46e467623a9aab8fd787df60af9cb4784218d776527d775615348754"
+}

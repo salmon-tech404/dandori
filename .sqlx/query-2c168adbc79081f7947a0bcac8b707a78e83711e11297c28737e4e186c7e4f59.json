@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            INSERT INTO feature_module (\n                id, group_name, name, description, version,\n                requires, scopes, risk, effort, core\n            )\n            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n            ON CONFLICT(id) DO UPDATE SET\n                group_name = excluded.group_name,\n                name = excluded.name,\n                description = excluded.description,\n                version = excluded.version,\n                requires = excluded.requires,\n                scopes = excluded.scopes,\n                risk = excluded.risk,\n                effort = excluded.effort,\n                core = excluded.core\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 10
+    },
+    "nullable": []
+  },
+  "hash": "2c168adbc79081f7947a0bcac8b707a78e83711e11297c28737e4e186c7e4f59"
+}

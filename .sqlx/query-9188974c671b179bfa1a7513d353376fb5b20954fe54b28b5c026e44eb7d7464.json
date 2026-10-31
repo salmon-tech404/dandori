@@ -1,0 +1,44 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT id, label, nonce, ciphertext, created_at\n            FROM secret\n            WHERE id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "label",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "nonce",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "ciphertext",
+        "ordinal": 3,
+        "type_info": "Blob"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 4,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "9188974c671b179bfa1a7513d353376fb5b20954fe54b28b5c026e44eb7d7464"
+}

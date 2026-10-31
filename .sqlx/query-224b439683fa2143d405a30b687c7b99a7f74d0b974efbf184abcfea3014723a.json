@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            INSERT INTO agent_account (\n                id, provider, label, home_dir, auth_type, secret_id,\n                status, enabled, priority, exhausted_until, last_checked_at\n            )\n            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 11
+    },
+    "nullable": []
+  },
+  "hash": "224b439683fa2143d405a30b687c7b99a7f74d0b974efbf184abcfea3014723a"
+}

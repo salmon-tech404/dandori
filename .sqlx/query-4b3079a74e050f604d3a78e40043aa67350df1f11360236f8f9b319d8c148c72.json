@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            UPDATE agent_account\n            SET status = ?, last_checked_at = ?\n            WHERE id = ?\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "4b3079a74e050f604d3a78e40043aa67350df1f11360236f8f9b319d8c148c72"
+}

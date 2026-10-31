@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            UPDATE project\n            SET name = ?, default_branch = ?\n            WHERE id = ? AND workspace_id = ?\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "17e39fe5fcbf1e001a3749169680d087c85e8295055855c51368b036b8f555ca"
+}

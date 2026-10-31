@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            INSERT INTO project (id, workspace_id, name, repo_path, default_branch, created_at)\n            VALUES (?, ?, ?, ?, ?, ?)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "a9bf26996ecea4bd2bb560f6cc3b14b96937249226dbd3da1920f08b01f2256e"
+}
