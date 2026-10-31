@@ -1,0 +1,12 @@
+{
+  "packages": [
+    {
+      "name": "helpers",
+      "version": "0.1.0",
+      "dependencies": []
+    }
+  ],
+  "workspace_members": [
+    "helpers 0.1.0 (path+file:///crates/helpers)"
+  ]
+}

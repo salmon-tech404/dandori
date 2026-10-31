@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            INSERT INTO feature_pack (id, name, modules)\n            VALUES (?, ?, ?)\n            ON CONFLICT(id) DO UPDATE SET\n                name = excluded.name,\n                modules = excluded.modules\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "b1b5f799b98acee86f89b67b2d30b906900c5004e03ae7669db0bb34003287d7"
+}

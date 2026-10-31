@@ -17,3 +17,10 @@ secrecy = { workspace = true }
 keyring = { workspace = true }
 thiserror = { workspace = true }
 rand = { workspace = true }
+sqlx = { workspace = true }
+tokio = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

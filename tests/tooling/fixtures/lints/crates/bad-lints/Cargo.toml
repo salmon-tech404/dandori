@@ -1,0 +1,9 @@
+[package]
+name = "bad-lints"
+version.workspace = true
+description = "x"
+
+[lints.rust]
+unused = "allow"
+
+[lints]

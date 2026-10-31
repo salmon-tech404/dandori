@@ -10,6 +10,14 @@ publish = false
 [lints]
 workspace = true
 
+[features]
+default = []
+sample-modules = [
+    "dep:mod-sample-hello",
+]
+
 [dependencies]
 dandori-types = { workspace = true }
 dandori-module-api = { workspace = true }
+mod-auth-login = { path = "../mod-auth-login" }
+mod-sample-hello = { path = "../mod-sample-hello", optional = true }

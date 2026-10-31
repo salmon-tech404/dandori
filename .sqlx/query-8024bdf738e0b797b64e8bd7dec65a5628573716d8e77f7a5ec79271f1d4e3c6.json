@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT\n                id, project_id, title, description, status,\n                lead_agent, worker_agent, workdir_path, created_at, updated_at\n            FROM task\n            WHERE project_id = ?\n            ORDER BY created_at ASC\n            LIMIT ? OFFSET ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "project_id",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "title",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "description",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "status",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "lead_agent",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "worker_agent",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "workdir_path",
+        "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 8,
+        "type_info": "Text"
+      },
+      {
+        "name": "updated_at",
+        "ordinal": 9,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "8024bdf738e0b797b64e8bd7dec65a5628573716d8e77f7a5ec79271f1d4e3c6"
+}

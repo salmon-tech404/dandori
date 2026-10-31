@@ -1,9 +1,15 @@
-//! Kho khóa mã hóa và quản lý bí mật của Dandori.
+//! Kho khóa mã hóa và quản lý bí mật của Dandori (01_KIEN_TRUC.md mục 6.2 & T08).
 
 #![warn(missing_docs)]
 
-/// Khởi tạo module kho khóa.
-#[must_use]
-pub fn init() -> &'static str {
-    "dandori-vault initialized"
-}
+pub mod error;
+pub mod keystore;
+pub mod secret;
+pub mod storage;
+pub mod vault;
+
+pub use error::VaultError;
+pub use keystore::{MasterKeyStore, MemoryKeyStore, OsKeyStore};
+pub use secret::SecretBox;
+pub use storage::{MemorySecretStorage, SecretStorage, SqliteSecretStorage};
+pub use vault::Vault;

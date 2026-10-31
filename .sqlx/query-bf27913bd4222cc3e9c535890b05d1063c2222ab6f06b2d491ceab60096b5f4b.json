@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            UPDATE user\n            SET system_role = ?\n            WHERE id = ?\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "bf27913bd4222cc3e9c535890b05d1063c2222ab6f06b2d491ceab60096b5f4b"
+}

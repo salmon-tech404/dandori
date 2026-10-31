@@ -1,0 +1,17 @@
+{
+  "id": "auth-login",
+  "group": "accounts",
+  "name": "Đăng ký / đăng nhập hệ thống",
+  "description": "Xác thực người dùng và phân quyền truy cập hệ thống",
+  "version": "0.1.0",
+  "requires": [],
+  "scopes": ["system"],
+  "effort": "light",
+  "risk": "low",
+  "core": true,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": []
+  }
+}

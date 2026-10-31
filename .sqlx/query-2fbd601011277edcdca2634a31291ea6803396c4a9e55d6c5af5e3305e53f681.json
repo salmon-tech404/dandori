@@ -1,0 +1,80 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT\n                id, provider, label, home_dir, auth_type, secret_id,\n                status, enabled, priority, exhausted_until, last_checked_at\n            FROM agent_account\n            WHERE id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "provider",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "label",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "home_dir",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "auth_type",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "secret_id",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "status",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "enabled",
+        "ordinal": 7,
+        "type_info": "Integer"
+      },
+      {
+        "name": "priority",
+        "ordinal": 8,
+        "type_info": "Integer"
+      },
+      {
+        "name": "exhausted_until",
+        "ordinal": 9,
+        "type_info": "Text"
+      },
+      {
+        "name": "last_checked_at",
+        "ordinal": 10,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "2fbd601011277edcdca2634a31291ea6803396c4a9e55d6c5af5e3305e53f681"
+}

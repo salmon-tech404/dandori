@@ -49,14 +49,14 @@ Chủ dự án (hoặc Claude thay mặt, theo lời chủ dự án) ghi `ĐỒN
 
 | Giai đoạn | Báo cáo | Kết quả |
 | :--- | :--- | :--- |
-| P0 | `reports/REVIEW_P0.md` | chưa |
+| P0 | `reports/REVIEW_P0.md` | **ĐẠT** sau kiểm lần 2 (Claude, 2026-10-31, kèm các sửa của Claude); còn mở: biên dịch Linux/macOS (DAN-VERIFY-008) |
 | P1 | `reports/REVIEW_P1.md` | chưa |
 | P2 | `reports/REVIEW_P2.md` | chưa |
 | P3 | `reports/REVIEW_P3.md` | chưa |
 | P4 | `reports/REVIEW_P4.md` | chưa |
 | P5 | `reports/REVIEW_P5.md` | chưa |
 
-## Task (64)
+## Task (71)
 
 Cột Phụ thuộc: task phải `DONE` (hoặc `DONE_WITH_GAPS` chấp nhận được) trước. `[CỔNG]` = cổng chủ dự án. **Cổng GĐ** = điểm dừng bắt buộc chờ Claude kiểm.
 
@@ -66,25 +66,26 @@ Cột Phụ thuộc: task phải `DONE` (hoặc `DONE_WITH_GAPS` chấp nhận �
 | :-: | :--- | :--- | :--- | :--- | :--- |
 | T01 | Khung workspace, chuỗi công cụ, hồ sơ | Bước 0 | ✅ DONE | | `reports/T01.md` |
 | T01B | Chỉnh khung theo cấu trúc chuẩn (sau kiểm T01) | T01 | ✅ DONE | | `reports/T01B.md` |
-| T02 | Cổng `verify` và các script kiểm | T01B | ⏳ Todo | | |
-| T03 | Cơ sở dữ liệu lõi | T02 | ⏳ Todo | | |
-| T04 | Bus sự kiện | T03 | ⏳ Todo | | |
-| T05 | Hợp đồng module và `gen-modules` | T03, T04 | ⏳ Todo | | |
-| T06 | Registry: trạng thái hiệu lực, audit, gói | T05 | ⏳ Todo | | |
-| T07 | Registry: vòng đời bật/tắt thật | T06 | ⏳ Todo | | |
-| T08 | Kho khóa mã hóa | T03 | ⏳ Todo | | |
-| T09 | Chạy tiến trình, cổng agent, `fake-agent` | T02 | ⏳ Todo | | |
-| T10 | Máy chủ axum, lỗi, phiên, `auth-login` | T07, T08 | ⏳ Todo | | |
-| T11 | Workspace, dự án, task (API lõi) | T10 | ⏳ Todo | | |
-| T12 | Kiểu chia sẻ và khung giao diện | T11 | ⏳ Todo | | |
-| T13 | Setting > Tính năng (bảng Option) | T12 | ⏳ Todo | | |
-| T14 | **Cổng P0** | T09, T13 | ⏳ Todo | | |
+| T02 | Cổng `verify` và các script kiểm | T01B | ✅ DONE | | `reports/T02.md` |
+| T03 | Cơ sở dữ liệu lõi | T02 | ✅ DONE | | `reports/T03.md` |
+| T04 | Bus sự kiện | T03 | ✅ DONE | | `reports/T04.md` |
+| T05 | Hợp đồng module và `gen-modules` | T03, T04 | ✅ DONE | | `reports/T05.md` |
+| T06 | Registry: trạng thái hiệu lực, audit, gói | T05 | ✅ DONE | | `reports/T06.md` |
+| T07 | Registry: vòng đời bật/tắt thật | T06 | ✅ DONE | | `reports/T07.md` |
+| T08 | Kho khóa mã hóa | T03 | ✅ DONE | | `reports/T08.md` |
+| T09 | Chạy tiến trình, cổng agent, `fake-agent` | T02 | ✅ DONE | | `reports/T09.md` |
+| T10 | Máy chủ axum, lỗi, phiên, `auth-login` | T07, T08 | ✅ DONE | | `reports/T10.md` |
+| T11 | Workspace, dự án, task (API lõi) | T10 | ✅ DONE | | `reports/T11.md` |
+| T12 | Kiểu chia sẻ và khung giao diện | T11 | ✅ DONE | | `reports/T12.md` |
+| T13 | Setting > Tính năng (bảng Option) | T12 | ✅ DONE | | `reports/T13.md` |
+| T14 | **Cổng P0** | T09, T13 | 🟡 DONE_WITH_GAPS (Claude: chưa đạt, xem T14B) | | `reports/T14.md` |
+| T14B | Sửa lỗi tìm thấy khi kiểm P0 (`10B_P0_SUA_LOI.md`) | T14 | ✅ DONE | | `reports/T14B.md` |
 
 ### Giai đoạn 1: chạy được một task (`11_P1_CHAY_MOT_TASK.md`)
 
 | # | Task | Phụ thuộc | Trạng thái | Commit (chủ dự án) | Báo cáo |
 | :-: | :--- | :--- | :--- | :--- | :--- |
-| P1-01 | Lõi chạy task, điểm mở rộng | T14 | ⏳ Todo | | |
+| P1-01 | Lõi chạy task, điểm mở rộng | T14B | ⏳ Todo | | |
 | P1-02 | `subscription-connect` + adapter CLI | P1-01 | ⏳ Todo | | |
 | P1-03 | `lead-worker` | P1-02 | ⏳ Todo | | |
 | P1-04 | `worktree` + `dandori-git` | P1-01 | ⏳ Todo | | |

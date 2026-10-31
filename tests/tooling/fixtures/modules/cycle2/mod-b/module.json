@@ -1,0 +1,11 @@
+{
+  "id": "b",
+  "group": "safety",
+  "name": "Module B",
+  "description": "Desc B",
+  "version": "0.1.0",
+  "requires": ["a"],
+  "scopes": ["project"],
+  "effort": "light",
+  "risk": "low"
+}

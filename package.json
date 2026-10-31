@@ -8,6 +8,8 @@
     "node": ">=24"
   },
   "scripts": {
-    "build": "pnpm --filter app build"
+    "build": "pnpm --filter app build",
+    "verify": "node scripts/verify.mjs",
+    "test:tooling": "node --test tests/tooling/check-architecture.test.mjs tests/tooling/check-lints.test.mjs tests/tooling/check-sql.test.mjs tests/tooling/check-sqlx-prepare.test.mjs tests/tooling/scan-secrets.test.mjs tests/tooling/gen-modules.test.mjs tests/tooling/generate-types.test.mjs"
   }
 }

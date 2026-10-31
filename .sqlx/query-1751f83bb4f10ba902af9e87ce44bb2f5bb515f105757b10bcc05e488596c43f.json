@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            INSERT INTO run (id, task_id, agent, account, status, started_at, finished_at, exit_code)\n            VALUES (?, ?, ?, ?, ?, ?, ?, ?)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "1751f83bb4f10ba902af9e87ce44bb2f5bb515f105757b10bcc05e488596c43f"
+}

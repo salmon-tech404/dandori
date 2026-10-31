@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT id, workspace_id, name, repo_path, default_branch, created_at\n            FROM project\n            WHERE workspace_id = ?\n            ORDER BY created_at ASC\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "workspace_id",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "name",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "repo_path",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "default_branch",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 5,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3a36ad5a49255aa060e0fb3a16b0cd34f6b9109ad12cc3489d48d501ea5a87f8"
+}

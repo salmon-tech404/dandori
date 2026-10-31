@@ -1,0 +1,22 @@
+[
+  "board.columns",
+  "board.header.chip",
+  "board.card.badge",
+  "board.task-panel.header",
+  "board.task-panel.tab",
+  "board.task-panel.section",
+  "board.task-panel.action",
+  "board.create-task",
+  "agents.defaults",
+  "agents.accounts",
+  "agents.banner",
+  "agents.panel",
+  "dashboard.kpi",
+  "dashboard.panel",
+  "calendar.toolbar",
+  "calendar.grid",
+  "calendar.panel",
+  "knowledge.tab",
+  "integrations.card",
+  "settings.section"
+]

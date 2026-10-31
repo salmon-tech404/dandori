@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT\n                id, module_id, scope_kind, scope_id,\n                action, performed_by, reason, created_at\n            FROM feature_audit\n            WHERE module_id = ?\n            ORDER BY created_at ASC\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "module_id",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "scope_kind",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "scope_id",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "action",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "performed_by",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "reason",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 7,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3ca4b69d1e7c372bbd573b2e63a6983f2b5c088d4d8e986a184682a30f6fb5da"
+}

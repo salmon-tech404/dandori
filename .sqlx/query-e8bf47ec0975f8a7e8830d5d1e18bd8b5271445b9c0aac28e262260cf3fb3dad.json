@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT\n                id, group_name, name, description, version,\n                requires, scopes, risk, effort, core\n            FROM feature_module\n            WHERE id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "group_name",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "name",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "description",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "version",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "requires",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "scopes",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "risk",
+        "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "effort",
+        "ordinal": 8,
+        "type_info": "Text"
+      },
+      {
+        "name": "core",
+        "ordinal": 9,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e8bf47ec0975f8a7e8830d5d1e18bd8b5271445b9c0aac28e262260cf3fb3dad"
+}

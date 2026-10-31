@@ -1,85 +1,69 @@
-import React from "react";
+import { useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { FeaturesProvider } from "./core/useFeatures";
+import { AppLayout } from "./core/AppLayout";
+import { AuthScreen } from "./core/AuthScreen";
+import { Slot } from "./core/Slot";
+import { SettingsFeaturesScreen } from "./features/settings-features";
+import type { Task } from "../../../shared/types";
 
-export const App: React.FC = () => {
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: 1, refetchOnWindowFocus: false },
+  },
+});
+
+const INITIAL_TASKS: Task[] = [
+  {
+    id: "task-1",
+    project_id: "p1",
+    title: "Thiết lập môi trường phát triển lõi",
+    description: "Khởi tạo repo và chuỗi công cụ",
+    status: "done",
+    lead_agent: "",
+    worker_agent: "",
+    workdir_path: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
+
+function AppRoutes() {
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "var(--spacing-8)",
-      }}
-    >
-      <header
-        style={{
-          textAlign: "center",
-          marginBottom: "var(--spacing-8)",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "var(--font-size-2xl)",
-            fontWeight: 700,
-            marginBottom: "var(--spacing-2)",
-          }}
-        >
-          Dandori
-        </h1>
-        <p style={{ color: "var(--color-text-secondary)" }}>
-          Trung tâm điều phối Agent Code cục bộ
-        </p>
-      </header>
-      <section
-        style={{
-          maxWidth: "var(--max-width-card)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "var(--radius-lg)",
-          padding: "var(--spacing-6)",
-          backgroundColor: "var(--color-bg-secondary)",
-        }}
-      >
-        <h2
-          style={{
-            fontSize: "var(--font-size-xl)",
-            fontWeight: 600,
-            marginBottom: "var(--spacing-4)",
-          }}
-        >
-          Hệ thống sẵn sàng
-        </h2>
-        <p
-          style={{
-            fontSize: "var(--font-size-sm)",
-            color: "var(--color-text-secondary)",
-            marginBottom: "var(--spacing-4)",
-          }}
-        >
-          Khung ứng dụng web đã được khởi tạo thành công. Các module chức năng sẽ được nạp động theo cấu hình tại Feature Registry.
-        </p>
-        <button
-          type="button"
-          style={{
-            minHeight: "var(--touch-target-min)",
-            minWidth: "var(--touch-target-min)",
-            padding: "var(--spacing-2) var(--spacing-4)",
-            backgroundColor: "var(--color-primary)",
-            color: "var(--color-on-primary)",
-            border: "none",
-            borderRadius: "var(--radius-md)",
-            cursor: "pointer",
-            fontWeight: 500,
-          }}
-          onClick={() => {
-            // Placeholder action
-          }}
-        >
-          Bắt đầu
-        </button>
-      </section>
-    </main>
+    <Routes>
+      <Route path="/" element={<div />} />
+      <Route path="/board" element={<div />} />
+      <Route path="/agents" element={<div><Slot name="agents.defaults" /></div>} />
+      <Route path="/dashboard" element={<div><Slot name="dashboard.kpi" /></div>} />
+      <Route path="/calendar" element={<div><Slot name="calendar.toolbar" /></div>} />
+      <Route path="/knowledge" element={<div><Slot name="knowledge.tab" /></div>} />
+      <Route path="/integrations" element={<div><Slot name="integrations.card" /></div>} />
+      <Route path="/settings" element={<div><SettingsFeaturesScreen /><Slot name="settings.section" /></div>} />
+      <Route path="/login" element={<AuthScreen onSubmit={async () => { await new Promise((r) => setTimeout(r, 100)); }} />} />
+    </Routes>
   );
-};
+}
+
+export function AppContent() {
+  const [tasks] = useState<Task[]>(INITIAL_TASKS);
+  return (
+    <AppLayout tasks={tasks}>
+      <AppRoutes />
+    </AppLayout>
+  );
+}
+
+export function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <FeaturesProvider initialModules={["auth-login", "sample-hello"]}>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </FeaturesProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

@@ -1,0 +1,28 @@
+[package]
+name = "dandori-e2e"
+description = "Kiểm thử xuyên suốt tích hợp hệ thống (E2E) của Dandori"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+dandori-types = { workspace = true }
+dandori-db = { workspace = true }
+dandori-events = { workspace = true }
+dandori-module-api = { workspace = true }
+dandori-registry = { workspace = true }
+dandori-modules = { workspace = true, features = ["sample-modules"] }
+dandori-server = { workspace = true }
+mod-sample-hello = { path = "../mod-sample-hello" }
+axum = { workspace = true }
+tower = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sqlx = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }

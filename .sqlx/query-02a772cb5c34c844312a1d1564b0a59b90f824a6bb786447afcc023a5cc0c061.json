@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            UPDATE run\n            SET status = ?, finished_at = ?, exit_code = ?\n            WHERE id = ? AND task_id = ?\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "02a772cb5c34c844312a1d1564b0a59b90f824a6bb786447afcc023a5cc0c061"
+}

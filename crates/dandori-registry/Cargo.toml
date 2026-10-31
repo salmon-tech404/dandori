@@ -14,5 +14,17 @@ dandori-types = { workspace = true }
 dandori-events = { workspace = true }
 dandori-db = { workspace = true }
 dandori-module-api = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+axum = { workspace = true }
+tower = { workspace = true }
+chrono = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sqlx = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+tower = { workspace = true, features = ["util"] }
