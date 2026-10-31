@@ -43,6 +43,7 @@ Tất cả các lint dưới đây đã được cấu hình tại `[workspace.l
 | `wildcard_imports` | `deny` | pedantic | Tồn tại, cấm glob import |
 | `too_many_lines` | `warn` | pedantic | Tồn tại, kết hợp threshold 50 dòng |
 | `indexing_slicing` | `warn` | restriction | Tồn tại, cảnh báo truy cập mảng qua index |
+| `mod_module_files` | `deny` | restriction | Tồn tại, kiểm tra layout module foo.rs nhất quán (RS-ARCH-008) |
 
 ## 3. Xác nhận cấu hình `clippy.toml`
 

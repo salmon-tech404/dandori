@@ -43,7 +43,7 @@ D:\19-dandori\
 │   ├── dandori-server/     CHƯƠNG TRÌNH CHÍNH (ghép mọi thứ lại)
 │   └── fake-agent/         Agent giả, chỉ dùng khi test
 │
-├── web/app/                     Giao diện (React), không phải Rust. HIỆN LÀ web/app/; sẽ đổi thành frontend/app/ ở task T01B
+├── frontend/app/                Giao diện (React), không phải Rust (đổi tên từ web/app/ ở task T01B)
 └── target/                 Nơi cargo đặt kết quả build (bị .gitignore, xóa đi cũng được)
 ```
 
