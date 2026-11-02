@@ -1,0 +1,24 @@
+{
+  "id": "skills-md",
+  "name": "Kỹ năng Agent (SKILL.md)",
+  "description": "Quản lý kỹ năng theo định dạng SKILL.md, nhập an toàn và đóng góp prompt tiết kiệm",
+  "version": "0.1.0",
+  "group": "knowledge",
+  "requires": ["prompt-library"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "skills-md-knowledge-tab",
+        "slot": "knowledge.tab",
+        "label": "Kỹ năng (SKILL.md)",
+        "order": 30
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "instruction-sync",
+  "name": "Đồng bộ tệp hướng dẫn CLI",
+  "description": "Đồng bộ tệp hướng dẫn AGENTS.md, CLAUDE.md, .cursorrules từ hồ sơ kỹ thuật và kỹ năng đã duyệt",
+  "version": "0.1.0",
+  "group": "knowledge",
+  "requires": ["tech-profile", "skills-md"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "medium",
+  "core": false,
+  "requires_worker_restart": false,
+  "allowed_workdir_files": ["AGENTS.md", "CLAUDE.md", ".cursorrules"],
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "instruction-sync-tab",
+        "slot": "knowledge.tab",
+        "label": "Đồng bộ hướng dẫn",
+        "order": 40
+      }
+    ]
+  }
+}

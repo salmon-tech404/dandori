@@ -1,0 +1,45 @@
+{
+  "id": "auto-lessons",
+  "name": "Tự động rút bài học",
+  "description": "Tự động trích xuất và đề xuất bài học vào bộ nhớ chung sau khi task hoàn thành",
+  "version": "0.1.0",
+  "group": "knowledge",
+  "requires": ["shared-memory"],
+  "scopes": ["workspace", "project"],
+  "effort": "low",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {
+    "trigger_on_done": {
+      "type": "boolean",
+      "default": true,
+      "description": "Tự động kích hoạt khi task hoàn thành (done)"
+    },
+    "trigger_on_failed": {
+      "type": "boolean",
+      "default": true,
+      "description": "Tự động kích hoạt khi task thất bại (failed)"
+    },
+    "max_token_budget": {
+      "type": "integer",
+      "default": 1000,
+      "description": "Ngân sách token tối đa cho mỗi lần chạy rút bài học"
+    },
+    "min_content_length": {
+      "type": "integer",
+      "default": 10,
+      "description": "Độ dài tối thiểu của thông tin task để kích hoạt rút bài học"
+    }
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "auto-lessons-settings",
+        "slot": "settings.section",
+        "label": "Tự động rút bài học",
+        "order": 55
+      }
+    ]
+  }
+}

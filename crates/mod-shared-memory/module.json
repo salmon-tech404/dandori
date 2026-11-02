@@ -1,0 +1,35 @@
+{
+  "id": "shared-memory",
+  "name": "Bộ nhớ dùng chung",
+  "description": "Bộ nhớ chia sẻ giữa các agent, chống nhiễm độc bộ nhớ và lọc khóa riêng đa dòng (B-10)",
+  "version": "0.1.0",
+  "group": "knowledge",
+  "requires": ["prompt-library"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "medium",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {
+    "max_items_in_prompt": {
+      "type": "integer",
+      "default": 10,
+      "description": "Số lượng mục nhớ tối đa nhúng vào prompt agent"
+    },
+    "auto_approve_agent_memories": {
+      "type": "boolean",
+      "default": false,
+      "description": "Tự động duyệt mục nhớ do agent đề xuất (Nguy hiểm: Mặc định tắt để chống tiêm nhiễm bộ nhớ)"
+    }
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "shared-memory-tab",
+        "slot": "knowledge.tab",
+        "label": "Bộ nhớ chung",
+        "order": 50
+      }
+    ]
+  }
+}
