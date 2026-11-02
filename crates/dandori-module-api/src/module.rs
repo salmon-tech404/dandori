@@ -1,6 +1,7 @@
 //! Hợp đồng trait Module và các kiểu cấu thành (01_KIEN_TRUC.md mục 4.2).
 
 use crate::context::ModuleContext;
+use crate::extension::{GitHostProvider, PromptContributor, TransitionGuard, WorkdirProvider};
 use crate::manifest::Manifest;
 use dandori_events::EventFilter;
 use dandori_types::Envelope;
@@ -100,4 +101,24 @@ pub trait Module: fmt::Debug + Send + Sync {
 
     /// Danh sách bộ nghe sự kiện do module đăng ký.
     fn subscriptions(&self) -> Vec<ModuleSubscription>;
+
+    /// Điểm mở rộng WorkdirProvider nếu module cung cấp (P1-01).
+    fn workdir_provider(&self, _ctx: &ModuleContext) -> Option<Arc<dyn WorkdirProvider>> {
+        None
+    }
+
+    /// Điểm mở rộng PromptContributor nếu module cung cấp (P1-01).
+    fn prompt_contributor(&self, _ctx: &ModuleContext) -> Option<Arc<dyn PromptContributor>> {
+        None
+    }
+
+    /// Điểm mở rộng TransitionGuard nếu module cung cấp (P2-03).
+    fn transition_guard(&self, _ctx: &ModuleContext) -> Option<Arc<dyn TransitionGuard>> {
+        None
+    }
+
+    /// Điểm mở rộng GitHostProvider nếu module cung cấp (P2-06).
+    fn git_host_provider(&self, _ctx: &ModuleContext) -> Option<Arc<dyn GitHostProvider>> {
+        None
+    }
 }

@@ -1,0 +1,30 @@
+{
+  "id": "live-status",
+  "group": "dashboard",
+  "name": "Xem thời gian thực",
+  "description": "Xem agent đang làm gì theo thời gian thực qua luồng SSE",
+  "version": "0.1.0",
+  "requires": [],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "live-status-dashboard-panel",
+        "slot": "dashboard.panel",
+        "label": "Agent đang làm việc",
+        "order": 10
+      },
+      {
+        "id": "live-status-task-tab",
+        "slot": "board.task-panel.tab",
+        "label": "Trực tiếp",
+        "order": 20
+      }
+    ]
+  }
+}

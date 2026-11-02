@@ -134,6 +134,7 @@ async fn test_secret_box_debug_and_display_redacted() {
     assert!(debug_output.contains("[REDACTED]"));
 }
 
+#[derive(Debug)]
 struct UnavailableKeyStore;
 
 impl MasterKeyStore for UnavailableKeyStore {

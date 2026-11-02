@@ -1,0 +1,24 @@
+{
+  "id": "multi-account",
+  "group": "accounts",
+  "name": "Nhiều tài khoản agent",
+  "description": "Quản lý nhiều tài khoản cùng nhà cung cấp, mức ưu tiên và trạng thái bật/tắt",
+  "version": "0.1.0",
+  "requires": ["subscription-connect"],
+  "scopes": ["system"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "multi-account-manager",
+        "slot": "agents.accounts",
+        "label": "Quản lý nhiều tài khoản",
+        "order": 20
+      }
+    ]
+  }
+}

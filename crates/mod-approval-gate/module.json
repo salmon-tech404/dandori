@@ -1,0 +1,56 @@
+{
+  "id": "approval-gate",
+  "name": "Cổng duyệt",
+  "group": "orchestration",
+  "version": "0.1.0",
+  "description": "Cổng duyệt của con người; chặn chuyển trạng thái nhạy cảm cho đến khi được duyệt",
+  "requires": [],
+  "scopes": ["system", "workspace", "project"],
+  "risk": "low",
+  "effort": "medium",
+  "settings": [
+    {
+      "key": "require_in_review_to_merge",
+      "type_name": "boolean",
+      "label": "Yêu cầu duyệt in_review sang ready_to_merge",
+      "description": "Bắt buộc phê duyệt khi chuyển từ in_review sang ready_to_merge",
+      "default": true
+    },
+    {
+      "key": "disallow_self_approval",
+      "type_name": "boolean",
+      "label": "Cấm người yêu cầu tự duyệt",
+      "description": "Không cho phép người gửi yêu cầu tự phê duyệt",
+      "default": true
+    },
+    {
+      "key": "expiry_hours",
+      "type_name": "number",
+      "label": "Thời hạn phê duyệt (giờ)",
+      "description": "Thời gian tối đa trước khi yêu cầu phê duyệt tự hết hạn",
+      "default": 24
+    }
+  ],
+  "ui": {
+    "contributes": [
+      {
+        "id": "approval-gate-chip",
+        "slot": "board.header.chip",
+        "label": "Cần bạn",
+        "order": 20
+      },
+      {
+        "id": "approval-gate-tab",
+        "slot": "board.task-panel.tab",
+        "label": "Duyệt",
+        "order": 40
+      },
+      {
+        "id": "approval-gate-kpi",
+        "slot": "dashboard.kpi",
+        "label": "Cần bạn",
+        "order": 20
+      }
+    ]
+  }
+}

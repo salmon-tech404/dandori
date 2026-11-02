@@ -1,0 +1,24 @@
+{
+  "id": "worktree",
+  "group": "runtime",
+  "name": "Git worktree cho task",
+  "description": "Môi trường git riêng biệt cho từng nhiệm vụ",
+  "version": "0.1.0",
+  "requires": [],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "worktree-info",
+        "slot": "board.task-panel.section",
+        "label": "Chạy ở đâu",
+        "order": 20
+      }
+    ]
+  }
+}

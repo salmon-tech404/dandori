@@ -65,6 +65,18 @@ pub enum ApiError {
     #[error("module đang tắt")]
     ModuleDisabled,
 
+    /// Vượt quá giới hạn chạy đồng thời.
+    #[error("vượt quá giới hạn chạy đồng thời: {0}")]
+    ConcurrencyLimitReached(String),
+
+    /// Thiếu WorkdirProvider để chuẩn bị thư mục làm việc.
+    #[error("thiếu WorkdirProvider")]
+    WorkdirProviderMissing,
+
+    /// Không có tài khoản agent khả dụng.
+    #[error("không có tài khoản agent khả dụng")]
+    NoAvailableAccount,
+
     /// Lỗi máy chủ nội bộ.
     #[error("lỗi máy chủ nội bộ: {0}")]
     Internal(String),
@@ -84,6 +96,9 @@ impl ApiError {
             Self::NotFound(_) => "not_found",
             Self::BadRequest(_) => "bad_request",
             Self::ModuleDisabled => "module_disabled",
+            Self::ConcurrencyLimitReached(_) => "concurrency_limit_reached",
+            Self::WorkdirProviderMissing => "workdir_provider_missing",
+            Self::NoAvailableAccount => "no_available_account",
             Self::Internal(_) => "internal_server_error",
         }
     }
@@ -96,10 +111,14 @@ impl ApiError {
             Self::Forbidden(_) | Self::ForbiddenOrigin | Self::ModuleDisabled => {
                 StatusCode::FORBIDDEN
             }
-            Self::AccountLocked { .. } => StatusCode::TOO_MANY_REQUESTS,
+            Self::AccountLocked { .. } | Self::ConcurrencyLimitReached(_) => {
+                StatusCode::TOO_MANY_REQUESTS
+            }
             Self::OwnerAlreadyExists => StatusCode::CONFLICT,
             Self::NotFound(_) => StatusCode::NOT_FOUND,
-            Self::BadRequest(_) => StatusCode::BAD_REQUEST,
+            Self::BadRequest(_) | Self::WorkdirProviderMissing | Self::NoAvailableAccount => {
+                StatusCode::BAD_REQUEST
+            }
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
@@ -121,6 +140,13 @@ impl ApiError {
             Self::NotFound(entity) => format!("Không tìm thấy tài nguyên yêu cầu: {entity}"),
             Self::BadRequest(msg) => format!("Yêu cầu không hợp lệ: {msg}"),
             Self::ModuleDisabled => "module đang tắt".to_string(),
+            Self::ConcurrencyLimitReached(msg) => {
+                format!("Vượt quá giới hạn chạy đồng thời: {msg}")
+            }
+            Self::WorkdirProviderMissing => {
+                "Thiếu môi trường làm việc (WorkdirProvider). Vui lòng bật module 'worktree' trong Cài đặt > Tính năng để bắt đầu giao việc.".to_string()
+            }
+            Self::NoAvailableAccount => "Không có tài khoản agent khả dụng".to_string(),
             Self::Internal(_) => "Đã xảy ra lỗi máy chủ nội bộ".to_string(),
         }
     }
@@ -129,6 +155,7 @@ impl ApiError {
     #[must_use]
     pub fn into_response_with_id(self, request_id: &str) -> Response {
         let status = self.status_code();
+        let is_concurrency = matches!(self, Self::ConcurrencyLimitReached(_));
         let body = Json(ErrorResponse {
             error: ErrorDetail {
                 code: self.code().to_string(),
@@ -136,7 +163,14 @@ impl ApiError {
                 request_id: request_id.to_string(),
             },
         });
-        (status, body).into_response()
+        let mut response = (status, body).into_response();
+        if is_concurrency {
+            response.headers_mut().insert(
+                axum::http::header::RETRY_AFTER,
+                axum::http::HeaderValue::from_static("5"),
+            );
+        }
+        response
     }
 }
 

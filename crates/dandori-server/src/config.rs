@@ -11,6 +11,11 @@ pub struct ServerConfig {
     pub port: u16,
     /// Thư mục lưu trữ dữ liệu bền vững.
     pub data_dir: PathBuf,
+    /// Bật nhà cung cấp `fake` (chạy `fake-agent`, chỉ để kiểm thử). Mặc định tắt: scenario của
+    /// `fake-agent` có thể ghi tệp tùy ý nên không được lộ ra trong bản chạy thật.
+    pub enable_fake_provider: bool,
+    /// Dùng khóa chủ của vault trong bộ nhớ thay vì kho khóa hệ điều hành (chỉ để kiểm thử; mặc định tắt).
+    pub vault_in_memory: bool,
 }
 
 impl Default for ServerConfig {
@@ -34,6 +39,8 @@ impl Default for ServerConfig {
             host: "127.0.0.1".to_string(),
             port: 3000,
             data_dir,
+            enable_fake_provider: false,
+            vault_in_memory: false,
         }
     }
 }
@@ -51,6 +58,8 @@ impl ServerConfig {
             host: host_str,
             port,
             data_dir,
+            enable_fake_provider: false,
+            vault_in_memory: false,
         })
     }
 
@@ -81,6 +90,9 @@ impl ServerConfig {
         if let Some(dir) = get("DANDORI_DATA_DIR") {
             config.data_dir = PathBuf::from(dir);
         }
+        config.vault_in_memory = get("DANDORI_VAULT_BACKEND").is_some_and(|v| v == "memory");
+        config.enable_fake_provider = get("DANDORI_ENABLE_FAKE_PROVIDER")
+            .is_some_and(|v| v == "1" || v.eq_ignore_ascii_case("true"));
         Ok(config)
     }
 

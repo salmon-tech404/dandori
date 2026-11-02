@@ -101,6 +101,10 @@ pub async fn create_project(
         return ApiError::BadRequest("Nhánh mặc định không được để trống".to_string())
             .into_response_with_id(&req_id.0);
     }
+    if dandori_git::validate_ref_name(default_branch).is_err() {
+        return ApiError::BadRequest("Tên nhánh mặc định không hợp lệ".to_string())
+            .into_response_with_id(&req_id.0);
+    }
 
     if let Err(validation_err) = validate_repo_path(&payload.repo_path) {
         return ApiError::BadRequest(validation_err).into_response_with_id(&req_id.0);
@@ -215,6 +219,10 @@ pub async fn update_project(
     let default_branch = payload.default_branch.trim();
     if name.is_empty() || default_branch.is_empty() {
         return ApiError::BadRequest("Tên dự án và nhánh mặc định không được để trống".to_string())
+            .into_response_with_id(&req_id.0);
+    }
+    if dandori_git::validate_ref_name(default_branch).is_err() {
+        return ApiError::BadRequest("Tên nhánh mặc định không hợp lệ".to_string())
             .into_response_with_id(&req_id.0);
     }
 

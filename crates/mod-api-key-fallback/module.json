@@ -1,0 +1,24 @@
+{
+  "id": "api-key-fallback",
+  "group": "accounts",
+  "name": "API Key Fallback",
+  "description": "Dự phòng bằng API key với trần chi tiêu bắt buộc khi tài khoản CLI hết hạn mức",
+  "version": "0.1.0",
+  "requires": ["auth-login"],
+  "scopes": ["system", "workspace", "project"],
+  "risk": "high",
+  "effort": "medium",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "api-key-fallback-card",
+        "slot": "agents.accounts",
+        "label": "API Key Dự Phòng",
+        "order": 50
+      }
+    ]
+  }
+}

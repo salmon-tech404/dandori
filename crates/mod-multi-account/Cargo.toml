@@ -1,0 +1,20 @@
+[package]
+name = "mod-multi-account"
+description = "Module Dandori quản lý nhiều tài khoản agent cùng nhà cung cấp"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+axum = { workspace = true }
+chrono = { workspace = true }
+dandori-module-api = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+sqlx = { workspace = true, features = ["runtime-tokio", "sqlite"] }
+tokio = { workspace = true, features = ["full"] }
+tracing = { workspace = true }

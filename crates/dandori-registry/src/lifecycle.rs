@@ -8,7 +8,10 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use chrono::Utc;
 use dandori_events::EventBus;
-use dandori_module_api::{Module, ModuleContext};
+use dandori_module_api::{
+    GitHostProvider, Module, ModuleContext, PromptContributor, TaskRunner, TransitionGuard,
+    WorkdirProvider,
+};
 use dandori_types::{Envelope, EventPayload, EventScope, FeatureModuleId};
 use sqlx::SqlitePool;
 use tokio::sync::RwLock;
@@ -25,6 +28,10 @@ struct ActiveModuleInstance {
     cancel_token: CancellationToken,
     worker_handles: Vec<tokio::task::JoinHandle<()>>,
     subscription_handles: Vec<tokio::task::JoinHandle<()>>,
+    workdir_provider: Option<Arc<dyn WorkdirProvider>>,
+    prompt_contributor: Option<Arc<dyn PromptContributor>>,
+    transition_guard: Option<Arc<dyn TransitionGuard>>,
+    git_host_provider: Option<Arc<dyn GitHostProvider>>,
 }
 
 /// Trình quản lý vòng đời thực thi (bật/tắt thật) cho các module Dandori.
@@ -35,6 +42,11 @@ pub struct FeatureLifecycleManager {
     event_bus: Arc<EventBus>,
     modules: Arc<RwLock<HashMap<String, Arc<dyn Module>>>>,
     active_modules: Arc<RwLock<HashMap<String, ActiveModuleInstance>>>,
+    test_workdir_providers: Arc<RwLock<Vec<Arc<dyn WorkdirProvider>>>>,
+    test_prompt_contributors: Arc<RwLock<Vec<Arc<dyn PromptContributor>>>>,
+    test_transition_guards: Arc<RwLock<Vec<Arc<dyn TransitionGuard>>>>,
+    test_git_host_providers: Arc<RwLock<Vec<Arc<dyn GitHostProvider>>>>,
+    task_runner: Arc<std::sync::RwLock<Option<Arc<dyn TaskRunner>>>>,
 }
 
 impl FeatureLifecycleManager {
@@ -47,6 +59,18 @@ impl FeatureLifecycleManager {
             event_bus,
             modules: Arc::new(RwLock::new(HashMap::new())),
             active_modules: Arc::new(RwLock::new(HashMap::new())),
+            test_workdir_providers: Arc::new(RwLock::new(Vec::new())),
+            test_prompt_contributors: Arc::new(RwLock::new(Vec::new())),
+            test_transition_guards: Arc::new(RwLock::new(Vec::new())),
+            test_git_host_providers: Arc::new(RwLock::new(Vec::new())),
+            task_runner: Arc::new(std::sync::RwLock::new(None)),
+        }
+    }
+
+    /// Thiết lập bộ điều phối TaskRunner dùng chung cho các module.
+    pub fn set_task_runner(&self, runner: Arc<dyn TaskRunner>) {
+        if let Ok(mut lock) = self.task_runner.write() {
+            *lock = Some(runner);
         }
     }
 
@@ -66,6 +90,145 @@ impl FeatureLifecycleManager {
     #[must_use]
     pub fn registry(&self) -> &FeatureRegistry {
         &self.registry
+    }
+
+    /// Lấy điểm mở rộng `WorkdirProvider` duy nhất đang hoạt động.
+    ///
+    /// # Errors
+    /// Trả về `RegistryError::WorkdirProviderMissing` nếu không có provider nào hoạt động.
+    /// Trả về `RegistryError::AmbiguousWorkdirProvider` nếu có nhiều hơn 1 provider.
+    pub async fn get_workdir_provider(&self) -> Result<Arc<dyn WorkdirProvider>, RegistryError> {
+        let mut providers = Vec::new();
+        {
+            let lock = self.active_modules.read().await;
+            for inst in lock.values() {
+                if let Some(ref wp) = inst.workdir_provider {
+                    providers.push(wp.clone());
+                }
+            }
+        }
+        {
+            let test_lock = self.test_workdir_providers.read().await;
+            for wp in test_lock.iter() {
+                providers.push(wp.clone());
+            }
+        }
+
+        match providers.len() {
+            0 => Err(RegistryError::WorkdirProviderMissing),
+            1 => Ok(providers.remove(0)),
+            count => Err(RegistryError::AmbiguousWorkdirProvider(count)),
+        }
+    }
+
+    /// Lấy danh sách toàn bộ các điểm mở rộng `PromptContributor` đang hoạt động.
+    pub async fn get_prompt_contributors(&self) -> Vec<Arc<dyn PromptContributor>> {
+        let mut contributors = Vec::new();
+        {
+            let lock = self.active_modules.read().await;
+            for inst in lock.values() {
+                if let Some(ref pc) = inst.prompt_contributor {
+                    contributors.push(pc.clone());
+                }
+            }
+        }
+        {
+            let test_lock = self.test_prompt_contributors.read().await;
+            for pc in test_lock.iter() {
+                contributors.push(pc.clone());
+            }
+        }
+        contributors
+    }
+
+    /// Lấy danh sách toàn bộ các điểm mở rộng `TransitionGuard` đang hoạt động (P2-03).
+    pub async fn get_transition_guards(&self) -> Vec<Arc<dyn TransitionGuard>> {
+        let mut guards = Vec::new();
+        {
+            let lock = self.active_modules.read().await;
+            for inst in lock.values() {
+                if let Some(ref tg) = inst.transition_guard {
+                    guards.push(tg.clone());
+                }
+            }
+        }
+        {
+            let test_lock = self.test_transition_guards.read().await;
+            for tg in test_lock.iter() {
+                guards.push(tg.clone());
+            }
+        }
+        guards
+    }
+
+    /// Lấy provider `GitHostProvider` theo tên nếu đang hoạt động (P2-06).
+    pub async fn get_git_host_provider(&self, name: &str) -> Option<Arc<dyn GitHostProvider>> {
+        {
+            let lock = self.active_modules.read().await;
+            for inst in lock.values() {
+                if let Some(ref ghp) = inst.git_host_provider
+                    && ghp.name() == name
+                {
+                    return Some(ghp.clone());
+                }
+            }
+        }
+        {
+            let test_lock = self.test_git_host_providers.read().await;
+            for ghp in test_lock.iter() {
+                if ghp.name() == name {
+                    return Some(ghp.clone());
+                }
+            }
+        }
+        None
+    }
+
+    /// Lấy danh sách toàn bộ các điểm mở rộng `GitHostProvider` đang hoạt động (P2-06).
+    pub async fn get_git_host_providers(&self) -> Vec<Arc<dyn GitHostProvider>> {
+        let mut providers = Vec::new();
+        {
+            let lock = self.active_modules.read().await;
+            for inst in lock.values() {
+                if let Some(ref ghp) = inst.git_host_provider {
+                    providers.push(ghp.clone());
+                }
+            }
+        }
+        {
+            let test_lock = self.test_git_host_providers.read().await;
+            for ghp in test_lock.iter() {
+                providers.push(ghp.clone());
+            }
+        }
+        providers
+    }
+
+    /// Đăng ký một `WorkdirProvider` phục vụ kiểm thử đơn vị hoặc giả lập.
+    pub async fn register_workdir_provider_for_test(&self, provider: Arc<dyn WorkdirProvider>) {
+        let mut lock = self.test_workdir_providers.write().await;
+        lock.push(provider);
+    }
+
+    /// Đăng ký một `PromptContributor` phục vụ kiểm thử đơn vị hoặc giả lập.
+    pub async fn register_prompt_contributor_for_test(
+        &self,
+        contributor: Arc<dyn PromptContributor>,
+    ) {
+        let mut lock = self.test_prompt_contributors.write().await;
+        lock.push(contributor);
+    }
+
+    /// Đăng ký một `TransitionGuard` phục vụ kiểm thử đơn vị hoặc giả lập (P2-03).
+    pub async fn register_transition_guard_for_test(&self, guard: Arc<dyn TransitionGuard>) {
+        let mut lock = self.test_transition_guards.write().await;
+        lock.push(guard);
+    }
+
+    /// Đăng ký một `GitHostProvider` phục vụ kiểm thử đơn vị hoặc giả lập (P2-06).
+    pub async fn register_git_host_provider_for_test(&self, provider: Arc<dyn GitHostProvider>) {
+        let mut lock = self.test_git_host_providers.write().await;
+        lock.push(provider);
     }
 
     /// Đếm số tác vụ worker hoặc subscription đang hoạt động (phục vụ kiểm tra RS-ASYNC-004).
@@ -164,15 +327,25 @@ impl FeatureLifecycleManager {
                 })?;
         }
 
-        // 2. Khởi tạo workers & subscriptions
+        // 2. Khởi tạo workers & subscriptions & extension points
         let cancel_token = CancellationToken::new();
-        let ctx = ModuleContext::new(
+        let mut ctx = ModuleContext::new(
             module_id.to_string(),
             self.event_bus.clone(),
             serde_json::json!({}),
         )
         .with_pool(self.pool.clone());
 
+        if let Ok(lock) = self.task_runner.read()
+            && let Some(ref runner) = *lock
+        {
+            ctx = ctx.with_task_runner(runner.clone());
+        }
+
+        let workdir_provider = module.workdir_provider(&ctx);
+        let prompt_contributor = module.prompt_contributor(&ctx);
+        let transition_guard = module.transition_guard(&ctx);
+        let git_host_provider = module.git_host_provider(&ctx);
         let worker_handles = self.spawn_workers(module, &ctx, &cancel_token);
         let subscription_handles = self.spawn_subscriptions(module, &cancel_token);
 
@@ -183,6 +356,10 @@ impl FeatureLifecycleManager {
                 cancel_token,
                 worker_handles,
                 subscription_handles,
+                workdir_provider,
+                prompt_contributor,
+                transition_guard,
+                git_host_provider,
             },
         );
 
@@ -499,9 +676,11 @@ impl FeatureLifecycleManager {
         .with_pool(self.pool.clone());
 
         let module_router = module.routes(&ctx);
-        let subpath = match subpath_opt {
-            Some(p) => format!("/{p}"),
-            None => "/".to_string(),
+        let subpath = match (subpath_opt, req.uri().query()) {
+            (Some(p), Some(q)) => format!("/{p}?{q}"),
+            (Some(p), None) => format!("/{p}"),
+            (None, Some(q)) => format!("/?{q}"),
+            (None, None) => "/".to_string(),
         };
 
         if let Ok(uri) = subpath.parse::<axum::http::Uri>() {

@@ -1,0 +1,24 @@
+{
+  "id": "auto-switch",
+  "group": "accounts",
+  "name": "Tự chuyển tài khoản",
+  "description": "Tự động chuyển sang tài khoản kế tiếp cùng nhà cung cấp khi gặp sự cố hết hạn mức",
+  "version": "0.1.0",
+  "requires": ["subscription-connect", "multi-account", "quota-tracking"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "auto-switch-config",
+        "slot": "agents.accounts",
+        "label": "Tự chuyển tài khoản",
+        "order": 40
+      }
+    ]
+  }
+}

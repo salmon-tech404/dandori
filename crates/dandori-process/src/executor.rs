@@ -28,7 +28,7 @@ fn build_command(spec: &ProcessSpec) -> Result<tokio::process::Command, ProcessE
         clippy::disallowed_methods,
         reason = "dandori-process là nơi duy nhất được tạo tiến trình con"
     )]
-    let mut cmd = tokio::process::Command::new(&spec.program);
+    let mut cmd = tokio::process::Command::new(crate::resolve::resolve_executable(&spec.program));
     cmd.args(&spec.args);
     cmd.current_dir(&spec.working_dir);
     cmd.stdout(std::process::Stdio::piped());
@@ -155,6 +155,11 @@ async fn monitor_streams(
             }
             status_res = child.wait() => {
                 return status_res.ok().and_then(|s| s.code()).or(Some(-1));
+            }
+            // Bên nhận đã bị hủy (ví dụ người dùng hủy lần chạy): diệt tiến trình, không để chạy ngầm.
+            () = tx.closed() => {
+                kill_process_tree(pid, child).await;
+                return None;
             }
             _ = sleep(Duration::from_millis(50)) => {}
         }

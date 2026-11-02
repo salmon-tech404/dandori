@@ -1,0 +1,45 @@
+{
+  "id": "doc-agent",
+  "group": "orchestration",
+  "name": "Agent viết tài liệu",
+  "description": "Agent viết tài liệu tự chạy khi task hoàn thành (ready_to_merge)",
+  "version": "0.1.0",
+  "requires": ["lead-worker"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "prompt_template": {
+      "type": "string",
+      "default": ""
+    },
+    "timeout_seconds": {
+      "type": "number",
+      "default": 600,
+      "min": 30,
+      "max": 3600
+    }
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "doc-agent-task-section",
+        "slot": "board.task-panel.section",
+        "label": "Tài liệu",
+        "order": 35
+      },
+      {
+        "id": "doc-agent-project-settings",
+        "slot": "settings.section",
+        "label": "Cấu hình Doc Agent",
+        "order": 45
+      }
+    ]
+  }
+}

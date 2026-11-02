@@ -1,0 +1,30 @@
+{
+  "id": "run-history",
+  "group": "dashboard",
+  "name": "Lịch sử lần chạy",
+  "description": "Xem lại chi tiết, phát lại log và ghi chú cho từng lần chạy",
+  "version": "0.1.0",
+  "requires": [],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {
+    "retentionDays": {
+      "type": "number",
+      "default": 90,
+      "min": 7
+    }
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "run-history-tab",
+        "slot": "board.task-panel.tab",
+        "label": "Lịch sử",
+        "order": 30
+      }
+    ]
+  }
+}

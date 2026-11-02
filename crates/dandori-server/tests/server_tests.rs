@@ -833,6 +833,45 @@ async fn test_every_route_requires_auth_except_whitelist() {
         ("POST", "/api/v1/features/plan-disable"),
         ("GET", "/api/v1/features/audit"),
         ("GET", "/api/v1/m/sample-hello/ping"),
+        ("POST", "/api/v1/tasks/t-test-1/runs"),
+        ("POST", "/api/v1/runs/r-test-1/cancel"),
+        ("GET", "/api/v1/runs/r-test-1"),
+        ("GET", "/api/v1/runs/r-test-1/events"),
+        ("GET", "/api/v1/m/subscription-connect/accounts"),
+        ("POST", "/api/v1/m/subscription-connect/accounts"),
+        ("DELETE", "/api/v1/m/subscription-connect/accounts/acc-1"),
+        (
+            "GET",
+            "/api/v1/m/subscription-connect/accounts/acc-1/login-instructions",
+        ),
+        (
+            "POST",
+            "/api/v1/m/subscription-connect/accounts/acc-1/check",
+        ),
+        ("POST", "/api/v1/tasks/t-test-1/dispatch"),
+        ("GET", "/api/v1/m/lead-worker/projects/p-test-1/defaults"),
+        ("PUT", "/api/v1/m/lead-worker/projects/p-test-1/defaults"),
+        ("GET", "/api/v1/m/lead-worker/tasks/t-test-1/assignment"),
+        ("POST", "/api/v1/m/lead-worker/tasks/t-test-1/dispatch"),
+        ("GET", "/api/v1/m/worktree/tasks/t-test-1/worktree"),
+        ("POST", "/api/v1/m/worktree/tasks/t-test-1/cleanup"),
+        ("GET", "/api/v1/m/kanban/status"),
+        ("GET", "/api/v1/m/live-status/stream"),
+        ("GET", "/api/v1/m/live-status/status"),
+        ("GET", "/api/v1/m/prompt-library/prompts"),
+        ("POST", "/api/v1/m/prompt-library/prompts"),
+        ("GET", "/api/v1/m/prompt-library/prompts/prm-1"),
+        ("PUT", "/api/v1/m/prompt-library/prompts/prm-1"),
+        ("GET", "/api/v1/m/prompt-library/prompts/prm-1/versions"),
+        ("POST", "/api/v1/m/prompt-library/prompts/prm-1/restore/1"),
+        ("POST", "/api/v1/m/prompt-library/prompts/test-render"),
+        ("GET", "/api/v1/m/tech-profile/projects/p-test-1/entries"),
+        ("POST", "/api/v1/m/tech-profile/projects/p-test-1/entries"),
+        ("PUT", "/api/v1/m/tech-profile/entries/tpe-1"),
+        ("DELETE", "/api/v1/m/tech-profile/entries/tpe-1"),
+        ("GET", "/api/v1/m/tech-profile/projects/p-test-1/preview"),
+        ("POST", "/api/v1/tasks/t-test-1/status"),
+        ("PATCH", "/api/v1/tasks/t-test-1/status"),
     ];
 
     for (method, uri) in protected_routes {
@@ -1066,4 +1105,57 @@ fn test_config_from_env_defaults_and_validation() {
         _ => None,
     });
     assert!(bad_port.is_err(), "cổng không phải số phải bị từ chối");
+}
+
+#[tokio::test]
+async fn test_fake_provider_is_only_registered_when_enabled() {
+    let dir_off = tempfile::tempdir().unwrap();
+    let config_off = ServerConfig::new("127.0.0.1", 0, dir_off.path().to_path_buf()).unwrap();
+    let (state_off, _lm) = dandori_server::init_server_state(&config_off)
+        .await
+        .unwrap();
+    assert!(
+        !state_off.run_service.has_adapter("fake").await,
+        "mặc định không được đăng ký nhà cung cấp fake (fake-agent ghi tệp tùy ý)"
+    );
+    assert!(state_off.run_service.has_adapter("claude").await);
+
+    let dir_on = tempfile::tempdir().unwrap();
+    let mut config_on = ServerConfig::new("127.0.0.1", 0, dir_on.path().to_path_buf()).unwrap();
+    config_on.enable_fake_provider = true;
+    let (state_on, _lm2) = dandori_server::init_server_state(&config_on).await.unwrap();
+    assert!(state_on.run_service.has_adapter("fake").await);
+
+    let from_env = ServerConfig::from_lookup(|k| match k {
+        "DANDORI_ENABLE_FAKE_PROVIDER" => Some("1".to_string()),
+        _ => None,
+    })
+    .unwrap();
+    assert!(from_env.enable_fake_provider);
+    assert!(
+        !ServerConfig::from_lookup(|_| None)
+            .unwrap()
+            .enable_fake_provider
+    );
+}
+
+#[tokio::test]
+async fn test_production_init_uses_os_keyring_for_vault() {
+    // Khóa chủ của vault trong bộ nhớ sẽ mất khi khởi động lại (mọi bí mật đã lưu không giải mã lại được);
+    // bản chạy thật phải dùng kho khóa của hệ điều hành.
+    let dir = tempfile::tempdir().unwrap();
+    let config = ServerConfig::new("127.0.0.1", 0, dir.path().to_path_buf()).unwrap();
+    assert!(
+        !config.vault_in_memory,
+        "mặc định không được dùng khóa trong bộ nhớ"
+    );
+    dandori_server::init_server_state(&config).await.unwrap();
+    assert_eq!(dandori_vault::default_key_store_kind(), "os-keyring");
+
+    let memory = ServerConfig::from_lookup(|k| match k {
+        "DANDORI_VAULT_BACKEND" => Some("memory".to_string()),
+        _ => None,
+    })
+    .unwrap();
+    assert!(memory.vault_in_memory, "chỉ bật khi yêu cầu rõ ràng");
 }

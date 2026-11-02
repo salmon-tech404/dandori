@@ -24,6 +24,8 @@ Nguồn thiết kế gốc của chủ dự án (chỉ đọc):
 | `03_ANH_XA_KANTANDA.md` | Quy ước TypeScript/frontend và ánh xạ Kantanda, hồ sơ dự án |
 | `04_GIAO_DIEN.md` + `ui-reference/` | **Giao diện:** bố cục theo mockup, hệ thống ô cắm (slot) cho module, token thiết kế, ảnh tham chiếu 7 màn hình. Đọc trước mọi task có giao diện |
 | `10_P0_LOI.md` | Giai đoạn 0: lõi + Option (T01–T14, kèm T01B; sửa lỗi sau kiểm: `10B_P0_SUA_LOI.md` = T14B) |
+| `00_BAI_HOC_P1.md` | Bài học từ hai lần kiểm độc lập P0 và P1 (tiếng Anh, đọc trước P2): luật hành vi, sự kiện thật của Claude CLI |
+| `00_BAI_HOC_P2.md` | Bài học từ kiểm độc lập P2 (tiếng Anh, đọc sau `00_BAI_HOC_P1.md`): bí mật qua vault, SSRF, ai được làm gì |
 | `11_P1_CHAY_MOT_TASK.md` | Giai đoạn 1: chạy được một task (P1-01…P1-09) |
 | `12_P2_VONG_LAM_VIEC.md` | Giai đoạn 2: vòng làm việc đầy đủ (P2-01…P2-13) |
 | `13_P3_TU_DONG_TRI_THUC.md` | Giai đoạn 3: tự động và tri thức (P3-01…P3-15) |

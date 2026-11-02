@@ -1,0 +1,24 @@
+{
+  "id": "quota-tracking",
+  "group": "accounts",
+  "name": "Theo dõi hạn mức tài khoản",
+  "description": "Theo dõi hạn mức từng tài khoản agent trung thực theo số liệu báo cáo hoặc ước tính lịch sử chạy",
+  "version": "0.1.0",
+  "requires": ["subscription-connect"],
+  "scopes": ["system"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "quota-tracking-card",
+        "slot": "agents.accounts",
+        "label": "Hạn mức tài khoản",
+        "order": 30
+      }
+    ]
+  }
+}

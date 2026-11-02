@@ -1,0 +1,24 @@
+{
+  "id": "tech-profile",
+  "group": "knowledge",
+  "name": "Hồ sơ kỹ thuật",
+  "description": "Hồ sơ kỹ thuật dự án mà mọi agent đều đọc khi chạy",
+  "version": "0.1.0",
+  "requires": ["lead-worker"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "tech-profile-tab",
+        "slot": "knowledge.tab",
+        "label": "Hồ sơ kỹ thuật",
+        "order": 20
+      }
+    ]
+  }
+}

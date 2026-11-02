@@ -312,7 +312,7 @@ Nhóm: 6 + 6 + 5 + 9 + 4 + 7 + 3 + 3 = **43**. `[CỔNG CHỦ]` (đọc `00_QUY_
 - Mọi lỗi cùng một dạng: `{ "error": { "code": "<snake_case>", "message": "<an toàn, không lộ nội bộ>", "request_id": "<uuid>" } }`. Không bao giờ trả stack trace hay đường dẫn tuyệt đối của máy (Kantanda `BE-ERR-002`).
 - Xác thực: cookie phiên `HttpOnly; SameSite=Strict`, kiểm `Origin`/`Host` với danh sách cho phép cục bộ; mọi route (trừ đăng nhập/đăng ký lần đầu, kiểm sức khỏe) đòi phiên hợp lệ. Server nghe **127.0.0.1**.
 - Dữ liệu vào được **kiểm ở biên** bằng kiểu có kiểm tra (Kantanda `BE-VAL-001/002`: schema chặt, từ chối trường lạ).
-- Thời gian thực: do module `live-status` cung cấp tại `GET /api/v1/m/live-status/stream` (SSE), lọc theo phạm vi và quyền người dùng, chỉ trả loại sự kiện cho phép (P1-06). Module khác cần "làm mới" thì dùng truy vấn thường, không phụ thuộc luồng này.
+- Thời gian thực: do module `live-status` cung cấp tại `GET /api/v1/m/live-status/stream` (SSE), lọc theo phạm vi và quyền người dùng, chỉ trả loại sự kiện cho phép (P1-06). (Đã chỉnh: đồng bộ đường dẫn SSE chuẩn hóa GET /api/v1/m/live-status/stream theo P1-06). Module khác cần "làm mới" thì dùng truy vấn thường, không phụ thuộc luồng này.
 - `GET /api/v1/features/effective?project=<id>` trả trạng thái hiệu lực của mọi module (để frontend dựng menu).
 
 ## 11. Frontend

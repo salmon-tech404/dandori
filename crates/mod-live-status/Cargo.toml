@@ -1,0 +1,24 @@
+[package]
+name = "mod-live-status"
+description = "Module live-status: Theo dõi hoạt động agent và luồng log SSE theo thời gian thực (P1-06)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+dandori-types = { workspace = true }
+dandori-module-api = { workspace = true }
+axum = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+sqlx = { workspace = true }

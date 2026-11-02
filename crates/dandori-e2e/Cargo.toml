@@ -26,3 +26,9 @@ serde_json = { workspace = true }
 sqlx = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+dandori-git = { workspace = true }
+dandori-agent-adapters = { workspace = true }
+dandori-agent-port = { workspace = true }
