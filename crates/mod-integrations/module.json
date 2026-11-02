@@ -1,0 +1,30 @@
+{
+  "id": "integrations",
+  "group": "integrations",
+  "name": "Tích hợp Git & Quản lý dự án",
+  "description": "Tích hợp nền tảng Git từ xa GitHub, GitLab và hệ thống quản lý công việc Linear",
+  "version": "0.1.0",
+  "requires": ["auth-login"],
+  "scopes": ["workspace"],
+  "effort": "heavy",
+  "risk": "medium",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "integrations-settings",
+        "slot": "settings.section",
+        "label": "Tích hợp Git & Quản lý dự án",
+        "order": 50
+      },
+      {
+        "id": "integrations-card",
+        "slot": "integrations.card",
+        "label": "Kết nối tích hợp",
+        "order": 10
+      }
+    ]
+  }
+}

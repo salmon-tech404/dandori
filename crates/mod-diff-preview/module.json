@@ -1,0 +1,37 @@
+{
+  "id": "diff-preview",
+  "name": "Diff & Xem trước",
+  "group": "dashboard",
+  "version": "0.1.0",
+  "description": "Xem diff thay đổi trong giao diện và mở bản xem trước kết quả",
+  "requires": ["worktree"],
+  "scopes": ["system", "workspace", "project"],
+  "risk": "low",
+  "effort": "medium",
+  "settings": [
+    {
+      "key": "preview_command",
+      "type_name": "string",
+      "label": "Lệnh xem trước",
+      "description": "Lệnh xem trước (dạng JSON array, ví dụ [\"npm\", \"run\", \"dev\"])",
+      "default": "[]"
+    },
+    {
+      "key": "preview_port",
+      "type_name": "number",
+      "label": "Cổng xem trước",
+      "description": "Cổng lắng nghe nội bộ 127.0.0.1 (từ 1024 đến 65535)",
+      "default": 3000
+    }
+  ],
+  "ui": {
+    "contributes": [
+      {
+        "id": "diff-preview-tab",
+        "slot": "board.task-panel.tab",
+        "label": "Diff",
+        "order": 30
+      }
+    ]
+  }
+}

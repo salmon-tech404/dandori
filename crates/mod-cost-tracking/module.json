@@ -1,0 +1,30 @@
+{
+  "id": "cost-tracking",
+  "group": "dashboard",
+  "name": "Theo dõi chi phí",
+  "description": "Theo dõi token và chi phí thực tế theo nhiệm vụ và agent, không ước đoán bịa đặt",
+  "version": "0.1.0",
+  "requires": ["live-status"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "cost-tracking-task-tab",
+        "slot": "board.task-panel.tab",
+        "label": "Chi phí",
+        "order": 50
+      },
+      {
+        "id": "cost-tracking-dashboard-panel",
+        "slot": "dashboard.panel",
+        "label": "Thống kê chi phí",
+        "order": 30
+      }
+    ]
+  }
+}

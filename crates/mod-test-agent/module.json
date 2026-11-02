@@ -1,0 +1,57 @@
+{
+  "id": "test-agent",
+  "group": "orchestration",
+  "name": "Agent test chuyên trách",
+  "description": "Agent test chuyên trách tự chạy sau khi worker xong",
+  "version": "0.1.0",
+  "requires": ["lead-worker"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "suggested_command": {
+      "type": "string",
+      "default": ""
+    },
+    "max_test_runs_per_worker": {
+      "type": "number",
+      "default": 1,
+      "min": 1,
+      "max": 5
+    },
+    "timeout_seconds": {
+      "type": "number",
+      "default": 600,
+      "min": 30,
+      "max": 3600
+    }
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "test-agent-task-section",
+        "slot": "board.task-panel.section",
+        "label": "Kiểm thử",
+        "order": 30
+      },
+      {
+        "id": "test-agent-card-badge",
+        "slot": "board.card.badge",
+        "label": "Kết quả test",
+        "order": 20
+      },
+      {
+        "id": "test-agent-project-settings",
+        "slot": "settings.section",
+        "label": "Cấu hình Test Agent",
+        "order": 40
+      }
+    ]
+  }
+}
