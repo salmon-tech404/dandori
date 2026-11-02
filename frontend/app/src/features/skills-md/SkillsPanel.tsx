@@ -86,7 +86,7 @@ interface SkillsContentSectionProps {
 }
 
 function SkillsContentSection(props: SkillsContentSectionProps) {
-  if (props.loading) return <p className="text-sm text-gray-500">Đang tải kỹ năng...</p>;
+  if (props.loading) return <p className="text-sm text-gray-500">{t("skills_loading")}</p>;
   if (props.error) return <p className="text-sm text-red-600">{props.error}</p>;
   if (props.skills.length === 0) {
     return (

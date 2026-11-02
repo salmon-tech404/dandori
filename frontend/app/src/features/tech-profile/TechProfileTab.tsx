@@ -67,7 +67,7 @@ const RowActions: React.FC<{ entry: TechProfileEntry; onEdit: (e: TechProfileEnt
     <button
       type="button"
       onClick={() => onEdit(entry)}
-      title="Sửa"
+      title={t("btn_edit")}
       className="p-1 text-neutral-500 hover:text-emerald-600 dark:hover:text-emerald-400"
     >
       <Edit3 size={14} />
@@ -75,7 +75,7 @@ const RowActions: React.FC<{ entry: TechProfileEntry; onEdit: (e: TechProfileEnt
     <button
       type="button"
       onClick={() => onDelete(entry)}
-      title="Xóa"
+      title={t("btn_delete")}
       className="p-1 text-neutral-500 hover:text-rose-600 dark:hover:text-rose-400"
     >
       <Trash2 size={14} />
@@ -99,9 +99,7 @@ const EntryRow: React.FC<{ entry: TechProfileEntry; onEdit: (e: TechProfileEntry
       {entry.value}
     </td>
     <td className="px-4 py-2.5">
-      <span className="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 font-mono text-[10px]">
-        v{entry.version}
-      </span>
+      <span className="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 font-mono text-[10px]">{t("version_prefix")}{entry.version}</span>
     </td>
     <td className="px-4 py-2.5 text-neutral-500">{new Date(entry.updated_at).toLocaleDateString()}</td>
     <RowActions entry={entry} onEdit={onEdit} onDelete={onDelete} />

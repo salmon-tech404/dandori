@@ -96,6 +96,11 @@ export async function apiClient<T>(
   const isJson = contentType.includes("application/json");
 
   if (!response.ok) {
+    if (response.status === 401 && !url.includes("/api/v1/auth/login") && !url.includes("/api/v1/me")) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("dandori:unauthorized"));
+      }
+    }
     const apiError = isJson
       ? await parseApiError(response)
       : new DandoriApiError(`http_${response.status}`, `Lỗi HTTP ${response.status}`, "");

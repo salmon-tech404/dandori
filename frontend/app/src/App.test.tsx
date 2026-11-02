@@ -32,7 +32,7 @@ describe("AC2: Slot Rendering for Disabled and Enabled Modules", () => {
 });
 
 describe("AC2: Sidebar Menu Visibility based on Active Slots", () => {
-  it("hides navigation menu items when a screen has no active slot contributions", () => {
+  it("always renders all 7 navigation menu items even when screen modules are disabled", () => {
     render(
       <FeaturesProvider initialModules={["auth-login"]}>
         <MemoryRouter initialEntries={["/"]}>
@@ -41,9 +41,12 @@ describe("AC2: Sidebar Menu Visibility based on Active Slots", () => {
       </FeaturesProvider>
     );
     expect(screen.getAllByText("Board").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Agent và tài khoản")).toBeDefined();
+    expect(screen.getByText("Dashboard")).toBeDefined();
+    expect(screen.getByText("Lịch")).toBeDefined();
+    expect(screen.getByText("Prompt và tri thức")).toBeDefined();
+    expect(screen.getByText("Tích hợp")).toBeDefined();
     expect(screen.getByText("Cài đặt: Tính năng")).toBeDefined();
-    expect(screen.queryByText("Agent và tài khoản")).toBeNull();
-    expect(screen.queryByText("Dashboard")).toBeNull();
   });
 
   it("shows navigation menu item when at least one module for that screen is enabled", () => {

@@ -18,7 +18,7 @@ export function ApiKeySpendingBar({ limit }: { limit: SpendingLimit }) {
   return (
     <div className="spending-bar-container">
       <div className="spending-labels">
-        <span>Đã dùng: {limit.used_value.toFixed(2)} / {limit.limit_value.toFixed(2)} ({limit.period})</span>
+        <span>{t("api_key_used_label")} {limit.used_value.toFixed(2)} / {limit.limit_value.toFixed(2)} ({limit.period})</span>
         <span className={`pct-label ${isCap ? 'cap' : isAlert ? 'alert' : ''}`}>{pct.toFixed(0)}%</span>
       </div>
       <div className="progress-bar-track">

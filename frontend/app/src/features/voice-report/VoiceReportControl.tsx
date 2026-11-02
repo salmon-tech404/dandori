@@ -86,10 +86,10 @@ const VoiceSelectors: React.FC<{
         onChange={(e) => onRateChange(parseFloat(e.target.value))}
         className="text-xs px-1.5 py-0.5 rounded border bg-background text-foreground"
       >
-        <option value="0.8">0.8x</option>
-        <option value="1.0">1.0x</option>
-        <option value="1.2">1.2x</option>
-        <option value="1.5">1.5x</option>
+        <option value="0.8">{t("voice_speed_08")}</option>
+        <option value="1.0">{t("voice_speed_10")}</option>
+        <option value="1.2">{t("voice_speed_12")}</option>
+        <option value="1.5">{t("voice_speed_15")}</option>
       </select>
     </div>
     {voices.length > 1 && (

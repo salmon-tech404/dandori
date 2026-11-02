@@ -56,9 +56,9 @@ const ProviderSelect: React.FC<{
       onChange={(e) => onChange(e.target.value)}
       className="w-full border rounded px-2 py-1"
     >
-      <option value="github">GitHub</option>
-      <option value="gitlab">GitLab</option>
-      <option value="linear">Linear</option>
+      <option value="github">{t("integration_provider_github")}</option>
+      <option value="gitlab">{t("integration_provider_gitlab")}</option>
+      <option value="linear">{t("integration_provider_linear")}</option>
     </select>
   </div>
 );

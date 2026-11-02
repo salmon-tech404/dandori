@@ -28,9 +28,9 @@ function PeriodTypeSelect(props: {
           value={props.period}
           onChange={(e) => props.setPeriod(e.target.value as 'daily' | 'weekly' | 'monthly')}
         >
-          <option value="daily">Hàng ngày (Daily)</option>
-          <option value="weekly">Hàng tuần (Weekly)</option>
-          <option value="monthly">Hàng tháng (Monthly)</option>
+          <option value="daily">{t("api_key_period_daily")}</option>
+          <option value="weekly">{t("api_key_period_weekly")}</option>
+          <option value="monthly">{t("api_key_period_monthly")}</option>
         </select>
       </div>
       <div>
@@ -40,8 +40,8 @@ function PeriodTypeSelect(props: {
           value={props.limitType}
           onChange={(e) => props.setLimitType(e.target.value as 'currency' | 'credits')}
         >
-          <option value="currency">USD / Tiền tệ</option>
-          <option value="credits">Credits</option>
+          <option value="currency">{t("api_key_unit_currency")}</option>
+          <option value="credits">{t("api_key_unit_credits")}</option>
         </select>
       </div>
     </div>
@@ -90,9 +90,9 @@ function ProviderSelect(props: { provider: string; setProvider: (v: string) => v
         value={props.provider}
         onChange={(e) => props.setProvider(e.target.value)}
       >
-        <option value="claude">Claude (Anthropic)</option>
-        <option value="codex">Codex (OpenAI)</option>
-        <option value="agy">Antigravity (Google)</option>
+        <option value="claude">{t("provider_claude_full")}</option>
+        <option value="codex">{t("provider_codex_full")}</option>
+        <option value="agy">{t("provider_agy_full")}</option>
       </select>
     </div>
   );
@@ -114,7 +114,7 @@ function KeyTextInputs(props: {
           required
           value={props.label}
           onChange={(e) => props.setLabel(e.target.value)}
-          placeholder="VD: Claude Backup Team Dev"
+          placeholder={t("api_key_name_placeholder")}
         />
       </div>
       <div className="form-group">
@@ -125,7 +125,7 @@ function KeyTextInputs(props: {
           required
           value={props.apiKey}
           onChange={(e) => props.setApiKey(e.target.value)}
-          placeholder="sk-..."
+          placeholder={t("api_key_secret_placeholder")}
         />
       </div>
     </>

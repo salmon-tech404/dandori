@@ -56,7 +56,7 @@ function CrossProviderField({
             type="text"
             value={allowedProviders}
             onChange={(e) => setAllowedProviders(e.target.value)}
-            placeholder="claude, gemini, agy"
+            placeholder={t("auto_switch_providers_placeholder")}
             className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
           />
         </label>

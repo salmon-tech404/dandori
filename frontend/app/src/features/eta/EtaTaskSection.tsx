@@ -35,11 +35,11 @@ const EtaMetrics: React.FC<{ eta: EtaResult }> = ({ eta }) => (
   <div className="grid grid-cols-2 gap-2 text-xs">
     <div className="p-2 rounded bg-muted/30">
       <span className="text-muted-foreground block">{t('eta_median')}:</span>
-      <span className="font-semibold">{eta.median_secs}s</span>
+      <span className="font-semibold">{eta.median_secs}{t("unit_second_short")}</span>
     </div>
     <div className="p-2 rounded bg-muted/30">
       <span className="text-muted-foreground block">{t('eta_p80')}:</span>
-      <span className="font-semibold">{eta.p80_secs}s</span>
+      <span className="font-semibold">{eta.p80_secs}{t("unit_second_short")}</span>
     </div>
     <div className="p-2 rounded bg-muted/30">
       <span className="text-muted-foreground block">{t('eta_samples')}:</span>

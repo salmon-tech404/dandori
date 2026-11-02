@@ -28,9 +28,7 @@ const PromptTableRow: React.FC<RowProps> = ({ prompt: p, onTest, onHistory, onEd
     </td>
     <td className="px-4 py-2.5 text-neutral-500">{p.skill_tag || '-'}</td>
     <td className="px-4 py-2.5">
-      <span className="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 font-mono text-[10px]">
-        v{p.current_version}
-      </span>
+      <span className="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 font-mono text-[10px]">{t("version_prefix")}{p.current_version}</span>
     </td>
     <td className="px-4 py-2.5 text-neutral-500">{new Date(p.updated_at).toLocaleDateString()}</td>
     <td className="px-4 py-2.5 text-right space-x-2">

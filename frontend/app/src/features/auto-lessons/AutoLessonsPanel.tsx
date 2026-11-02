@@ -19,7 +19,7 @@ export const AutoLessonsPanel: React.FC<AutoLessonsPanelProps> = ({
     useAutoLessons(projectId);
 
   if (loading && !config) {
-    return <div className="p-4 text-sm text-muted-foreground">Đang tải...</div>;
+    return <div className="p-4 text-sm text-muted-foreground">{t("loading")}</div>;
   }
 
   return (

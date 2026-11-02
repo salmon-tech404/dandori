@@ -112,7 +112,7 @@ interface BindingSectionProps {
 function BindingSection(props: BindingSectionProps) {
   return (
     <div>
-      <h4 className="text-sm font-semibold mb-2">Gắn kết dự án & vai trò</h4>
+      <h4 className="text-sm font-semibold mb-2">{t("skill_binding_title")}</h4>
       <BindingInputBar
         projectId={props.projectId}
         role={props.role}
@@ -142,16 +142,16 @@ function BindingInputBar(props: BindingInputBarProps) {
     <div className="flex flex-wrap items-center gap-2 text-xs">
       <input
         type="text"
-        placeholder="Project ID (để trống = toàn bộ)"
+        placeholder={t("skill_project_id_placeholder")}
         value={props.projectId}
         onChange={(e) => props.onProjectChange(e.target.value)}
         className="rounded border p-1"
       />
       <select value={props.role} onChange={(e) => props.onRoleChange(e.target.value)} className="rounded border p-1">
-        <option value="worker">Worker</option>
-        <option value="lead">Lead</option>
-        <option value="test">Test</option>
-        <option value="doc">Doc</option>
+        <option value="worker">{t("role_worker")}</option>
+        <option value="lead">{t("role_lead")}</option>
+        <option value="test">{t("role_test")}</option>
+        <option value="doc">{t("role_doc")}</option>
       </select>
       <label className="flex items-center space-x-1">
         <input type="checkbox" checked={props.embedFull} onChange={(e) => props.onEmbedFullChange(e.target.checked)} />
@@ -180,7 +180,7 @@ function BindingList({
       {bindings.map((b) => (
         <div key={b.id} className="flex items-center justify-between p-2">
           <span>
-            Dự án: {b.project_id || "Tất cả"} | Vai trò: {b.role || "Tất cả"} |{" "}
+            {t("skill_project_prefix")} {b.project_id || t("filter_all")} {t("skill_role_prefix")} {b.role || t("filter_all")} |{" "}
             {b.embed_full ? t("skills_embed_full_label") : t("skills_embed_default_label")}
           </span>
           <button type="button" onClick={() => onDeleteBinding(b.id)} className="text-red-600 hover:underline">

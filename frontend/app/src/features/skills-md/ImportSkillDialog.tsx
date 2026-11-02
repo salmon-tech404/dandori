@@ -131,9 +131,7 @@ interface ImportActionsProps {
 function ImportActions({ onClose, onSubmit, canSubmit, importing }: ImportActionsProps) {
   return (
     <div className="mt-6 flex justify-end space-x-2">
-      <button type="button" onClick={onClose} className="rounded border px-4 py-2 text-sm hover:bg-gray-50">
-        Hủy
-      </button>
+      <button type="button" onClick={onClose} className="rounded border px-4 py-2 text-sm hover:bg-gray-50">{t("btn_cancel")}</button>
       <button
         type="button"
         disabled={!canSubmit}

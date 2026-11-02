@@ -135,7 +135,7 @@ function GroupHeader({ group }: { group: ProviderGroup }): ReactElement {
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <h3 style={{ fontSize: "16px", margin: 0, color: "var(--fg)" }}>{group.provider.toUpperCase()}</h3>
-        <span style={{ fontSize: "12px", color: "var(--mu)" }}>({group.accounts.length} tài khoản)</span>
+        <span style={{ fontSize: "12px", color: "var(--mu)" }}>({group.accounts.length} {t("account_unit")})</span>
       </div>
       {!group.supports_home_isolation && (
         <span className="chip chip-orange" style={{ fontSize: "11px" }}>

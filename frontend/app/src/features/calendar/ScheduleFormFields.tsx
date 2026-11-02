@@ -40,7 +40,7 @@ export const ScheduleFormFields: React.FC<Props> = ({
       </div>
       <div>
         <label className="block text-xs text-text-subtle mb-1">{t("calendar_timezone")}</label>
-        <input className="w-full text-sm border rounded px-2 py-1 bg-surface" value={timezone} onChange={(e) => setTimezone(e.target.value)} placeholder="UTC hoặc +07:00" />
+        <input className="w-full text-sm border rounded px-2 py-1 bg-surface" value={timezone} onChange={(e) => setTimezone(e.target.value)} placeholder={t("calendar_tz_placeholder")} />
       </div>
       <div>
         <label className="block text-xs text-text-subtle mb-1">{t("calendar_task_title")}</label>
