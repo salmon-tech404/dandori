@@ -1,0 +1,35 @@
+{
+  "id": "md-jobs",
+  "group": "scheduling",
+  "name": "Job viết bằng file Markdown",
+  "description": "Tự động phát hiện các công việc định kỳ từ tệp Markdown trong kho mã nguồn và kiểm soát phê duyệt",
+  "version": "0.1.0",
+  "requires": ["calendar"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "medium",
+  "core": false,
+  "requires_worker_restart": true,
+  "settings": {
+    "scanPath": {
+      "type": "string",
+      "default": ".cron/jobs"
+    },
+    "maxFileSizeKb": {
+      "type": "number",
+      "default": 64,
+      "min": 1,
+      "max": 512
+    }
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "md-jobs-panel",
+        "slot": "calendar.panel",
+        "label": "Job viết bằng Markdown",
+        "order": 10
+      }
+    ]
+  }
+}

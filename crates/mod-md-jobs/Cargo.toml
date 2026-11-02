@@ -1,0 +1,25 @@
+[package]
+name = "mod-md-jobs"
+description = "Module định nghĩa và quản lý các công việc định kỳ từ tệp Markdown trong kho mã nguồn"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+dandori-types = { workspace = true }
+dandori-module-api = { workspace = true }
+axum = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sqlx = { workspace = true }
+chrono = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+uuid = { workspace = true }
+croner = { workspace = true }
+sha2 = { workspace = true }

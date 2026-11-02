@@ -1,0 +1,46 @@
+{
+  "id": "calendar",
+  "group": "scheduling",
+  "name": "Calendar để lên lịch task định kỳ",
+  "description": "Lên lịch task định kỳ theo biểu thức cron hoặc khoảng đều, tự động giao việc",
+  "version": "0.1.0",
+  "requires": ["subscription-connect"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": true,
+  "settings": {
+    "defaultTimezone": {
+      "type": "string",
+      "default": "UTC"
+    },
+    "minIntervalSeconds": {
+      "type": "number",
+      "default": 60,
+      "min": 60
+    },
+    "maxSchedulesPerProject": {
+      "type": "number",
+      "default": 50,
+      "min": 1,
+      "max": 1000
+    }
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "calendar-toolbar",
+        "slot": "calendar.toolbar",
+        "label": "Thanh công cụ lịch",
+        "order": 10
+      },
+      {
+        "id": "calendar-grid",
+        "slot": "calendar.grid",
+        "label": "Lưới lịch tuần",
+        "order": 20
+      }
+    ]
+  }
+}
