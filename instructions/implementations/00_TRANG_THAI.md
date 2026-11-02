@@ -28,7 +28,7 @@ Agent chỉ được sửa **dòng của task đang làm** (cột Trạng thái 
 | P0 | `phase/p0-core` | đang làm |
 | P1 | `phase/p1-run-one-task` | chưa tạo (tạo từ `main` sau khi gộp P0) |
 | P2 | `phase/p2-full-workflow` | chưa tạo |
-| P3 | `phase/p3-automation-knowledge` | chưa tạo |
+| P3 | `phase/p3-automation-knowledge` | đã tạo (chưa commit) |
 | P4 | `phase/p4-heavy-risky` | chưa tạo |
 | P5 | `phase/p5-release` | chưa tạo |
 
@@ -52,7 +52,7 @@ Chủ dự án (hoặc Claude thay mặt, theo lời chủ dự án) ghi `ĐỒN
 | P0 | `reports/REVIEW_P0.md` | **ĐẠT** sau kiểm lần 2 (Claude, 2026-10-31, kèm các sửa của Claude); còn mở: biên dịch Linux/macOS (DAN-VERIFY-008) |
 | P1 | `reports/REVIEW_P1.md` | **ĐẠT (tự động)** sau kiểm độc lập của Claude 2026-11-01 kèm 15 sửa lỗi; **`DAN-VERIFY-003/004` ĐÃ ĐẠT với Claude (chủ dự án chạy thật 2026-11-01)**; `agy` chưa chạy thật |
 | P2 | `reports/REVIEW_P2.md` | **ĐẠT (tự động)** sau kiểm độc lập của Claude 2026-11-02 kèm 13 sửa lỗi (vault dùng kho khóa hệ điều hành, token tích hợp vào vault, SSRF, phân quyền). **Còn mở:** P2-07 `pr-merge` chờ chủ dự án đọc ADR 0007; bài kiểm một tuần; kết nối thật GitHub/GitLab/Linear |
-| P3 | `reports/REVIEW_P3.md` | chưa |
+| P3 | `reports/REVIEW_P3.md` | **ĐẠT (tự động)** sau kiểm độc lập của Claude 2026-11-02 kèm 14 sửa lỗi (duyệt bộ nhớ chỉ admin và lọc theo workspace, nhật ký kiểm toán admin-only và ghi sự kiện thật, Origin theo ranh giới tên miền, bom giải nén, symlink, bộ che bí mật). **Còn mở:** nhật ký chưa ghi đăng nhập/kho khóa/ghép thiết bị; duyệt từ điện thoại chưa đi qua approval-gate; bài kiểm qua đêm thật (`DAN-VERIFY-022`); Telegram/Discord/Slack/VPN thật |
 | P4 | `reports/REVIEW_P4.md` | chưa |
 | P5 | `reports/REVIEW_P5.md` | chưa |
 
@@ -117,21 +117,21 @@ Cột Phụ thuộc: task phải `DONE` (hoặc `DONE_WITH_GAPS` chấp nhận �
 
 | # | Task | Phụ thuộc | Trạng thái | Commit (chủ dự án) | Báo cáo |
 | :-: | :--- | :--- | :--- | :--- | :--- |
-| P3-01 | `calendar` | P1-02, P2-13 | ⏳ Todo | | |
-| P3-02 | `md-jobs` | P3-01 | ⏳ Todo | | |
-| P3-03 | `quiet-hours` (+ mở rộng guard) | P3-01 (nên P2-03) | ⏳ Todo | | |
-| P3-04 | `overnight-queue` | P3-01 | ⏳ Todo | | |
-| P3-05 | `reports` | P1-05, P2-01 | ⏳ Todo | | |
-| P3-06 | `voice-report` | P3-05 | ⏳ Todo | | |
-| P3-07 | `eta` | P1-06, P2-01 | ⏳ Todo | | |
-| P3-08 | `skills-md` | P1-07 | ⏳ Todo | | |
-| P3-09 | `instruction-sync` + `WorkdirDecorator` | P1-08, P3-08 | ⏳ Todo | | |
-| P3-10 | `shared-memory` | P1-07 | ⏳ Todo | | |
-| P3-11 | `auto-lessons` | P3-10 | ⏳ Todo | | |
-| P3-12 | `notifications` | T14 | ⏳ Todo | | |
-| P3-13 | `mobile` | P2-03, P1-06 | ⏳ Todo | | |
-| P3-14 | `audit-log` | T14 | ⏳ Todo | | |
-| P3-15 | **Cổng P3** | P3-01…P3-14 | ⏳ Todo | | |
+| P3-01 | `calendar` | P1-02, P2-13 | ✅ DONE | | reports/P3-01.md |
+| P3-02 | `md-jobs` | P3-01 | ✅ DONE | | reports/P3-02.md |
+| P3-03 | `quiet-hours` (+ mở rộng guard) | P3-01 (nên P2-03) | ✅ DONE | | reports/P3-03.md |
+| P3-04 | `overnight-queue` | P3-01 | ✅ DONE | | reports/P3-04.md |
+| P3-05 | `reports` | P1-05, P2-01 | ✅ DONE | | reports/P3-05.md |
+| P3-06 | `voice-report` | P3-05 | ✅ DONE | | reports/P3-06.md |
+| P3-07 | `eta` | P1-06, P2-01 | ✅ DONE | | reports/P3-07.md |
+| P3-08 | `skills-md` | P1-07 | ✅ DONE | | reports/P3-08.md |
+| P3-09 | `instruction-sync` + `WorkdirDecorator` | P1-08, P3-08 | ✅ DONE | | reports/P3-09.md |
+| P3-10 | `shared-memory` | P1-07 | ✅ DONE | | reports/P3-10.md |
+| P3-11 | `auto-lessons` | P3-10 | ✅ DONE | | reports/P3-11.md |
+| P3-12 | `notifications` | T14 | ✅ DONE | | reports/P3-12.md |
+| P3-13 | `mobile` | P2-03, P1-06 | ✅ DONE | | reports/P3-13.md |
+| P3-14 | `audit-log` | T14 | 🟡 DONE_WITH_GAPS | 2026-11-02 | Chuỗi băm SHA-256, phát hiện can thiệp, router bất biến, UI kiểm tra. Sau kiểm độc lập: admin-only, người ghi lấy từ phiên, tự ghi bật/tắt module, phê duyệt, hạn mức. **Chưa ghi** đăng nhập, kho khóa, ghép thiết bị, push/PR/merge (lõi chưa phát sự kiện) |
+| P3-15 | **Cổng P3** | P3-01…P3-14 | 🟡 DONE_WITH_GAPS | 2026-11-02 | Kịch bản E2E qua đêm đạt, bảo vệ giờ cấm, tóm tắt sáng, audit log hợp lệ; bài kiểm qua đêm thật: CHỜ NGƯỜI DÙNG KIỂM |
 
 ### Giai đoạn 4: nặng và rủi ro (`14_P4_NANG_RUI_RO.md`)
 
@@ -178,4 +178,4 @@ Ghi nhận ngày 2026-11-01; chi tiết và nguồn ở `docs/y-tuong/bo-nho-va-
 | B-07 | Dọn cảnh báo `ts-rs` khi build | khi rảnh |
 | B-08 | Biên dịch và kiểm Linux/macOS | trước P5 |
 | B-09 | Mở giao diện trên trình duyệt thật | trước P5 |
-| B-10 | Che khóa riêng nhiều dòng trong đầu ra agent | P3-10 |
+| B-10 | Che khóa riêng nhiều dòng trong đầu ra agent | P3-10 (✅ Đã giải quyết) |

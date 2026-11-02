@@ -52,6 +52,16 @@ Tại điểm thực thi chuyển trạng thái tác vụ (`execute_task_transit
    - Nếu guard trả về `NeedsApproval`: Chuyển trạng thái tác vụ sang `needs_human`, phát sự kiện `ApprovalRequested` lên `EventBus`, lưu yêu cầu phê duyệt và trả về tác vụ ở trạng thái `needs_human`.
    - Nếu tất cả các guard đều trả về `Allow`: Tiến hành cập nhật trạng thái tác vụ sang `target_status` và phát sự kiện `TaskStatusChanged`.
 
+
+### 2.3 Hợp đồng xử lý `Deny(retry_after)` cho các module lập lịch (Bổ sung P3-03)
+Khi một module lập lịch hoặc worker nền (`calendar`, `md-jobs`, `overnight-queue`) muốn chuyển tác vụ sang trạng thái `running` (hoặc khởi chạy lần chạy của task):
+1. Tác nhân phải được xác định rõ là `TransitionActor::System(SystemSource::Scheduler("<module-id>"))`.
+2. Khi `TransitionGuard` (chẳng hạn `quiet-hours`) trả về `GuardDecision::Deny { reason, retry_after: Some(dt) }`:
+   - Module lập lịch **không** được bỏ cuộc hoặc hủy tác vụ (trừ khi có chính sách hủy cụ thể).
+   - Module lập lịch cập nhật thời điểm kích hoạt tiếp theo (`next_fire`) sang đúng thời điểm `dt` (`retry_after`), từ đó hoãn lại việc thực thi một cách an toàn cho đến khi hết khung giờ cấm.
+   - Nếu `retry_after` là `None`, module áp dụng chính sách lùi hàm mũ (exponential backoff) hoặc giữ nguyên trạng thái chờ.
+3. Khi `quiet-hours` bị tắt (`enabled = 0` hoặc module bị vô hiệu hóa), guard tự động được gỡ bỏ khỏi `FeatureLifecycleManager`, các lịch trình và tác vụ chuyển sang trạng thái `running` bình thường mà không bị cản trở.
+
 ## 3. Phân tích mối nguy và Biện pháp giảm thiểu (Threats & Mitigations)
 
 | Mối nguy cơ | Tác động | Biện pháp giảm thiểu của Dandori |
