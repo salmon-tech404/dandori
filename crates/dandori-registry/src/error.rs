@@ -59,6 +59,16 @@ pub enum RegistryError {
     #[error("Các module phụ thuộc đang hoạt động: {0:?}")]
     DependentModulesActive(Vec<String>),
 
+    /// Thiếu điểm mở rộng WorkdirProvider (cần bật module worktree).
+    #[error("thiếu điểm mở rộng WorkdirProvider: cần bật module worktree")]
+    WorkdirProviderMissing,
+
+    /// Có nhiều hơn một điểm mở rộng WorkdirProvider đang cùng hoạt động.
+    #[error(
+        "xung đột điểm mở rộng WorkdirProvider: có {0} providers đang hoạt động, yêu cầu duy nhất 1"
+    )]
+    AmbiguousWorkdirProvider(usize),
+
     /// Lỗi cơ sở dữ liệu.
     #[error("Lỗi cơ sở dữ liệu: {0}")]
     Db(#[from] dandori_db::DbError),

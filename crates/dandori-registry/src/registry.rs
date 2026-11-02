@@ -43,64 +43,17 @@ impl FeatureRegistry {
     }
 
     async fn seed_default_modules(&self) -> Result<(), RegistryError> {
-        let sample_mod = FeatureModule {
-            id: FeatureModuleId::new("sample-hello"),
-            group_name: "safety".into(),
-            name: "Module mẫu kiểm thử".into(),
-            description: "Module mẫu phục vụ kiểm thử và thử cổng P0".into(),
-            version: "0.1.0".into(),
-            requires: vec![],
-            scopes: vec!["workspace".into(), "project".into()],
-            risk: "low".into(),
-            effort: "light".into(),
-            core: false,
-        };
-        self.repo().upsert_module(&sample_mod).await?;
+        let repo = self.repo();
+        for m in default_feature_modules() {
+            repo.upsert_module(&m).await?;
+        }
         Ok(())
     }
 
     async fn seed_default_packs(&self) -> Result<(), RegistryError> {
         let repo = self.repo();
-        let packs = [
-            FeaturePack {
-                id: FeaturePackId::new("solo-light"),
-                name: "Solo nhẹ".into(),
-                modules: vec![
-                    "sample-hello".into(),
-                    "auth-login".into(),
-                    "kanban".into(),
-                    "live-status".into(),
-                ],
-            },
-            FeaturePack {
-                id: FeaturePackId::new("small-team"),
-                name: "Nhóm nhỏ".into(),
-                modules: vec![
-                    "sample-hello".into(),
-                    "auth-login".into(),
-                    "kanban".into(),
-                    "live-status".into(),
-                    "multi-account".into(),
-                    "approval-gate".into(),
-                ],
-            },
-            FeaturePack {
-                id: FeaturePackId::new("full"),
-                name: "Đầy đủ".into(),
-                modules: vec![
-                    "sample-hello".into(),
-                    "auth-login".into(),
-                    "kanban".into(),
-                    "live-status".into(),
-                    "multi-account".into(),
-                    "approval-gate".into(),
-                    "calendar".into(),
-                ],
-            },
-        ];
-
-        for p in &packs {
-            repo.upsert_pack(p).await?;
+        for p in default_feature_packs() {
+            repo.upsert_pack(&p).await?;
         }
         Ok(())
     }
@@ -588,4 +541,295 @@ impl FeatureRegistry {
         let audits = self.repo().list_audits(&mid).await?;
         Ok(audits)
     }
+}
+
+fn make_mod(
+    id: &'static str,
+    group: &'static str,
+    name: &'static str,
+    desc: &'static str,
+    requires: &[&'static str],
+    risk: &'static str,
+    effort: &'static str,
+) -> FeatureModule {
+    FeatureModule {
+        id: FeatureModuleId::new(id),
+        group_name: group.into(),
+        name: name.into(),
+        description: desc.into(),
+        version: "0.1.0".into(),
+        requires: requires.iter().map(|s| (*s).into()).collect(),
+        scopes: vec!["workspace".into(), "project".into()],
+        risk: risk.into(),
+        effort: effort.into(),
+        core: false,
+    }
+}
+
+fn make_subscription_connect_module() -> FeatureModule {
+    let mut sub_mod = make_mod(
+        "subscription-connect",
+        "accounts",
+        "Kết nối tài khoản subscription",
+        "Kết nối tài khoản AI thông qua CLI chính thức với HOME riêng biệt",
+        &[],
+        "low",
+        "light",
+    );
+    sub_mod.scopes = vec!["system".into()];
+    sub_mod
+}
+
+fn make_dashboard_modules() -> Vec<FeatureModule> {
+    vec![
+        make_mod(
+            "kanban",
+            "dashboard",
+            "Bảng Kanban",
+            "Bảng nhiệm vụ theo trạng thái",
+            &[],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "live-status",
+            "dashboard",
+            "Xem thời gian thực",
+            "Xem agent đang làm gì theo thời gian thực qua luồng SSE",
+            &[],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "run-history",
+            "dashboard",
+            "Lịch sử lần chạy",
+            "Xem lại chi tiết, phát lại log và ghi chú cho từng lần chạy",
+            &[],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "diff-preview",
+            "dashboard",
+            "Diff & Xem trước",
+            "Xem diff thay đổi trong giao diện và mở bản xem trước kết quả",
+            &["worktree"],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "cost-tracking",
+            "dashboard",
+            "Theo dõi chi phí",
+            "Theo dõi token và chi phí thực tế theo nhiệm vụ và agent, không ước đoán bịa đặt",
+            &["live-status"],
+            "low",
+            "medium",
+        ),
+    ]
+}
+
+fn make_knowledge_modules() -> Vec<FeatureModule> {
+    vec![
+        make_mod(
+            "prompt-library",
+            "knowledge",
+            "Thư viện prompt",
+            "Thư viện prompt gắn theo vai trò agent và kỹ năng",
+            &["lead-worker"],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "tech-profile",
+            "knowledge",
+            "Hồ sơ kỹ thuật",
+            "Hồ sơ kỹ thuật dự án mà mọi agent đều đọc khi chạy",
+            &["lead-worker"],
+            "low",
+            "medium",
+        ),
+    ]
+}
+
+#[expect(
+    clippy::too_many_lines,
+    reason = "Hàm tổng hợp danh sách module runtime"
+)]
+fn make_runtime_modules() -> Vec<FeatureModule> {
+    vec![
+        make_mod(
+            "lead-worker",
+            "orchestration",
+            "Phân công Lead và Worker",
+            "Chọn Lead (PM) và Worker cho từng task theo vai trò và dự án",
+            &["subscription-connect"],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "approval-gate",
+            "orchestration",
+            "Cổng duyệt",
+            "Cổng duyệt của con người; chặn chuyển trạng thái nhạy cảm cho đến khi được duyệt",
+            &[],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "test-agent",
+            "orchestration",
+            "Agent test chuyên trách",
+            "Agent test chuyên trách tự chạy sau khi worker xong",
+            &["lead-worker"],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "doc-agent",
+            "orchestration",
+            "Agent viết tài liệu",
+            "Agent viết tài liệu tự chạy khi task hoàn thành (ready_to_merge)",
+            &["lead-worker"],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "integrations",
+            "integrations",
+            "Tích hợp Git & Quản lý dự án",
+            "Tích hợp nền tảng Git từ xa GitHub, GitLab và hệ thống quản lý công việc Linear",
+            &["auth-login"],
+            "medium",
+            "heavy",
+        ),
+        make_mod(
+            "worktree",
+            "runtime",
+            "Git worktree cho task",
+            "Môi trường git riêng biệt cho từng nhiệm vụ",
+            &[],
+            "low",
+            "medium",
+        ),
+    ]
+}
+
+fn default_feature_modules() -> Vec<FeatureModule> {
+    let mut mods = vec![make_mod(
+        "sample-hello",
+        "safety",
+        "Module mẫu kiểm thử",
+        "Module mẫu phục vụ kiểm thử và thử cổng P0",
+        &[],
+        "low",
+        "light",
+    )];
+    mods.extend(make_account_modules());
+    mods.extend(make_runtime_modules());
+    mods.extend(make_knowledge_modules());
+    mods.extend(make_dashboard_modules());
+    mods
+}
+
+fn make_account_modules() -> Vec<FeatureModule> {
+    let mut mods = vec![
+        make_mod(
+            "auth-login",
+            "accounts",
+            "Đăng ký / đăng nhập hệ thống",
+            "Xác thực người dùng và phân quyền truy cập hệ thống",
+            &[],
+            "low",
+            "light",
+        ),
+        make_subscription_connect_module(),
+        make_mod(
+            "multi-account",
+            "accounts",
+            "Nhiều tài khoản agent",
+            "Quản lý nhiều tài khoản cùng nhà cung cấp, mức ưu tiên và trạng thái bật/tắt",
+            &["subscription-connect"],
+            "low",
+            "medium",
+        ),
+    ];
+    mods.extend(make_advanced_account_modules());
+    mods
+}
+
+fn make_advanced_account_modules() -> Vec<FeatureModule> {
+    vec![
+        make_mod(
+            "quota-tracking",
+            "accounts",
+            "Theo dõi hạn mức tài khoản",
+            "Theo dõi hạn mức từng tài khoản agent trung thực theo số liệu báo cáo hoặc ước tính lịch sử chạy",
+            &["subscription-connect"],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "auto-switch",
+            "accounts",
+            "Tự chuyển tài khoản",
+            "Tự động chuyển sang tài khoản kế tiếp cùng nhà cung cấp khi gặp sự cố hết hạn mức",
+            &["subscription-connect", "multi-account", "quota-tracking"],
+            "low",
+            "medium",
+        ),
+        {
+            let mut m = make_mod(
+                "api-key-fallback",
+                "accounts",
+                "Dự phòng khóa API",
+                "Dự phòng bằng API key với trần chi tiêu bắt buộc khi tài khoản CLI hết hạn mức",
+                &["auth-login"],
+                "high",
+                "medium",
+            );
+            m.scopes = vec!["system".into(), "workspace".into(), "project".into()];
+            m
+        },
+    ]
+}
+
+fn default_feature_packs() -> Vec<FeaturePack> {
+    let base_modules: Vec<String> = vec![
+        "sample-hello".into(),
+        "auth-login".into(),
+        "subscription-connect".into(),
+        "lead-worker".into(),
+        "worktree".into(),
+        "kanban".into(),
+        "live-status".into(),
+        "prompt-library".into(),
+        "tech-profile".into(),
+    ];
+
+    let mut small_team = base_modules.clone();
+    small_team.push("multi-account".into());
+    small_team.push("approval-gate".into());
+
+    let mut full = small_team.clone();
+    full.push("calendar".into());
+
+    vec![
+        FeaturePack {
+            id: FeaturePackId::new("solo-light"),
+            name: "Solo nhẹ".into(),
+            modules: base_modules,
+        },
+        FeaturePack {
+            id: FeaturePackId::new("small-team"),
+            name: "Nhóm nhỏ".into(),
+            modules: small_team,
+        },
+        FeaturePack {
+            id: FeaturePackId::new("full"),
+            name: "Đầy đủ".into(),
+            modules: full,
+        },
+    ]
 }

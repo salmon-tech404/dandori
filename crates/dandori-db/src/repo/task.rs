@@ -283,6 +283,50 @@ impl<'a> TaskRepo<'a> {
         Ok(())
     }
 
+    /// Cập nhật thông tin task bao gồm phân công lead và worker.
+    ///
+    /// # Errors
+    /// Trả về `DbError` nếu task không tồn tại hoặc cập nhật thất bại.
+    pub async fn update_task_full(
+        &self,
+        project_id: &ProjectId,
+        id: &TaskId,
+        title: &str,
+        description: &str,
+        lead_agent: &str,
+        worker_agent: &str,
+    ) -> Result<(), DbError> {
+        let id_str = id.to_string();
+        let proj_str = project_id.to_string();
+        let now_str = Utc::now().to_rfc3339();
+
+        let result = sqlx::query(
+            r#"
+            UPDATE task
+            SET title = ?, description = ?, lead_agent = ?, worker_agent = ?, updated_at = ?
+            WHERE id = ? AND project_id = ?
+            "#,
+        )
+        .bind(title)
+        .bind(description)
+        .bind(lead_agent)
+        .bind(worker_agent)
+        .bind(now_str)
+        .bind(&id_str)
+        .bind(&proj_str)
+        .execute(self.pool)
+        .await?;
+
+        if result.rows_affected() == 0 {
+            return Err(DbError::NotFound {
+                entity: "task",
+                id: id_str,
+            });
+        }
+
+        Ok(())
+    }
+
     /// Lấy danh sách task phân trang kèm tổng số lượng.
     ///
     /// # Errors
@@ -347,8 +391,67 @@ impl<'a> TaskRepo<'a> {
         Ok((list, total))
     }
 
+    /// Cập nhật workdir_path của task, bắt buộc chỉ định `project_id` sở hữu (RS-DB-002).
+    ///
+    /// # Errors
+    /// Trả về `DbError` nếu task không thuộc dự án hoặc cập nhật thất bại.
+    pub async fn update_task_workdir(
+        &self,
+        project_id: &ProjectId,
+        id: &TaskId,
+        workdir_path: Option<&str>,
+    ) -> Result<(), DbError> {
+        let id_str = id.to_string();
+        let proj_str = project_id.to_string();
+        let now_str = Utc::now().to_rfc3339();
+
+        let result = sqlx::query(
+            r#"
+            UPDATE task
+            SET workdir_path = ?1, updated_at = ?2
+            WHERE id = ?3 AND project_id = ?4
+            "#,
+        )
+        .bind(workdir_path)
+        .bind(now_str)
+        .bind(&id_str)
+        .bind(proj_str)
+        .execute(self.pool)
+        .await?;
+
+        if result.rows_affected() == 0 {
+            return Err(DbError::NotFound {
+                entity: "task",
+                id: id_str,
+            });
+        }
+
+        Ok(())
+    }
+
     /// Cập nhật trạng thái task, bắt buộc chỉ định `project_id` sở hữu (RS-DB-002).
     ///
+    /// Chiếm task để chạy một cách nguyên tử: chỉ đổi sang `running` nếu task chưa `running`/`done`.
+    /// Trả về `false` nếu đã có người chiếm (hai yêu cầu đồng thời chỉ một bên thắng).
+    ///
+    /// # Errors
+    /// Trả về `DbError` nếu truy vấn thất bại.
+    pub async fn try_claim_for_run(
+        &self,
+        project_id: &ProjectId,
+        id: &TaskId,
+    ) -> Result<bool, DbError> {
+        let result = sqlx::query(
+            "UPDATE task SET status = 'running', updated_at = ?              WHERE id = ? AND project_id = ? AND status NOT IN ('running', 'done')",
+        )
+        .bind(Utc::now().to_rfc3339())
+        .bind(id.to_string())
+        .bind(project_id.to_string())
+        .execute(self.pool)
+        .await?;
+        Ok(result.rows_affected() == 1)
+    }
+
     /// # Errors
     /// Trả về `DbError` nếu task không thuộc dự án hoặc cập nhật thất bại.
     pub async fn update_task_status(

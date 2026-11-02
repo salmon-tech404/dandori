@@ -19,5 +19,23 @@ sample-modules = [
 [dependencies]
 dandori-types = { workspace = true }
 dandori-module-api = { workspace = true }
+mod-api-key-fallback = { path = "../mod-api-key-fallback" }
+mod-approval-gate = { path = "../mod-approval-gate" }
 mod-auth-login = { path = "../mod-auth-login" }
+mod-auto-switch = { path = "../mod-auto-switch" }
+mod-cost-tracking = { path = "../mod-cost-tracking" }
+mod-diff-preview = { path = "../mod-diff-preview" }
+mod-doc-agent = { path = "../mod-doc-agent" }
+mod-integrations = { path = "../mod-integrations" }
+mod-kanban = { path = "../mod-kanban" }
+mod-lead-worker = { path = "../mod-lead-worker" }
+mod-live-status = { path = "../mod-live-status" }
+mod-multi-account = { path = "../mod-multi-account" }
+mod-prompt-library = { path = "../mod-prompt-library" }
+mod-quota-tracking = { path = "../mod-quota-tracking" }
+mod-run-history = { path = "../mod-run-history" }
+mod-subscription-connect = { path = "../mod-subscription-connect" }
+mod-tech-profile = { path = "../mod-tech-profile" }
+mod-test-agent = { path = "../mod-test-agent" }
+mod-worktree = { path = "../mod-worktree" }
 mod-sample-hello = { path = "../mod-sample-hello", optional = true }

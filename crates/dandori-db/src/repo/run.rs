@@ -30,20 +30,20 @@ impl<'a> RunRepo<'a> {
         let started_at_str = run.started_at.to_rfc3339();
         let finished_at_str = run.finished_at.map(|t| t.to_rfc3339());
 
-        sqlx::query!(
+        sqlx::query(
             r#"
             INSERT INTO run (id, task_id, agent, account, status, started_at, finished_at, exit_code)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             "#,
-            id_str,
-            task_str,
-            run.agent,
-            run.account,
-            run.status,
-            started_at_str,
-            finished_at_str,
-            run.exit_code
         )
+        .bind(&id_str)
+        .bind(&task_str)
+        .bind(&run.agent)
+        .bind(&run.account)
+        .bind(&run.status)
+        .bind(&started_at_str)
+        .bind(finished_at_str)
+        .bind(run.exit_code)
         .execute(self.pool)
         .await?;
 
@@ -58,49 +58,79 @@ impl<'a> RunRepo<'a> {
         let id_str = id.to_string();
         let task_str = task_id.to_string();
 
-        let row = sqlx::query!(
+        let row = sqlx::query(
             r#"
             SELECT id, task_id, agent, account, status, started_at, finished_at, exit_code
             FROM run
             WHERE id = ? AND task_id = ?
             "#,
-            id_str,
-            task_str
         )
+        .bind(&id_str)
+        .bind(&task_str)
         .fetch_optional(self.pool)
         .await?;
 
-        row.map(|r| {
-            let run_id = RunId::from_str(&r.id)
-                .map_err(|e| DbError::ConstraintViolation(format!("UUID không hợp lệ: {e}")))?;
-            let t_id = TaskId::from_str(&r.task_id)
-                .map_err(|e| DbError::ConstraintViolation(format!("UUID không hợp lệ: {e}")))?;
-            let started_at = DateTime::parse_from_rfc3339(&r.started_at)
-                .map_err(|e| DbError::ConstraintViolation(format!("Timestamp không hợp lệ: {e}")))?
-                .with_timezone(&Utc);
-            let finished_at = r
-                .finished_at
-                .map(|s| {
-                    DateTime::parse_from_rfc3339(&s)
-                        .map(|t| t.with_timezone(&Utc))
-                        .map_err(|e| {
-                            DbError::ConstraintViolation(format!("Timestamp không hợp lệ: {e}"))
-                        })
-                })
-                .transpose()?;
+        row.map(|r| self.map_run_row(&r)).transpose()
+    }
 
-            Ok(Run {
-                id: run_id,
-                task_id: t_id,
-                agent: r.agent,
-                account: r.account,
-                status: r.status,
-                started_at,
-                finished_at,
-                exit_code: r.exit_code,
+    /// Lấy thông tin lần chạy theo RunId duy nhất.
+    ///
+    /// # Errors
+    /// Trả về `DbError` nếu truy vấn thất bại.
+    pub async fn get_run_by_id(&self, id: &RunId) -> Result<Option<Run>, DbError> {
+        let id_str = id.to_string();
+
+        let row = sqlx::query(
+            r#"
+            SELECT id, task_id, agent, account, status, started_at, finished_at, exit_code
+            FROM run
+            WHERE id = ?
+            "#,
+        )
+        .bind(&id_str)
+        .fetch_optional(self.pool)
+        .await?;
+
+        row.map(|r| self.map_run_row(&r)).transpose()
+    }
+
+    fn map_run_row(&self, r: &sqlx::sqlite::SqliteRow) -> Result<Run, DbError> {
+        let r_id: String = sqlx::Row::try_get(r, "id")?;
+        let r_task_id: String = sqlx::Row::try_get(r, "task_id")?;
+        let r_agent: String = sqlx::Row::try_get(r, "agent")?;
+        let r_account: String = sqlx::Row::try_get(r, "account")?;
+        let r_status: String = sqlx::Row::try_get(r, "status")?;
+        let r_started_at: String = sqlx::Row::try_get(r, "started_at")?;
+        let r_finished_at: Option<String> = sqlx::Row::try_get(r, "finished_at")?;
+        let r_exit_code: Option<i64> = sqlx::Row::try_get(r, "exit_code")?;
+
+        let run_id = RunId::from_str(&r_id)
+            .map_err(|e| DbError::ConstraintViolation(format!("UUID không hợp lệ: {e}")))?;
+        let t_id = TaskId::from_str(&r_task_id)
+            .map_err(|e| DbError::ConstraintViolation(format!("UUID không hợp lệ: {e}")))?;
+        let started_at = DateTime::parse_from_rfc3339(&r_started_at)
+            .map_err(|e| DbError::ConstraintViolation(format!("Timestamp không hợp lệ: {e}")))?
+            .with_timezone(&Utc);
+        let finished_at = r_finished_at
+            .map(|s| {
+                DateTime::parse_from_rfc3339(&s)
+                    .map(|t| t.with_timezone(&Utc))
+                    .map_err(|e| {
+                        DbError::ConstraintViolation(format!("Timestamp không hợp lệ: {e}"))
+                    })
             })
+            .transpose()?;
+
+        Ok(Run {
+            id: run_id,
+            task_id: t_id,
+            agent: r_agent,
+            account: r_account,
+            status: r_status,
+            started_at,
+            finished_at,
+            exit_code: r_exit_code,
         })
-        .transpose()
     }
 
     /// Danh sách các lần chạy của một task.
@@ -110,48 +140,21 @@ impl<'a> RunRepo<'a> {
     pub async fn list_runs(&self, task_id: &TaskId) -> Result<Vec<Run>, DbError> {
         let task_str = task_id.to_string();
 
-        let rows = sqlx::query!(
+        let rows = sqlx::query(
             r#"
             SELECT id, task_id, agent, account, status, started_at, finished_at, exit_code
             FROM run
             WHERE task_id = ?
             ORDER BY started_at ASC
             "#,
-            task_str
         )
+        .bind(&task_str)
         .fetch_all(self.pool)
         .await?;
 
         let mut list = Vec::with_capacity(rows.len());
         for r in rows {
-            let run_id = RunId::from_str(&r.id)
-                .map_err(|e| DbError::ConstraintViolation(format!("UUID không hợp lệ: {e}")))?;
-            let t_id = TaskId::from_str(&r.task_id)
-                .map_err(|e| DbError::ConstraintViolation(format!("UUID không hợp lệ: {e}")))?;
-            let started_at = DateTime::parse_from_rfc3339(&r.started_at)
-                .map_err(|e| DbError::ConstraintViolation(format!("Timestamp không hợp lệ: {e}")))?
-                .with_timezone(&Utc);
-            let finished_at = r
-                .finished_at
-                .map(|s| {
-                    DateTime::parse_from_rfc3339(&s)
-                        .map(|t| t.with_timezone(&Utc))
-                        .map_err(|e| {
-                            DbError::ConstraintViolation(format!("Timestamp không hợp lệ: {e}"))
-                        })
-                })
-                .transpose()?;
-
-            list.push(Run {
-                id: run_id,
-                task_id: t_id,
-                agent: r.agent,
-                account: r.account,
-                status: r.status,
-                started_at,
-                finished_at,
-                exit_code: r.exit_code,
-            });
+            list.push(self.map_run_row(&r)?);
         }
 
         Ok(list)
@@ -173,18 +176,18 @@ impl<'a> RunRepo<'a> {
         let task_str = task_id.to_string();
         let finished_at_str = finished_at.map(|t| t.to_rfc3339());
 
-        let result = sqlx::query!(
+        let result = sqlx::query(
             r#"
             UPDATE run
             SET status = ?, finished_at = ?, exit_code = ?
             WHERE id = ? AND task_id = ?
             "#,
-            status,
-            finished_at_str,
-            exit_code,
-            id_str,
-            task_str
         )
+        .bind(status)
+        .bind(finished_at_str)
+        .bind(exit_code)
+        .bind(&id_str)
+        .bind(&task_str)
         .execute(self.pool)
         .await?;
 
@@ -206,14 +209,14 @@ impl<'a> RunRepo<'a> {
         let id_str = id.to_string();
         let task_str = task_id.to_string();
 
-        sqlx::query!(
+        sqlx::query(
             r#"
             DELETE FROM run
             WHERE id = ? AND task_id = ?
             "#,
-            id_str,
-            task_str
         )
+        .bind(&id_str)
+        .bind(&task_str)
         .execute(self.pool)
         .await?;
 
@@ -243,18 +246,18 @@ impl<'a> RunEventRepo<'a> {
         let run_str = event.run_id.to_string();
         let created_at_str = event.created_at.to_rfc3339();
 
-        sqlx::query!(
+        sqlx::query(
             r#"
             INSERT INTO run_event (id, run_id, seq, event_type, data, created_at)
             VALUES (?, ?, ?, ?, ?, ?)
             "#,
-            id_str,
-            run_str,
-            event.seq,
-            event.event_type,
-            event.data,
-            created_at_str
         )
+        .bind(&id_str)
+        .bind(&run_str)
+        .bind(event.seq)
+        .bind(&event.event_type)
+        .bind(&event.data)
+        .bind(&created_at_str)
         .execute(self.pool)
         .await?;
 
@@ -268,38 +271,90 @@ impl<'a> RunEventRepo<'a> {
     pub async fn list_run_events(&self, run_id: &RunId) -> Result<Vec<RunEvent>, DbError> {
         let run_str = run_id.to_string();
 
-        let rows = sqlx::query!(
+        let rows = sqlx::query(
             r#"
             SELECT id, run_id, seq, event_type, data, created_at
             FROM run_event
             WHERE run_id = ?
             ORDER BY seq ASC
             "#,
-            run_str
         )
+        .bind(&run_str)
         .fetch_all(self.pool)
         .await?;
 
         let mut list = Vec::with_capacity(rows.len());
         for r in rows {
-            let event_id = RunEventId::from_str(&r.id)
-                .map_err(|e| DbError::ConstraintViolation(format!("UUID không hợp lệ: {e}")))?;
-            let r_id = RunId::from_str(&r.run_id)
-                .map_err(|e| DbError::ConstraintViolation(format!("UUID không hợp lệ: {e}")))?;
-            let created_at = DateTime::parse_from_rfc3339(&r.created_at)
-                .map_err(|e| DbError::ConstraintViolation(format!("Timestamp không hợp lệ: {e}")))?
-                .with_timezone(&Utc);
-
-            list.push(RunEvent {
-                id: event_id,
-                run_id: r_id,
-                seq: r.seq,
-                event_type: r.event_type,
-                data: r.data,
-                created_at,
-            });
+            list.push(self.map_event_row(&r)?);
         }
 
         Ok(list)
+    }
+
+    /// Lấy danh sách sự kiện phân trang cùng tổng số sự kiện của một lần chạy.
+    ///
+    /// # Errors
+    /// Trả về `DbError` nếu truy vấn thất bại.
+    pub async fn list_run_events_paginated(
+        &self,
+        run_id: &RunId,
+        limit: i64,
+        offset: i64,
+    ) -> Result<(Vec<RunEvent>, i64), DbError> {
+        let run_str = run_id.to_string();
+
+        let count_row = sqlx::query("SELECT COUNT(*) as total FROM run_event WHERE run_id = ?")
+            .bind(&run_str)
+            .fetch_one(self.pool)
+            .await?;
+        let total: i64 = sqlx::Row::try_get(&count_row, "total")?;
+
+        let rows = sqlx::query(
+            r#"
+            SELECT id, run_id, seq, event_type, data, created_at
+            FROM run_event
+            WHERE run_id = ?
+            ORDER BY seq ASC
+            LIMIT ? OFFSET ?
+            "#,
+        )
+        .bind(&run_str)
+        .bind(limit)
+        .bind(offset)
+        .fetch_all(self.pool)
+        .await?;
+
+        let mut list = Vec::with_capacity(rows.len());
+        for r in rows {
+            list.push(self.map_event_row(&r)?);
+        }
+
+        Ok((list, total))
+    }
+
+    fn map_event_row(&self, r: &sqlx::sqlite::SqliteRow) -> Result<RunEvent, DbError> {
+        let id_val: String = sqlx::Row::try_get(r, "id")?;
+        let r_id_val: String = sqlx::Row::try_get(r, "run_id")?;
+        let seq_val: i64 = sqlx::Row::try_get(r, "seq")?;
+        let event_type_val: String = sqlx::Row::try_get(r, "event_type")?;
+        let data_val: String = sqlx::Row::try_get(r, "data")?;
+        let created_at_val: String = sqlx::Row::try_get(r, "created_at")?;
+
+        let event_id = RunEventId::from_str(&id_val)
+            .map_err(|e| DbError::ConstraintViolation(format!("UUID không hợp lệ: {e}")))?;
+        let r_id = RunId::from_str(&r_id_val)
+            .map_err(|e| DbError::ConstraintViolation(format!("UUID không hợp lệ: {e}")))?;
+        let created_at = DateTime::parse_from_rfc3339(&created_at_val)
+            .map_err(|e| DbError::ConstraintViolation(format!("Timestamp không hợp lệ: {e}")))?
+            .with_timezone(&Utc);
+
+        Ok(RunEvent {
+            id: event_id,
+            run_id: r_id,
+            seq: seq_val,
+            event_type: event_type_val,
+            data: data_val,
+            created_at,
+        })
     }
 }
