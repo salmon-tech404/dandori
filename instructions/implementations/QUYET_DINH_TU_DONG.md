@@ -482,3 +482,208 @@ Tài liệu này ghi nhận các quyết định kỹ thuật do nhóm AI Agent 
 - **Lý do:** Đáp ứng trọn vẹn tiêu chí nghiệm thu của Cổng P2 (`12_P2_VONG_LAM_VIEC.md`), bảo đảm tính toàn vẹn kiến trúc và trung thực với số liệu.
 - **Hệ quả:** Kịch bản kiểm thử E2E xanh 100%, vượt qua kiểm thử đột biến QC1 (RED mutation), hoàn thành probe HTTP trên binary thực tế `dandori.exe`, và vượt qua cổng xác thực 18 bước `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
 
+## 72. Task P3-01: Lên lịch định kỳ với module `calendar`, giới hạn hành động chỉ tạo task và phân quyền quản trị
+- **Mục:** Triển khai cơ chế lên lịch định kỳ theo cron hoặc khoảng đều cho các nhiệm vụ tự động, bảo đảm tính an toàn tuyệt đối chống lạm dụng thực thi lệnh và chống kích hoạt trùng lặp.
+- **Lựa chọn:** Xây dựng crate `crates/mod-calendar` sử dụng thư viện `croner = "2.2.0"` đã được phê duyệt. Cấu trúc hành động `CalendarAction` được thiết kế có **duy nhất một biến thể** là `CreateTask`, tuyệt đối cấm mọi hành động thực thi lệnh shell từ lịch. Worker nền sử dụng cập nhật nguyên tử (Atomic CAS) trên cột `next_fire` để chống kích hoạt lặp. Phân quyền BOLA: xem danh sách lịch yêu cầu quyền thành viên workspace (`can_access_workspace`), trong khi các hành động quản trị (tạo, cập nhật, xóa, tạm dừng, khôi phục, kích hoạt ngay) bắt buộc yêu cầu quyền quản trị viên workspace (`can_administer_workspace`). Sử dụng hàm an toàn `utc_offset()` loại bỏ hoàn toàn `unwrap()` trong tính toán múi giờ và chuyển đổi giờ mùa hè (DST).
+- **Lý do:** Đáp ứng các tiêu chí nghiệm thu AC1 đến AC7 của Task P3-01 (`13_P3_TU_DONG_TRI_THUC.md`), tuân thủ điều cấm tuyệt đối về bảo mật hệ thống và quy tắc Clean Code.
+- **Hệ quả:** Vượt qua toàn bộ 7 ca kiểm thử đơn vị, 2 ca kiểm thử tích hợp server, 4 bài kiểm thử giao diện React Vitest, probe HTTP nhị phân thật trên `dandori.exe`, và 18/18 bước kiểm tra chất lượng của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+
+## 73. Task P3-02: Bộ phân tích YAML Front Matter an toàn (Hardened Parser) và kiểm soát phê duyệt Content-Addressable
+- **Mục:** Quét và thực thi định kỳ các định nghĩa công việc dạng tệp `.cron/jobs/*.md` trong kho mã nguồn người dùng mà không phụ thuộc vào thư viện unmaintained (`serde_yaml`), đồng thời ngăn chặn thực thi tệp bị sửa đổi trái phép mà chưa qua phê duyệt.
+- **Lựa chọn:** Viết bộ phân tích frontmatter thủ công theo ADR 0008 (`docs/adr/0008-yaml.md`), không dùng thêm thư viện bên ngoài; giới hạn kích thước tệp tối đa 64 KB, chỉ chấp nhận danh sách trắng 4 trường phẳng (`name`, `schedule`, `agent`, `account`), kiểm tra tính hợp lệ của biểu thức cron bằng `croner`. Áp dụng băm nội dung SHA-256 (`content_hash` vs `approved_hash`): khi quét thấy tệp mới hoặc tệp bị sửa đổi nội dung, hệ thống đưa job về trạng thái `pending_approval` và xóa lịch kích hoạt `next_fire`. Chỉ khi Quản trị viên workspace (`can_administer_workspace`) gọi API phê duyệt `/jobs/{id}/approve`, mã băm mới được ghi nhận vào `approved_hash` và tính toán `next_fire`. Khi tệp bị xóa khỏi kho mã nguồn, scanner tự động đánh dấu `is_archived = 1` và xóa `next_fire`. Ngăn chặn Directory Traversal và symlink trỏ ra ngoài theo quy tắc RS-SEC-004.
+- **Lý do:** Đảm bảo an toàn chuỗi cung ứng mã nguồn, tuân thủ `cargo deny`, ngăn ngừa mã độc/prompt injection từ kho mã nguồn tự động kích hoạt ngoài tầm kiểm soát của con người.
+- **Hệ quả:** Vượt qua toàn bộ 8 bài kiểm thử đơn vị nội bộ crate `mod-md-jobs`, 3 bài kiểm thử tích hợp server, 3 bài kiểm thử giao diện React Vitest, probe HTTP trên `dandori.exe`, và 18/18 bước kiểm tra của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+## 74. Task P3-03: Module `quiet-hours`, Thuật toán xử lý khung cấm qua nửa đêm & mở rộng TransitionGuard
+- **Mục:** Bảo vệ người dùng khỏi các tác vụ tự động chạy ngoài ý muốn trong khung giờ cấm, đồng thời mở rộng hợp đồng kiến trúc của điểm mở rộng `TransitionGuard` cho các tác nhân hệ thống và bộ lập lịch.
+- **Lựa chọn:** Xây dựng crate `crates/mod-quiet-hours` cài đặt trait `TransitionGuard` của lõi. Thiết kế thuật toán đánh giá thời gian độc lập với đồng hồ thực (`Clock` trait: `RealClock` / `MockClock`), hỗ trợ đầy đủ các múi giờ IANA / FixedOffset và chuyển đổi giờ mùa hè (DST). Xử lý chính xác các khung giờ cấm vắt qua nửa đêm (Cross-midnight, `start > end`) bằng cách tính toán ngày bắt đầu từ ngày hôm trước (`local_date - 1`). Đối với trường hợp nhiều khung giờ cấm chồng chéo nhau (Overlapping windows), thuật toán mở rộng liên tục thời điểm kết thúc `retry_after` tới khung cấm cuối cùng trong chuỗi chồng lấn. Bổ sung mục 2.3 vào `docs/adr/0005-transition-guard.md` quy định rõ: các bộ lập lịch khi nhận `GuardDecision::Deny { retry_after: Some(dt), .. }` sẽ hoãn thời điểm kích hoạt kế tiếp `next_fire` sang `dt`. Chạy tay thủ công (`TransitionActor::User`) mặc định không bị chặn trừ khi bật cấu hình `block_manual_runs = 1`. Khi module bị tắt, guard được gỡ bỏ hoàn toàn khỏi `FeatureLifecycleManager`.
+- **Lý do:** Đáp ứng trọn vẹn các tiêu chí nghiệm thu AC1 đến AC6 của Task P3-03 (`13_P3_TU_DONG_TRI_THUC.md`), đảm bảo tính nhất quán kiến trúc theo ADR 0005 và quy tắc Clean Code.
+- **Hệ quả:** Vượt qua toàn bộ 7 ca kiểm thử đơn vị nội bộ crate `mod-quiet-hours`, 3 ca kiểm thử tích hợp server, 3 bài kiểm thử giao diện React Vitest, probe nhị phân thật trên `dandori.exe`, và 18/18 bước kiểm tra chất lượng của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+
+## 75. Task P3-04: Module `overnight-queue`, Dừng an toàn (Safe Stop), Chuỗi để duyệt sáng và An toàn tuyệt đối không lệnh hệ thống
+- **Mục:** Triển khai hàng đợi tác vụ chạy qua đêm với cơ chế giới hạn song song, dừng an toàn tự động để bảo toàn hạn mức tài khoản khi gặp chuỗi lỗi liên tiếp, và tổng hợp chuỗi để duyệt sáng hôm sau mà tuyệt đối không chứa bất kỳ lệnh can thiệp nguồn máy tính nào.
+- **Lựa chọn:** Xây dựng crate `crates/mod-overnight-queue` quản lý cấu hình hàng đợi (`m_overnight_queue_config`) và các mục trong hàng đợi (`m_overnight_queue_item`) với thứ tự ưu tiên `order_index`. Worker nền tự động kích hoạt khi đến `start_time` (mặc định `23:00`), giới hạn số lượng task chạy đồng thời `max_concurrency` (mặc định 1). Cơ chế Dừng an toàn (Safe Stop): khi số lần thất bại liên tiếp đạt ngưỡng `consecutive_failure_limit` (mặc định 3), hàng đợi chuyển sang trạng thái `stopped` và phát sự kiện cảnh báo qua `EventBus`, bảo đảm không tiêu tốn thêm quota API. Trạng thái và vị trí hàng đợi được lưu bền vững trong SQLite, phục hồi chính xác khi khởi động lại mà không chạy lại các task đã xong (`completed`). Khi kết thúc chuỗi hoặc dừng an toàn, hàm `finalize_overnight_queue` tổng hợp số lượng `completed`, `failed`, `needs_human` kèm nhánh git vào trường `last_run_summary` để trả về cho giao diện "Chuỗi để duyệt" (Morning Review Chain). Phân quyền BOLA 3 vai trò: Outsider bị từ chối 403, Member được xem/xếp hàng/đảo thứ tự, Admin/Owner quản trị cấu hình và điều hành tạm dừng/tiếp tục/chạy ngay. Bảo đảm an toàn hệ thống (AC 7): Toàn bộ mã nguồn backend và frontend tuyệt đối không chứa bất kỳ lệnh tắt máy (`shutdown`), khởi động lại (`restart`), hay chuyển chế độ ngủ (`sleep`).
+- **Lý do:** Đáp ứng các tiêu chí nghiệm thu AC1 đến AC7 của Task P3-04 (`13_P3_TU_DONG_TRI_THUC.md`), tuân thủ điều cấm tuyệt đối về an toàn máy người dùng và kiến trúc phân quyền BOLA.
+- **Hệ quả:** Vượt qua toàn bộ 4 ca kiểm thử đơn vị nội bộ (gồm bài test an toàn `safety_test.rs`), 3 ca kiểm thử tích hợp server, 3 bài kiểm thử giao diện React Vitest, probe HTTP nhị phân thật trên `dandori.exe`, và 18/18 bước kiểm tra của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+
+## 76. Task P3-05: Báo cáo Tổng kết Xác định (Reports), Không Số liệu Bịa, Khử Bí mật và Tối ưu hóa Khóa Bộ nhớ
+- **Mục:** Cung cấp báo cáo tổng kết chu kỳ ngày và tuần có số liệu xác thực từ cơ sở dữ liệu lõi, phản ánh trung thực tình trạng thiếu module phụ thuộc, lọc sạch toàn bộ bí mật trước khi xuất file Markdown, và loại bỏ hoàn toàn tranh chấp luồng trong môi trường kiểm thử.
+- **Lựa chọn:** Xây dựng crate `crates/mod-reports` tổng hợp dữ liệu từ các bảng `task`, `run` của lõi SQLite. Tính toán thời lượng trung vị (`calculate_median`) an toàn cho cả tập mẫu chẵn và lẻ, phòng ngừa lỗi indexing. Khi các bảng của module phụ thuộc (`m_account_switch_event` của auto-switch hoặc `m_cost_record` của cost-tracking) không tồn tại hoặc chưa kích hoạt, báo cáo ghi nhận rõ ràng `has_data = false` kèm lý do cụ thể (ví dụ "module cost-tracking chưa kích hoạt"), tuyệt đối không đoán hay bịa đặt số liệu tài chính. Bộ lọc `redact_secrets` nhận diện và thay thế an toàn các tiền tố khóa API (`sk-`, `ghp_`, `dandori_`, `xoxb-`, `xoxp-`) bằng `[REDACTED_SECRET]` và khối private key nhiều dòng (`-----BEGIN ... PRIVATE KEY-----` đến `-----END ... PRIVATE KEY-----`) bằng `[REDACTED_PRIVATE_KEY]`. Phân quyền 3 cấp (BOLA): Outsider bị từ chối 403 Forbidden, Member được xem báo cáo trực tiếp và danh sách snapshot, Quản trị viên workspace được quyền điều chỉnh lịch chốt tự động. Về an toàn đồng thời, sửa đổi cơ chế lấy khóa trong `MemoryKeyStore` (`crates/dandori-vault/src/keystore.rs`): sử dụng khóa đọc không chặn `read()` khi khóa đã tồn tại và khóa ghi đồng bộ `write()` thay cho `try_write()`, loại bỏ triệt để hiện tượng tranh chấp luồng và lỗi flaky `Khóa bộ nhớ đang bận` khi chạy song song nhiều suite kiểm thử.
+- **Lý do:** Đáp ứng trọn vẹn các tiêu chí nghiệm thu AC1 đến AC7 của Task P3-05 (`13_P3_TU_DONG_TRI_THUC.md`), tuân thủ quy tắc trung thực số liệu và bảo vệ bí mật theo RS-SEC-003, RS-VAULT-*.
+- **Hệ quả:** Vượt qua toàn bộ 6 ca kiểm thử đơn vị nội bộ crate `mod-reports`, 2 ca kiểm thử tích hợp server, RED mutation proof, probe HTTP trên nhị phân thật `dandori.exe`, và 18/18 bước kiểm tra của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+
+## 77. Task P3-06: Giọng đọc Báo cáo (Voice Report) qua Web Speech API Client-side, Lọc Bí mật và Xử lý Tương thích
+- **Mục:** Cung cấp tính năng phát giọng đọc tóm tắt báo cáo tổng kết hoàn toàn ở phía client (Client-side Speech Synthesis) bằng Web Speech API tiêu chuẩn của trình duyệt, không gửi âm thanh hay dữ liệu ra bất kỳ dịch vụ bên thứ ba nào, có cơ chế lọc bỏ bí mật và xử lý tương thích mượt mà.
+- **Lựa chọn:** Xây dựng crate `crates/mod-voice-report` chuẩn theo kiến trúc module của Dandori (`slot: dashboard.panel`, khai báo phụ thuộc `requires: ["reports"]`, `risk: low`, `effort: light`, `publish = false`). Ở phía frontend React (`frontend/app/src/features/voice-report/`), triển khai các module:
+  1. `speech.ts`: Sử dụng hàm `isSpeechSynthesisSupported()` kiểm tra an toàn `window.speechSynthesis` và `window.SpeechSynthesisUtterance`. Hàm `cleanVoiceText` loại bỏ định dạng Markdown, đường dẫn URL dài, và thay thế các secret token (`sk-*`, `ghp_*`, `dandori_*`) bằng cụm từ "thông tin bí mật đã che" và khối private key bằng "khóa riêng đã che". Hàm `formatReportToSpeech` chuyển đổi `ReportData` thành các câu văn súc tích ngắn gọn, phân tách thành các chunk nhỏ hơn 150 ký tự để trình duyệt đọc không bị ngắt quãng.
+  2. `useVoiceReport.ts`: Quản lý vòng đời phát âm thanh, hàng đợi chunk, trạng thái playing/paused/stopped và sự kiện kết thúc.
+  3. `VoiceReportControl.tsx`: Thanh điều khiển phát âm thanh với các nút Đọc, Tạm dừng, Tiếp tục, Dừng, chọn giọng đọc, điều chỉnh tốc độ (0.8x đến 1.5x), thông báo unsupported khi không hỗ trợ và tooltip ghi chú quyền riêng tư minh bạch (`DAN-VERIFY-013`).
+  4. Tích hợp trực tiếp vào `ReportsPanel` của module `reports`.
+- **Lý do:** Đáp ứng các tiêu chí nghiệm thu AC 1 đến AC 5 của Task P3-06 (`13_P3_TU_DONG_TRI_THUC.md`), đảm bảo an toàn dữ liệu người dùng, không tạo chi phí API bên ngoài và tuân thủ chặt chẽ các giới hạn ESLint (`max-lines-per-function` <= 40, `max-depth` <= 3).
+- **Hệ quả:** Vượt qua toàn bộ 2 ca kiểm thử đơn vị backend, 6 ca kiểm thử đơn vị frontend Vitest, 2 ca kiểm thử tích hợp server, RED mutation proof, probe HTTP nhị phân thật trên `dandori.exe`, và 18/18 bước kiểm tra của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+
+## 78. Task P3-07: Phương pháp Thống kê ETA không tham số (Median & P80), Ngưỡng không phỏng đoán và Cơ chế Tự đo Sai số
+- **Mục:** Cung cấp tính năng ước lượng khoảng thời gian hoàn thành tác vụ (ETA) dựa trên thống kê thực tế không tham số, loại bỏ hoàn toàn phỏng đoán khi thiếu dữ liệu và tự động hạ bậc độ tin cậy khi sai số gần đây cao.
+- **Lựa chọn:** Xây dựng crate `crates/mod-eta` và giao diện React `frontend/app/src/features/eta`:
+  1. Ban hành ADR 0009 (`docs/adr/0009-eta-method.md`): Lựa chọn Trung vị (Median / P50) làm ước tính trung tâm và Phân vị 80 (P80) làm cận trên khoảng thời gian `[Median, P80]` bằng phương pháp nội suy tuyến tính, chống chịu tốt phân phối lệch phải (Right-skewed) của tác vụ lập trình.
+  2. Nguyên tắc Zero Guessing: Khi số lượng mẫu hoàn tất thành công cùng ngữ cảnh `(project_id, role, provider)` < 5, hệ thống từ chối sinh số liệu ước tính, trả về `has_estimate: false` kèm lý do giải thích trung thực.
+  3. Cơ chế tự đo sai số (Self-measurement): Lưu mọi dự đoán vào bảng SQLite `m_eta_prediction`. Khi tác vụ kết thúc, gọi `record_actual_duration` cập nhật `actual_duration_secs` và tính sai số tuyệt đối `absolute_error_secs = |actual - predicted_median|`. Nếu tỷ lệ sai số trung vị 10 lần gần nhất so với thời lượng trung vị thực tế vượt quá 50% (`recent_mae_ratio > 0.5`), độ tin cậy được tự động hạ 1 bậc (`High -> Medium -> Low`).
+  4. Lọc dữ liệu nghiêm ngặt: Chỉ lấy các lần chạy có `status = 'success'`, cùng dự án, cùng vai trò (`worker`/`lead`), cùng nhà cung cấp CLI (`claude`/`agy`/`codex`), loại bỏ hoàn toàn các lần chạy lỗi hoặc huỷ bỏ.
+  5. Đóng góp giao diện và phân quyền BOLA: Góp UI vào slot `board.card.badge` (badge hiển thị trên thẻ Kanban) và `board.task-panel.section` (mục chi tiết trong panel task). Kiểm tra phân quyền truy cập workspace cho tất cả endpoint REST API.
+- **Lý do:** Đáp ứng các tiêu chí nghiệm thu AC 1 đến AC 5 của Task P3-07 (`13_P3_TU_DONG_TRI_THUC.md`), đảm bảo tính khoa học của phương pháp thống kê và trung thực tuyệt đối với dữ liệu.
+- **Hệ quả:** Vượt qua toàn bộ 5 ca kiểm thử đơn vị backend, 6 ca kiểm thử frontend Vitest, 2 ca kiểm thử tích hợp server, RED mutation proof, probe HTTP trên nhị phân thật `dandori.exe`, và 18/18 bước kiểm tra của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+
+## 79. Task P3-08: Bộ Giải nén Zip Thuần An toàn, Phân tích SKILL.md Tiết kiệm Token và Cơ chế Khôi phục Chờ duyệt
+- **Mục:** Quản lý kỹ năng theo chuẩn đặc tả chính thức `SKILL.md` (Antigravity & Agent Skills specification), hỗ trợ nhập từ thư mục hoặc zip mà không thêm thư viện ngoài, chống Zip-slip và bom giải nén, phát hiện script nhưng không bao giờ thực thi, kiểm soát phê duyệt an toàn và đóng góp prompt tiết kiệm token.
+- **Lựa chọn:** Xây dựng crate `crates/mod-skills-md` và giao diện React `frontend/app/src/features/skills-md`:
+  1. Tài liệu hóa đặc tả kỹ thuật chính thức: `docs/agents/skill-format.md` trích xuất chính xác các trường bắt buộc (`name`, `description`) và các trường tùy chọn (`version`, `author`, `tags`, `tools`, `dependencies`), ghi rõ URL nguồn và ngày đọc.
+  2. Bộ giải nén `.zip` thuần Rust với giải mã RFC 1951 Deflate: Tự triển khai bộ đọc zip và giải mã luồng Deflate không cần thêm crate bên ngoài (`flate2`, `miniz_oxide`, `zip`). Áp dụng cơ chế an toàn: cấm Zip-slip (phát hiện `..`, ký tự tuyệt đối, phân tách ổ đĩa), giới hạn kích thước nén tối đa 10MB, giải nén tối đa 20MB và tối đa 100 tệp.
+  3. Cảnh báo script & Tuyệt đối không thực thi: Quét toàn bộ tệp trong kỹ năng phát hiện các phần mở rộng script (.sh, .py, .js, .ts, .bat, .cmd, .ps1, ...), gán cờ `has_scripts = true` và lưu danh sách `script_files`. Tuyệt đối không có bất kỳ đường dẫn thực thi nào đối với các tệp này; hiển thị cảnh báo đỏ trên giao diện người dùng để Quản trị viên cân nhắc trước khi phê duyệt.
+  4. Cơ chế tự động khôi phục chờ duyệt khi đổi băm (Content Hash Reversion): Băm SHA-256 được tính toán từ nội dung và toàn bộ tệp kèm theo. Khi nhập lại một kỹ năng đã có mà nội dung thay đổi (`content_hash != approved_hash`), trạng thái kỹ năng tự động hoàn trả về `pending_approval` và lập tức bị loại khỏi prompt agent cho đến khi được duyệt lại.
+  5. Đóng góp Prompt tối ưu chi phí token (`PromptContributor`): Triển khai `SkillsPromptContributor` thuộc nhóm `knowledge.skills`. Mặc định chỉ nhúng `- **<name>**: <description>` để tiết kiệm token tối đa; chỉ khi cờ `embed_full = true` được bật mới chèn toàn bộ phần thân Markdown.
+  6. Phân quyền đa người dùng BOLA: Outsider bị chặn 403 Forbidden; Member chỉ được xem danh sách và chi tiết (200); Admin/Owner mới có quyền nhập thư mục/zip, phê duyệt, gắn kết vào dự án/vai trò và xóa.
+- **Lý do:** Đáp ứng trọn vẹn 7 tiêu chí nghiệm thu của Task P3-08 (`13_P3_TU_DONG_TRI_THUC.md`), tuân thủ triệt để các quy tắc an toàn hệ thống, kiến trúc module độc lập và chính sách zero-dependency ngoài danh mục.
+- **Hệ quả:** Vượt qua toàn bộ 6 ca kiểm thử đơn vị backend, 4 ca kiểm thử giao diện Vitest, 4 ca kiểm thử tích hợp server, RED mutation proof, probe HTTP trên nhị phân thật `dandori.exe`, và 18/18 bước kiểm tra của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+
+## 80. Task P3-09: Điểm Mở rộng Lõi `WorkdirDecorator`, Cơ chế Loại trừ Git Cục bộ và Đồng bộ Tệp Hướng dẫn CLI Tất định
+- **Mục:** Triển khai điểm mở rộng `WorkdirDecorator` trong lõi Dandori và module `crates/mod-instruction-sync` nhằm tự động sinh và đồng bộ tệp hướng dẫn agent CLI (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`) từ một nguồn duy nhất (hồ sơ kỹ thuật và kỹ năng đã duyệt), bảo vệ repository gốc chống ghi đè và chống ô nhiễm commit.
+- **Lựa chọn:** Xây dựng điểm mở rộng lõi và module `mod-instruction-sync`:
+  1. Ban hành ADR 0010 (`docs/adr/0010-workdir-decorator.md`): Phân tích rủi ro ghi đè tệp thật của người dùng và thiết lập các biện pháp giảm thiểu: danh sách tên tệp cho phép (`allowed_workdir_files`), chỉ cho phép ghi tại gốc worktree, kiểm tra chống đường dẫn con và path traversal (`..`, `/`, `\`).
+  2. Tài liệu hóa đặc tả tệp chỉ thị CLI: `docs/agents/instruction-files.md` trích xuất chính xác quy định về tệp hướng dẫn mà các CLI đọc từ tài liệu chính thức của Anthropic (`CLAUDE.md`), OpenAI/Antigravity (`AGENTS.md`), Cursor (`.cursorrules`), ghi rõ URL nguồn và ngày đọc.
+  3. Cơ chế chống ô nhiễm commit Git: Bổ sung phương thức `add_local_exclude` vào `GitClient` sử dụng `git rev-parse --git-path info/exclude`. Mọi tệp sinh tự động bởi decorator đều được tự động đăng ký vào tệp exclude cục bộ của worktree, đảm bảo không bao giờ xuất hiện trong `git status --porcelain` và không bị `pr-merge` commit vào repository.
+  4. Cơ chế bảo toàn tệp thật của dự án: Khi tệp đã tồn tại trong repository gốc, mặc định hệ thống chọn chiến lược `skip` (bỏ qua sinh tệp và báo cáo, giữ nguyên vẹn nội dung và mã băm SHA-256 của tệp trong repo). Nếu người dùng chủ động chọn chiến lược `append`, hệ thống chèn khối hướng dẫn có ranh giới rõ ràng `<!-- BEGIN DANDORI INSTRUCTION SYNC -->` ... `<!-- END DANDORI INSTRUCTION SYNC -->` vào bản sao trong worktree mà không hề sửa đổi repository gốc.
+  5. Sinh nội dung tất định (Deterministic Generation): Nội dung sinh được sắp xếp theo thứ tự bảng chữ cái cố định của danh mục và khóa trong hồ sơ kỹ thuật, cũng như tên của các kỹ năng đã duyệt. Mỗi tệp đều mang dòng tiêu đề quy chuẩn `"<!-- Tệp sinh tự động bởi Dandori (Auto-generated by Dandori) - Không chỉnh sửa trực tiếp -->"`.
+  6. Quản lý vòng đời decorator: `FeatureLifecycleManager` tự động đăng ký decorator khi module `instruction-sync` được kích hoạt và gỡ bỏ hoàn toàn khỏi danh sách decorator hoạt động khi module bị tắt.
+  7. Phân quyền BOLA: Xác thực quyền workspace chặt chẽ (Outsider 403, Member chỉ xem cấu hình và xem trước 200, Workspace Admin mới được quyền chỉnh sửa cấu hình).
+- **Lý do:** Đáp ứng trọn vẹn 7 tiêu chí nghiệm thu của Task P3-09 (`13_P3_TU_DONG_TRI_THUC.md`), giải quyết bài toán đồng bộ hướng dẫn đa CLI từ nguồn duy nhất mà vẫn bảo vệ an toàn tuyệt đối cho repository của người dùng.
+- **Hệ quả:** Vượt qua toàn bộ 2 ca kiểm thử đơn vị core API, 2 ca kiểm thử generator, 3 ca kiểm thử frontend Vitest, 4 ca kiểm thử tích hợp server, RED mutation proof, probe HTTP trên nhị phân thật `dandori.exe`, và 18/18 bước kiểm tra của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+
+## 81. Task P3-10: Module `shared-memory` — Bộ nhớ Dùng chung, Phòng thủ Nhiễm độc Bộ nhớ và Lọc Khóa Riêng Đa dòng (B-10)
+- **Mục:** Triển khai module `crates/mod-shared-memory` nhằm chia sẻ tri thức và bối cảnh lịch sử giữa các agent, thiết lập cơ chế phòng thủ nhiễm độc bộ nhớ (Memory Poisoning / Backdoor Prompt Injection) và che giấu khóa riêng tư đa dòng (Backlog B-10) mà không thêm thư viện ngoài.
+- **Lựa chọn:** Xây dựng crate `crates/mod-shared-memory` và giao diện React `frontend/app/src/features/shared-memory`:
+  1. Ban hành ADR 0011 (`docs/adr/0011-memory-safety.md`): Phân tích toàn diện mối đe dọa nhiễm độc bộ nhớ và tấn công cửa sau khi agent đọc tri thức lịch sử; thiết lập nguyên tắc Human-in-the-loop — mọi tri thức do agent đề xuất mặc định ở trạng thái `pending`, tuyệt đối không bao giờ được đưa vào prompt của agent khác cho đến khi người dùng bấm Duyệt.
+  2. Ranh giới bối cảnh nghiêm ngặt: Khi người dùng đã duyệt, dữ liệu tri thức được đưa vào qua `PromptContributor` nhưng bắt buộc phải bao bọc trong ranh giới rõ ràng `<!-- BEGIN DANDORI SHARED MEMORY (CONTEXT ONLY - UNTRUSTED HISTORICAL DATA) -->` kèm lời nhắc hệ thống coi đây là dữ liệu tham khảo, tuyệt đối không thực thi các mệnh lệnh chứa bên trong.
+  3. Lọc và che giấu bí mật thuần Rust (B-10): Tự triển khai thuật toán đối sánh chuỗi bộ nhớ trong `src/redaction.rs` phát hiện và che giấu khối khóa riêng tư đa dòng (`-----BEGIN ... PRIVATE KEY-----` ... `-----END ... PRIVATE KEY-----` -> `[BÍ MẬT ĐÃ CHE: KHÓA RIÊNG TƯ]`) và các API token (`ghp_`, `sk-`, `AKIA`) với zero-dependency (không cần thêm crate `regex`, đảm bảo `cargo deny check` xanh).
+  4. Trích xuất cú pháp an toàn: Phân tích khối `<<<DANDORI_MEMORY ... >>>` từ đầu ra của agent, phân loại chuẩn hóa (`fact`, `decision`, `convention`, `lesson`), giới hạn tối đa 5 khối mỗi lần chạy và tối đa 2000 ký tự mỗi khối để chống tràn context window, bỏ qua an toàn các khối sai định dạng hoặc chứa bí mật.
+  5. Phân quyền BOLA: Xác thực quyền workspace chặt chẽ (Outsider bị 403 Forbidden ở cả GET và POST; Member xem, thêm và duyệt/từ chối 200; chỉ Quản trị viên Workspace Admin mới có quyền xóa vĩnh viễn).
+- **Lý do:** Đáp ứng trọn vẹn 6 tiêu chí nghiệm thu của Task P3-10 (`13_P3_TU_DONG_TRI_THUC.md`) và giải quyết dứt điểm Backlog B-10.
+- **Hệ quả:** Vượt qua toàn bộ 4 ca kiểm thử đơn vị backend, 2 ca kiểm thử frontend Vitest, 4 ca kiểm thử tích hợp server, RED mutation proof, probe HTTP trên nhị phân thật `dandori.exe`, và 18/18 bước kiểm tra của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+
+## 82. Task P3-11: Module `auto-lessons` — Tự động Rút Bài học Sau Task, Chống Lặp và Bỏ qua Task Tầm thường
+- **Mục:** Triển khai module `crates/mod-auto-lessons` và giao diện React `frontend/app/src/features/auto-lessons` nhằm tự động ghi nhận và trích xuất bài học sau khi task chuyển sang trạng thái `done` hoặc `failed`, chuyển vào `shared-memory` dưới dạng mục `lesson` ở trạng thái `pending`.
+- **Lựa chọn:** Xây dựng crate `crates/mod-auto-lessons` và feature `auto-lessons`:
+  1. Quy trình kích hoạt tự động: Lắng nghe sự kiện `EventPayload::TaskStatusChanged` từ `EventBus` khi trạng thái task đạt `done` hoặc `failed` (có thể cấu hình bật/tắt riêng biệt theo từng trạng thái).
+  2. Cơ chế chống lặp (Anti-loop) tuyệt đối:
+     - Bảng cơ sở dữ liệu `m_auto_lessons_run` sử dụng ràng buộc khóa duy nhất `task_id TEXT NOT NULL UNIQUE`, đảm bảo mỗi task chỉ được chạy rút bài học đúng duy nhất một lần.
+     - Kiểm tra tiêu đề và ngữ cảnh: Bỏ qua các task chứa nhãn `[auto-lessons]` để ngăn chặn triệt để vòng lặp kích hoạt đệ quy vô tận.
+  3. Bỏ qua task tầm thường (Trivial Task Filtering):
+     - Kiểm tra độ dài nội dung của task (`title` + `description`). Nếu tổng độ dài nhỏ hơn ngưỡng cấu hình `min_content_length` (mặc định 10 ký tự), ghi nhận bản ghi với trạng thái `skipped` và lý do `"Task quá ngắn hoặc thiếu thông tin"`, không phát sinh tiến trình rút bài học và không tạo mục nhớ rác.
+  4. Nguyên tắc An toàn Bộ nhớ (Human-in-the-loop):
+     - Bài học sau khi trích xuất được lưu vào bảng `m_shared_memory_entry` với `category = 'lesson'`, `source_type = 'agent'`, và bắt buộc ở trạng thái `pending`. Tuyệt đối không tự động duyệt (`approved`), tuân thủ triệt để nguyên tắc phòng chống nhiễm độc bộ nhớ (Memory Poisoning) theo ADR 0011.
+  5. Lọc và che giấu bí mật thuần Rust (B-10):
+     - Trước khi lưu vào bộ nhớ chung và trước khi truyền vào prompt của vai PM, toàn bộ nội dung được lọc qua `redact_secrets` để che giấu các khối khóa riêng tư đa dòng (`-----BEGIN ... PRIVATE KEY-----` -> `[REDACTED_PRIVATE_KEY]`) và API tokens (`sk-`, `ghp_`, `gho_`, `xoxb-` -> `[REDACTED_SECRET]`) với zero external dependencies.
+  6. Quản trị và cấu hình dự án: Cung cấp API `GET / PUT /projects/{id}/auto-lessons/config` và `GET /projects/{id}/auto-lessons/runs` với kiểm tra phân quyền BOLA chặt chẽ (chỉ Workspace Admin mới có quyền cập nhật cấu hình; Outsider bị chặn 403 Forbidden).
+- **Lý do:** Đáp ứng trọn vẹn 5 tiêu chí nghiệm thu của Task P3-11 (`13_P3_TU_DONG_TRI_THUC.md`), đảm bảo bài học thực tế được ghi nhận tự động vào bối cảnh dự án một cách an toàn, có chọn lọc và không gây ô nhiễm tri thức.
+- **Hệ quả:** Vượt qua toàn bộ 5 ca kiểm thử đơn vị backend, 1 ca kiểm thử frontend Vitest, 4 ca kiểm thử tích hợp server, RED mutation proof, probe HTTP trên nhị phân thật `dandori.exe`, và 18/18 bước kiểm tra của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+## 83. Task P3-12: Module `notifications` — Kênh Thông báo Ngoài (Telegram, Discord, Slack), Trích xuất SSRF-safe HTTP Client và Bảo mật Vault
+- **Mục:** Triển khai module `crates/mod-notifications` và giao diện React `frontend/app/src/features/notifications` nhằm tự động gửi thông báo qua Telegram Bot API, Discord Webhook và Slack Incoming Webhook; trích xuất SSRF-safe HTTP client dùng chung vào `dandori-module-api` (Quy tắc 9); bảo vệ bí mật tuyệt đối qua Dandori Vault; thiết lập cơ chế gộp trùng và giới hạn tần suất.
+- **Lựa chọn:** Xây dựng crate `crates/mod-notifications` và feature `notifications`:
+  1. *Trích xuất SSRF Client Dùng chung (Quy tắc 9):*
+     - Di chuyển các hàm phân tích an toàn URL, kiểm tra IP cấm (loopback, link-local, private LAN, metadata cloud 169.254.169.254), danh sách miền cho phép (`validate_domain_in_allowlist`), bộ client HTTP an toàn (`build_safe_client`, `build_safe_client_with_timeout`) và làm sạch thông báo lỗi (`sanitize_error_message`) từ `crates/mod-integrations` sang `crates/dandori-module-api/src/safe_http.rs`.
+     - Cập nhật `mod-integrations` tái sử dụng `dandori_module_api::safe_http`. Các module độc lập hoàn toàn, không phụ thuộc chéo lẫn nhau.
+  2. *Tích hợp API chuẩn theo tài liệu chính thức (Điều cấm 11):*
+     - Telegram Bot API: Gọi `POST https://api.telegram.org/bot<token>/sendMessage` với `chat_id`, `text` (tối đa 4096 bytes) và `parse_mode = "MarkdownV2"`. Tự động escape các ký tự đặc biệt của MarkdownV2 (`_`, `*`, `[`, `]`, `(`, `)`, `~`, `\`...) để tránh lỗi API.
+     - Discord Webhook: Gọi `POST https://discord.com/api/webhooks/<id>/<token>` với body `{ "content": string }` (tối đa 2000 ký tự).
+     - Slack Incoming Webhook: Gọi `POST https://hooks.slack.com/services/...` với payload `{ "text": string }`.
+  3. *Bảo vệ bí mật và cách ly người dùng (D-09 & BOLA):*
+     - Khóa Bot Token và Webhook URLs lưu qua `dandori_vault::default_key_store()`, bảng cơ sở dữ liệu `m_notifications_channel` chỉ lưu định danh `vault_secret_id` dưới dạng `vault:<uuid>`.
+     - Tuyệt đối không bao giờ trả về khóa thô qua REST API hoặc hiển thị lên giao diện (chỉ trả về `has_secret: true`).
+     - Outsider (người dùng ngoài workspace) bị chặn 403 Forbidden. Chỉ Quản trị viên (Workspace Admin) mới có quyền tạo, sửa, xóa, và gửi thử nghiệm kênh.
+  4. *Chống lặp và giới hạn tần suất (Deduplication & Rate Limiting):*
+     - Gộp trùng (dedup): Các sự kiện gửi cho cùng một task trong vòng 300 giây được đánh dấu `deduplicated` trong bảng `m_notifications_history`, không gửi trùng ra ngoài.
+     - Giới hạn tần suất (rate limit): Tối đa 10 thông báo/phút trên mỗi kênh, vượt quá sẽ ghi nhận `rate_limited`.
+  5. *Cách ly lỗi (Failure Isolation):*
+     - Lỗi mạng hoặc lỗi phản hồi từ phía dịch vụ ngoài chỉ được ghi nhận vào `m_notifications_history` với trạng thái `failed` và nội dung lỗi đã che giấu khóa; tuyệt đối không làm ảnh hưởng đến tiến trình chạy hay trạng thái thực thi của task.
+- **Lý do:** Đáp ứng trọn vẹn 6 tiêu chí nghiệm thu của Task P3-12 (`13_P3_TU_DONG_TRI_THUC.md`), bảo đảm an toàn hệ thống, tuân thủ nguyên tắc zero-dependency ngoài danh mục được duyệt và không rò rỉ bí mật.
+- **Hệ quả:** Vượt qua toàn bộ 5 ca kiểm thử đơn vị backend, 1 ca kiểm thử frontend Vitest, 3 ca kiểm thử tích hợp server, RED mutation proof, probe HTTP trên nhị phân thật `dandori.exe`, và 18/18 bước kiểm tra của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+## 84. Task P3-13: Module `mobile` — Truy cập Di động An toàn (Mobile Companion), Phê duyệt Từ xa và Thẩm định Origin
+- **Mục:** Triển khai module `crates/mod-mobile` và giao diện React `frontend/app/src/features/mobile` (màn hình độc lập `/m` cho điện thoại di động); ban hành ADR 0012 về kiến trúc truy cập từ xa; thiết lập cơ chế ghép đôi thiết bị với token phạm vi hẹp; bảo vệ Origin/Host nghiêm ngặt (RS-SEC-006) và cách ly không gian làm việc.
+- **Lựa chọn:** Xây dựng crate `crates/mod-mobile` và feature `mobile`:
+  1. *Nguyên tắc an toàn và kiến trúc truy cập từ xa (ADR 0012 & RS-SEC-006):*
+     - Dandori mặc định chỉ lắng nghe trên `127.0.0.1` (`ServerConfig::default().host`), tuyệt đối không tự ý bind `0.0.0.0` và không tự động thiết lập đường hầm ra Internet.
+     - Ban hành `docs/adr/0012-mobile-access.md` hướng dẫn người dùng tự thiết lập mạng riêng ảo (Tailscale, WireGuard) hoặc Reverse Proxy qua Cloudflare Tunnel / SSH tunnel nếu muốn truy cập từ xa an toàn.
+     - Thêm bài kiểm tra thủ công `DAN-VERIFY-020` vào `docs/manual-test-checklist.md`.
+  2. *Token ghép đôi phạm vi hẹp và băm một chiều:*
+     - Token sinh ngẫu nhiên định dạng `mob_<64_hex_chars>`, hiển thị đúng một lần duy nhất khi tạo thiết bị.
+     - Cơ sở dữ liệu `m_mobile_device` chỉ lưu chuỗi băm SHA-256 (`token_hash`), không lưu token thô.
+     - Token chỉ có quyền truy cập phạm vi hẹp: xem trạng thái tóm tắt (`/status`), xem danh sách yêu cầu cần duyệt (`/approvals`), và gửi quyết định duyệt/từ chối (`/approvals/{id}/decision`).
+     - Token di động bị cổng `FeatureLifecycleManager` chặn hoàn toàn (`403 Forbidden` - `forbidden_scope`) nếu gọi sang các module khác (`notifications`, `reports`, `shared-memory`...), bị từ chối `401 Unauthorized` khi gọi các route lõi của server (`/workspaces`, `/projects`...), và bị từ chối khi gọi route quản trị nội bộ của module.
+  3. *Thẩm định Origin header linh hoạt và bảo vệ CSRF:*
+     - Cập nhật middleware `check_origin` của `dandori-server` để kiểm tra danh sách `allowed_origins` được cấu hình động theo từng workspace từ bảng `m_mobile_config`.
+     - Hỗ trợ so khớp chính xác tên miền và wildcard subdomain (`*.tunnel.mycompany.com`).
+  4. *Cách ly không gian làm việc (BOLA isolation):*
+     - Thiết bị thuộc workspace A gửi yêu cầu duyệt task thuộc workspace B bị từ chối ngay lập tức với `403 Forbidden`.
+     - Chỉ thành viên có vai trò Admin của workspace mới có quyền tạo thiết bị, xem log hành động hoặc thu hồi token.
+  5. *Giao diện tối ưu di động và khả năng tiếp cận (Accessibility):*
+     - Màn hình `/m` chạy độc lập, tự động ẩn thanh điều hướng và sidebar của desktop để tối đa hóa không gian hiển thị trên màn hình nhỏ.
+     - Toàn bộ vùng chạm (touch target) trên các nút duyệt, từ chối, kết nối, làm mới đạt chuẩn $\ge 44\text{px}$ (`min-h-[44px]`).
+     - Khai báo đầy đủ 36 khóa bản địa hóa tiếng Việt trong `i18n.ts`.
+- **Lý do:** Đáp ứng trọn vẹn 8 tiêu chí nghiệm thu của Task P3-13 (`13_P3_TU_DONG_TRI_THUC.md`), bảo đảm an toàn hệ thống, tuân thủ nguyên tắc zero-dependency và phòng ngừa rủi ro mở cổng mạng trái phép.
+- **Hệ quả:** Vượt qua toàn bộ 4 ca kiểm thử đơn vị backend, 3 ca kiểm thử frontend Vitest, 5 ca kiểm thử tích hợp server, RED mutation proof, probe HTTP trên nhị phân thật `dandori.exe`, và 18/18 bước kiểm tra của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+## 85. Task P3-14: Module `audit-log` — Chuỗi Băm Mật Mã SHA-256 Kiểm Toán, Phát Hiện Can Thiệp và Router Bất Biến
+- **Mục:** Triển khai module `crates/mod-audit-log` và giao diện React `frontend/app/src/features/audit-log` (ô cắm `settings.section`, order 80); ban hành ADR 0013 về kiến trúc toàn vẹn nhật ký kiểm toán; xây dựng chuỗi băm mật mã SHA-256 (`prev_hash`); tự động làm sạch các chuỗi bí mật/token trước khi lưu trữ; bảo vệ tính bất biến của router (tuyệt đối không có PUT/PATCH/DELETE); hỗ trợ kiểm tra toàn vẹn chuỗi và xuất dữ liệu JSON; công bố trung thực giới hạn lưu trữ cục bộ SQLite.
+- **Lựa chọn:** Xây dựng crate `crates/mod-audit-log` và feature `audit-log`:
+  1. *Kiến trúc chuỗi băm SHA-256 và phát hiện can thiệp (ADR 0013):*
+     - Mỗi bản ghi mới lấy băm của bản ghi trước đó (`prev_hash`), bắt đầu từ `GENESIS_HASH` (chuỗi 64 số 0).
+     - Payload băm gồm: `prev_hash|sequence|workspace_id|actor_id|action|target_type|target_id|created_at|details`.
+     - Endpoint `/workspaces/{ws}/verify` duyệt toàn bộ bản ghi theo thứ tự `sequence`: nếu phát hiện `sequence` bị ngắt quãng, `prev_hash` sai lệch hoặc nội dung `details` bị sửa đổi ngoài luồng trực tiếp trong SQLite, trả về `is_valid: false` cùng chỉ số `broken_at_sequence`.
+     - Ban hành `docs/adr/0013-audit-log-integrity.md` và bổ sung `DAN-VERIFY-021` vào `docs/manual-test-checklist.md`.
+  2. *Làm sạch chuỗi bí mật (RS-SEC-003) & Phòng chống rò rỉ:*
+     - Trước khi tính băm và lưu vào bảng `m_audit_log`, hàm `redact_sensitive_strings` tự động thay thế Private Key (`-----BEGIN ... PRIVATE KEY-----`), Bearer token (`Bearer ...`), Mobile token (`mob_...`), và API key (`sk-...`) bằng chuỗi `[BẢO MẬT ĐÃ ĐƯỢC CHE GIẤU]`.
+     - Đảm bảo nhật ký xuất ra qua `/workspaces/{ws}/export` an toàn, không chứa thông tin nhạy cảm.
+  3. *Tính bất biến và Router chỉ có GET/POST:*
+     - Cung cấp các endpoint: GET/POST `/workspaces/{ws}/logs`, GET `/workspaces/{ws}/verify`, GET `/workspaces/{ws}/export`.
+     - Router không khai báo bất kỳ handler nào cho `PUT`, `PATCH`, hoặc `DELETE`, trả về `405 Method Not Allowed` khi cố tình gửi yêu cầu sửa/xóa.
+  4. *Cách ly không gian làm việc (BOLA Isolation):*
+     - Mọi endpoint của module đều thẩm tra phiên qua `can_access_workspace(pool, &user, ws)`. Người dùng không thuộc workspace bị từ chối với mã lỗi `403 Forbidden`.
+  5. *Giao diện người dùng và Giới hạn kiến trúc (UI Slot & i18n):*
+     - Hợp phần `AuditLogPanel` gắn vào ô cắm Cài đặt: hiển thị bảng sự kiện, hộp thông báo giới hạn SQLite cục bộ (ADR 0013), bộ lọc theo hành động, nút "Kiểm tra toàn vẹn chuỗi" và nút "Xuất nhật ký (JSON)".
+     - Áp dụng các custom hooks `useAuditLog` và `useAuditVerification` để tuân thủ giới hạn hàm $\le 40$ dòng của Kantanda ESLint.
+     - Khai báo 18 khóa i18n tiếng Việt trong `i18n.ts`.
+- **Lý do:** Đáp ứng đầy đủ các tiêu chí nghiệm thu của Task P3-14 (`13_P3_TU_DONG_TRI_THUC.md`), đảm bảo an toàn kiểm toán, tính toàn vẹn dữ liệu và minh bạch về giới hạn bảo mật cục bộ.
+- **Hệ quả:** Vượt qua toàn bộ 4 ca kiểm thử đơn vị backend, 3 ca kiểm thử frontend Vitest, 5 ca kiểm thử tích hợp server, RED mutation proof, probe HTTP trên nhị phân thật `dandori.exe`, và 18/18 bước kiểm tra của cổng `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+
+## 86. Task P3-15: Cổng Giai đoạn 3 (P3 Gate) — Kịch bản E2E Vòng lặp Tự động Qua đêm, Đồng hồ Giả tăng tốc và Bảo vệ Nguồn điện
+- **Mục:** Xác thực tự động vòng làm việc tự động hóa và quản lý tri thức khép kín của toàn bộ 34 module trong Giai đoạn 3 (P0 đến P3); kiểm chứng luồng hoạt động qua đêm với đồng hồ mô phỏng tăng tốc; bảo đảm an toàn hệ thống (không tắt máy) và bảo đảm tính trung thực đối với bài kiểm thực tế.
+- **Lựa chọn:** Xây dựng kịch bản kiểm thử E2E tích hợp đầy đủ tại `crates/dandori-e2e/tests/p3_gate.rs`:
+  1. *Đồng hồ giả tăng tốc và bảo vệ khung giờ cấm (Quiet Hours Guard):*
+     - Cấu hình khung giờ cấm ban ngày (08:00 - 22:00) tại `m_quiet_window`.
+     - Kiểm tra tại thời điểm ban ngày (14:00): `in_quiet_hours` = true, hàng đợi tự động bị chặn.
+  2. *Hàng đợi tự động qua đêm (Overnight Queue lúc 23:00):*
+     - Đưa 5 task vào hàng đợi qua đêm: 4 task hoàn thành chuyển sang `ready_to_merge`, 1 task cố ý thất bại đưa về `needs_human`.
+     - Task thứ 4 gặp lỗi cạn hạn mức (`QuotaExhausted`), hệ thống kích hoạt bộ chọn tài khoản tự động chuyển sang tài khoản dự phòng và hoàn thành nhiệm vụ.
+  3. *Báo cáo buổi sáng và Kênh thông báo ngoài (Morning Daily Report & Notifications):*
+     - Lúc 07:00 sáng, hệ thống lấy báo cáo ngày xác nhận chính xác: 4 task thành công, 1 task cần hỗ trợ thủ công (`needs_human`).
+     - Gửi thông báo tóm tắt qua mock HTTP server với SSRF an toàn.
+  4. *Tính toàn vẹn của Nhật ký kiểm toán (Audit Log Hash Chain):*
+     - Gọi GET `/api/v1/m/audit-log/workspaces/{ws}/verify`: chuỗi băm mật mã SHA-256 toàn vẹn (`is_valid: true`).
+  5. *Quy tắc an toàn tuyệt đối Zero Shutdown:*
+     - Kiểm tra mã nguồn bằng `cargo test --test safety_test`: tuyệt đối không chứa bất kỳ chuỗi lệnh tắt máy hay đưa máy vào chế độ ngủ nào.
+  6. *Sổ tay kiểm thử thủ công bài kiểm qua đêm thật:*
+     - Bổ sung `DAN-VERIFY-022` vào `docs/manual-test-checklist.md`.
+     - Đánh dấu P3-15 là `DONE_WITH_GAPS` do bài kiểm thực tế cần người dùng chạy trên máy thật với tài khoản CLI thật.
+- **Lý do:** Đáp ứng trọn vẹn tiêu chí nghiệm thu của Cổng P3 (`13_P3_TU_DONG_TRI_THUC.md`), bảo đảm an toàn máy tính và tính trung thực với số liệu.
+- **Hệ quả:** Kịch bản kiểm thử E2E xanh 100%, vượt qua kiểm thử đột biến QC1 (RED mutation proof), hoàn thành probe HTTP trên binary thực tế `dandori.exe`, và vượt qua cổng xác thực 18 bước `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.

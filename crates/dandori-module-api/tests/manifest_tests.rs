@@ -167,3 +167,35 @@ fn test_table_name_convention() {
     assert!(table_name("bad name!", "note").is_err());
     assert!(table_name("sample-hello", "").is_err());
 }
+
+#[test]
+fn test_manifest_allowed_workdir_files_validation() {
+    let valid_json = r#"{
+        "id": "instruction-sync",
+        "group": "knowledge",
+        "name": "Đồng bộ hướng dẫn",
+        "description": "Đồng bộ file hướng dẫn agent",
+        "version": "0.1.0",
+        "effort": "medium",
+        "risk": "low",
+        "allowed_workdir_files": ["AGENTS.md", "CLAUDE.md", ".cursorrules"]
+    }"#;
+    let manifest: Manifest = serde_json::from_str(valid_json).expect("should parse");
+    assert!(manifest.validate().is_ok());
+
+    let invalid_json = r#"{
+        "id": "instruction-sync",
+        "group": "knowledge",
+        "name": "Đồng bộ hướng dẫn",
+        "description": "Đồng bộ file hướng dẫn agent",
+        "version": "0.1.0",
+        "effort": "medium",
+        "risk": "low",
+        "allowed_workdir_files": ["../evil.sh"]
+    }"#;
+    let bad_manifest: Manifest = serde_json::from_str(invalid_json).expect("should parse");
+    assert!(matches!(
+        bad_manifest.validate().unwrap_err(),
+        ManifestError::InvalidWorkdirFile(_)
+    ));
+}

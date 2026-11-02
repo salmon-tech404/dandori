@@ -1,0 +1,24 @@
+{
+  "id": "voice-report",
+  "group": "dashboard",
+  "name": "Giọng đọc báo cáo (Voice Report)",
+  "description": "Đọc báo cáo tổng kết bằng Web Speech API có sẵn của trình duyệt",
+  "version": "0.1.0",
+  "requires": ["reports"],
+  "scopes": ["workspace"],
+  "risk": "low",
+  "effort": "low",
+  "backend": {
+    "crate": "crates/mod-voice-report"
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "voice-report-dashboard-panel",
+        "slot": "dashboard.panel",
+        "label": "Giọng đọc báo cáo",
+        "order": 40
+      }
+    ]
+  }
+}

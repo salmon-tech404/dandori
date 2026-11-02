@@ -350,3 +350,168 @@ pub trait GitHostProvider: fmt::Debug + Send + Sync {
         method: MergeMethod,
     ) -> BoxFuture<'static, Result<MergeResult, GitHostError>>;
 }
+
+/// Lỗi xảy ra trong quá trình trang trí thư mục làm việc (P3-09).
+#[derive(Debug, thiserror::Error)]
+pub enum DecoratorError {
+    /// Tên tệp không nằm trong danh sách cho phép của module.
+    #[error("tệp '{0}' không nằm trong danh sách cho phép của module")]
+    DisallowedFile(String),
+
+    /// Đường dẫn tệp chứa ký tự phân cách thư mục hoặc '..'.
+    #[error("đường dẫn tệp không hợp lệ hoặc chứa ký tự nguy hiểm: {0}")]
+    UnsafePath(String),
+
+    /// Lỗi I/O khi thao tác với tệp.
+    #[error("lỗi I/O khi trang trí worktree: {0}")]
+    Io(#[from] std::io::Error),
+
+    /// Lỗi Git khi thao tác với repository/worktree.
+    #[error("lỗi git khi cấu hình exclude worktree: {0}")]
+    Git(String),
+
+    /// Lỗi nội bộ khác.
+    #[error("lỗi trang trí worktree: {0}")]
+    Other(String),
+}
+
+/// Ngữ cảnh khi thực hiện trang trí thư mục làm việc (P3-09).
+#[derive(Debug, Clone)]
+pub struct DecoratorContext {
+    /// ID workspace.
+    pub workspace_id: String,
+    /// ID dự án.
+    pub project_id: String,
+    /// ID tác vụ.
+    pub task_id: String,
+    /// Vai trò của agent đang chạy (worker, lead, test, doc...).
+    pub role: AgentRole,
+    /// Nhà cung cấp CLI (claude, codex, agy, cursor...).
+    pub provider: Option<String>,
+}
+
+/// Kết quả trang trí thư mục làm việc (P3-09).
+#[derive(Debug, Clone, Default)]
+pub struct DecoratorResult {
+    /// Danh sách tên tệp mới được tạo tại gốc worktree.
+    pub created_files: Vec<String>,
+    /// Danh sách tên tệp bị bỏ qua (do đã tồn tại trong repository gốc).
+    pub skipped_files: Vec<String>,
+    /// Danh sách tên tệp được nối thêm khối nội dung có ranh giới.
+    pub appended_files: Vec<String>,
+}
+
+/// Điểm mở rộng trang trí thư mục làm việc trước khi agent chạy (P3-09).
+pub trait WorkdirDecorator: fmt::Debug + Send + Sync {
+    /// Danh sách tên tệp (tại gốc worktree) mà decorator được phép tạo/sửa.
+    fn allowed_filenames(&self) -> &[&str];
+
+    /// Thực hiện trang trí thư mục làm việc.
+    fn decorate(
+        &self,
+        workdir: &std::path::Path,
+        context: &DecoratorContext,
+    ) -> BoxFuture<'static, Result<DecoratorResult, DecoratorError>>;
+}
+
+/// Tệp đích có tồn tại không; từ chối nếu đường dẫn là symlink/không phải tệp thường.
+///
+/// Không bao giờ ghi xuyên liên kết tượng trưng: kho mã không đáng tin có thể đặt `AGENTS.md` là symlink trỏ ra
+/// ngoài worktree (kể cả symlink treo), khi đó ghi/nối sẽ sửa tệp ngoài thư mục làm việc.
+async fn existing_regular_file(
+    file_path: &std::path::Path,
+    filename: &str,
+) -> Result<bool, DecoratorError> {
+    match tokio::fs::symlink_metadata(file_path).await {
+        Ok(meta) => {
+            if meta.file_type().is_symlink() || !meta.is_file() {
+                return Err(DecoratorError::UnsafePath(filename.to_string()));
+            }
+            Ok(true)
+        }
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(false),
+        Err(e) => Err(DecoratorError::from(e)),
+    }
+}
+
+/// Thay hoặc nối khối nội dung có ranh giới `BEGIN/END` vào tệp hiện có.
+fn merge_boundary_block(existing: &str, content: &str, marker: &str) -> String {
+    let begin_marker = format!("<!-- BEGIN {marker} -->");
+    let end_marker = format!("<!-- END {marker} -->");
+
+    if existing.contains(&begin_marker) && existing.contains(&end_marker) {
+        // Thay thế khối đã có
+        let start = existing.find(&begin_marker).unwrap_or(0);
+        let end = existing[start..]
+            .find(&end_marker)
+            .map_or(existing.len(), |i| start + i + end_marker.len());
+        format!(
+            "{}{}\n{}\n{}{}",
+            &existing[..start],
+            begin_marker,
+            content.trim(),
+            end_marker,
+            &existing[end..]
+        )
+    } else {
+        // Nối vào cuối tệp
+        format!(
+            "{}\n\n{}\n{}\n{}\n",
+            existing.trim_end(),
+            begin_marker,
+            content.trim(),
+            end_marker
+        )
+    }
+}
+
+/// Ghi hoặc nối thêm tệp an toàn vào gốc worktree và tự động thêm vào `.git/info/exclude` (P3-09).
+///
+/// # Errors
+/// Trả về `DecoratorError` nếu đường dẫn không an toàn, không nằm trong danh sách cho phép, hoặc lỗi I/O.
+pub async fn safe_write_worktree_file(
+    workdir: &std::path::Path,
+    filename: &str,
+    content: &str,
+    allowed: &[&str],
+    append_mode: bool,
+    boundary_marker: Option<&str>,
+) -> Result<bool, DecoratorError> {
+    // 1. Kiểm tra ký tự phân tách thư mục hoặc '..'
+    if filename.trim().is_empty()
+        || filename.contains('/')
+        || filename.contains('\\')
+        || filename.contains("..")
+    {
+        return Err(DecoratorError::UnsafePath(filename.to_string()));
+    }
+
+    // 2. Kiểm tra whitelist allowed_filenames
+    if !allowed.contains(&filename) {
+        return Err(DecoratorError::DisallowedFile(filename.to_string()));
+    }
+
+    let file_path = workdir.join(filename);
+    let file_exists = existing_regular_file(&file_path, filename).await?;
+
+    if file_exists {
+        if !append_mode {
+            // Chế độ skip: không ghi đè
+            return Ok(false);
+        }
+        // Chế độ append: nối thêm khối có ranh giới
+        let marker = boundary_marker.unwrap_or("DANDORI INSTRUCTION SYNC");
+        let existing = tokio::fs::read_to_string(&file_path).await?;
+        let updated = merge_boundary_block(&existing, content, marker);
+        tokio::fs::write(&file_path, updated).await?;
+    } else {
+        // Tạo mới tệp
+        tokio::fs::write(&file_path, content).await?;
+    }
+
+    // 3. Tự động thêm vào `.git/info/exclude` để chống bẩn worktree
+    let git_client = dandori_git::GitClient::new(workdir);
+    let _ = git_client.add_local_exclude(filename).await;
+
+    Ok(true)
+}

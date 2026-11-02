@@ -105,6 +105,7 @@ fn get_manifest() -> Manifest {
         requires_worker_restart: false,
         settings: default_settings(),
         ui: default_ui(),
+        allowed_workdir_files: Vec::new(),
     }
 }
 

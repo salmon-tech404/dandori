@@ -92,11 +92,11 @@ pub fn create_app(state: AppState) -> Router {
         .merge(make_entity_router())
         .merge(make_features_router())
         .merge(make_runs_router())
-        .with_state(state);
+        .with_state(state.clone());
 
     Router::new()
         .nest("/api/v1/m", module_router)
         .nest("/api/v1", api_router)
-        .layer(axum::middleware::from_fn(check_origin))
+        .layer(axum::middleware::from_fn_with_state(state, check_origin))
         .layer(axum::middleware::from_fn(set_request_id))
 }

@@ -40,6 +40,7 @@ fn get_manifest() -> Manifest {
                 },
             ],
         },
+        allowed_workdir_files: Vec::new(),
     }
 }
 

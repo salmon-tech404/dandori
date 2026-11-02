@@ -43,6 +43,12 @@ pub enum ManifestError {
     /// Slot giao diện rỗng hoặc không đúng định dạng.
     #[error("Slot giao diện không hợp lệ: {0}")]
     InvalidSlot(String),
+
+    /// Tên tệp trong allowed_workdir_files không hợp lệ hoặc chứa đường dẫn con.
+    #[error(
+        "Tên tệp workdir '{0}' không hợp lệ (chỉ được đặt tên tệp tại gốc, không chứa đường dẫn con hay '..')"
+    )]
+    InvalidWorkdirFile(String),
 }
 
 /// Nhóm phân loại module theo 01_KIEN_TRUC.md mục 4.1.
@@ -243,6 +249,11 @@ pub struct Manifest {
     /// Đóng góp giao diện vào các slot.
     #[serde(default)]
     pub ui: UiDeclaration,
+
+    /// Danh sách tên tệp (tại gốc worktree) mà module được phép can thiệp (P3-09).
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub allowed_workdir_files: Vec<String>,
 }
 
 impl Manifest {
@@ -281,6 +292,17 @@ impl Manifest {
         for (key, schema) in &self.settings {
             if let Err(msg) = schema.validate() {
                 return Err(ManifestError::InvalidSettingSchema(key.clone(), msg));
+            }
+        }
+
+        // 4b. Kiểm tra danh sách allowed_workdir_files (P3-09)
+        for file in &self.allowed_workdir_files {
+            if file.trim().is_empty()
+                || file.contains('/')
+                || file.contains('\\')
+                || file.contains("..")
+            {
+                return Err(ManifestError::InvalidWorkdirFile(file.clone()));
             }
         }
 

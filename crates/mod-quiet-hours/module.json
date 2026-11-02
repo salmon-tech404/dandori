@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dandori-dev/dandori/main/schemas/module.schema.json",
+  "id": "quiet-hours",
+  "name": "Khung giờ cấm chạy (Quiet Hours)",
+  "version": "0.1.0",
+  "description": "Quản lý khung giờ cấm chạy cho các tác vụ tự động và bảo vệ người dùng",
+  "scope": "workspace",
+  "dependencies": ["calendar"],
+  "contributions": [
+    {
+      "id": "quiet-hours-toolbar",
+      "slot": "calendar.toolbar",
+      "component": "QuietHoursToolbarBadge"
+    },
+    {
+      "id": "quiet-hours-settings",
+      "slot": "settings.panel",
+      "component": "QuietHoursSettingsPanel"
+    }
+  ],
+  "settings": {
+    "defaultTimezone": {
+      "type": "string",
+      "default": "UTC",
+      "description": "Múi giờ mặc định cho các khung giờ cấm mới tạo"
+    }
+  }
+}
