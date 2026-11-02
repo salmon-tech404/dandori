@@ -687,3 +687,58 @@ Tài liệu này ghi nhận các quyết định kỹ thuật do nhóm AI Agent 
      - Đánh dấu P3-15 là `DONE_WITH_GAPS` do bài kiểm thực tế cần người dùng chạy trên máy thật với tài khoản CLI thật.
 - **Lý do:** Đáp ứng trọn vẹn tiêu chí nghiệm thu của Cổng P3 (`13_P3_TU_DONG_TRI_THUC.md`), bảo đảm an toàn máy tính và tính trung thực với số liệu.
 - **Hệ quả:** Kịch bản kiểm thử E2E xanh 100%, vượt qua kiểm thử đột biến QC1 (RED mutation proof), hoàn thành probe HTTP trên binary thực tế `dandori.exe`, và vượt qua cổng xác thực 18 bước `pnpm run verify` trên bản sao sạch `D:\Dandori-qc`.
+
+
+## 87. Task UI-00: Siết kiểm tra i18n và trợ thủ chụp ảnh trình duyệt bằng CDP thuần
+- **Mục:** Bắt toàn bộ chuỗi ký tự viết cứng trong `<option>`, `title`, `placeholder`, `aria-label`, `alt`, `label`; xây dựng công cụ chụp ảnh trình duyệt thật không phụ thuộc Playwright/Puppeteer.
+- **Lựa chọn:** Nâng cấp `scripts/check-i18n.mjs` với biểu thức chính quy toàn diện và AST regex; tạo `scripts/ui-shots.mjs` giao tiếp trực tiếp qua Chrome DevTools Protocol (CDP) WebSocket bằng Node.js thuần.
+- **Lý do:** Tuân thủ quy chuẩn không thêm thư viện ngoài (RS-ARCH-012), không kéo theo các gói trình duyệt nặng, hỗ trợ chụp ở 1440x900 và 390x844.
+- **Hệ quả:** Bắt và chuẩn hóa toàn bộ văn bản giao diện sang `i18n.ts`, công cụ chụp trình duyệt hoạt động ổn định trên cả máy chủ cục bộ và CI.
+
+## 88. Task UI-01: Xác thực phiên thật qua HttpOnly Cookie và loại bỏ màn hình Setup Owner
+- **Mục:** Quản lý đăng nhập/đăng xuất bằng API thật `/api/v1/auth/login`, `/api/v1/me`, `/api/v1/auth/logout`.
+- **Lựa chọn:** Tạo `session.tsx` cung cấp `SessionContext`; chặn 401 tự động đưa về màn Đăng nhập; loại bỏ cờ `isSetupOwner` khỏi giao diện người dùng theo chỉ thị của chủ dự án (backend giữ nguyên route `setup-owner`).
+- **Lý do:** Bảo mật cao nhất theo RS-SEC: Cookie phiên do trình duyệt tự quản lý, không lưu mật khẩu hoặc token vào `localStorage`/`sessionStorage`.
+- **Hệ quả:** Đăng nhập mượt mà, thông báo lỗi an toàn bằng tiếng Việt, bảo mật bộ nhớ trình duyệt tuyệt đối.
+
+## 89. Task UI-02: Ngữ cảnh Workspace và Dự án thật từ cơ sở dữ liệu
+- **Mục:** Quản lý dự án động, xóa bỏ dữ liệu viết cứng "Dandori Core" và "1 repo".
+- **Lựa chọn:** Tạo `frontend/app/src/core/project.tsx` cung cấp `ProjectProvider`, lưu `last_project_id` vào `localStorage` (chỉ lưu ID, không lưu dữ liệu nhạy cảm); xây dựng `ProjectSelector`, `CreateWorkspaceModal`, `CreateProjectModal`.
+- **Lý do:** Đáp ứng AC của UI-02, hỗ trợ kiểm tra đường dẫn kho Git hợp lệ, chuyển đổi dự án tức thì trên toàn ứng dụng.
+- **Hệ quả:** Loại bỏ 100% chuỗi "Dandori Core" và số repo giả lập; giao diện phản ánh đúng dự án thật từ backend SQLite.
+
+## 90. Task UI-03: Feature Registry động, luôn hiện 7 menu và ModuleDisabledNotice
+- **Mục:** Kết nối màn hình Cài đặt với Feature Registry thật, menu bên trái luôn hiển thị đầy đủ 7 mục.
+- **Lựa chọn:** Cập nhật `useFeatures.tsx` nạp trạng thái module từ `/features/modules` và `/features/effective`; xây dựng `ModuleDisabledNotice` hướng dẫn người dùng vào Cài đặt khi truy cập màn hình của module chưa bật.
+- **Lý do:** Tuân thủ yêu cầu bắt buộc của chủ dự án (Yêu cầu 1 trong `16_NOI_GIAO_DIEN.md`): mọi màn hình luôn có trong menu nhưng chỉ dùng được khi đã bật module tương ứng.
+- **Hệ quả:** Bật gói Đầy đủ (41/41) hoặc cấu hình từng module cập nhật tức thì trạng thái ứng dụng không cần tải lại trang.
+
+## 91. Task UI-04: Kanban Board 5 cột theo mockup và API nạp task mẫu
+- **Mục:** Hiển thị 5 cột Kanban theo thiết kế, nạp task từ API thật, loại bỏ `INITIAL_TASKS` tĩnh.
+- **Lựa chọn:** Cập nhật `KanbanBoard.tsx` với 5 cột (Backlog, Đang chạy, Cần bạn, Đang review, Sẵn sàng merge); xây dựng helper `sampleTasks.ts` tạo dữ liệu mẫu thông qua API `POST /projects/{id}/tasks` thật khi người dùng nhấn "Nạp task mẫu".
+- **Lý do:** Tuân thủ quy tắc không hardcode dữ liệu mẫu trong mã nguồn chạy thật (Rule 10), kéo thả cập nhật trạng thái tức thì qua API.
+- **Hệ quả:** Bảng Kanban trực quan, đồng bộ bền vững với cơ sở dữ liệu backend.
+
+## 92. Task UI-05: Giao việc cho Agent và theo dõi log trực tiếp an toàn
+- **Mục:** Giao task cho agent qua `POST /tasks/{id}/dispatch`, hiển thị nhật ký chạy trực tiếp và hủy lần chạy.
+- **Lựa chọn:** Xây dựng `TaskDispatchCard.tsx` và `TaskLiveRunSection.tsx`; bắt lỗi `no_available_account` hiển thị thông báo hướng dẫn chuyển tới `/agents`; render 100% nội dung nhật ký bằng React text thuần (chống XSS, không dùng `dangerouslySetInnerHTML`).
+- **Lý do:** Tuân thủ nghiêm ngặt Rule 8/17 về an toàn dữ liệu không đáng tin cậy từ agent/người dùng.
+- **Hệ quả:** Người dùng theo dõi được log thời gian thực, hủy tiến trình chạy chậm an toàn, hệ thống phòng thủ vững chắc trước mã độc chèn vào log.
+
+## 93. Task UI-06: Cấu trúc Tabbed Slot Layout cho các màn hình module mở rộng
+- **Mục:** Kết nối trọn vẹn 6 màn hình module còn lại với dữ liệu thật và kiểm tra tương thích di động.
+- **Lựa chọn:** Bổ sung thuộc tính `asTabs={true}` cho `Slot.tsx`, tự động render giao diện thẻ tab (`TabbedSlotLayout`) với thanh điều hướng ARIA (`role="tablist"` / `role="tab"`) khi có nhiều module cùng đóng góp vào một slot (như `knowledge.tab` hay `board.task-panel.tab`).
+- **Lý do:** Giải quyết triệt để việc nhiều module đóng góp vào cùng một màn hình mà không làm tràn hay vỡ bố cục, khớp hoàn toàn với thiết kế mockup trực quan.
+- **Hệ quả:** Tất cả 6 màn hình và màn di động `/m` hoạt động mượt mà, không lỗi console, chụp đủ 13 ảnh nghiệm thu desktop và mobile.
+
+## 94. Task UI-07: Tích hợp kiểm thử trình duyệt thật vào verify gate (bước 16)
+- **Mục:** Đưa kiểm thử giao diện bằng trình duyệt thật vào cổng kiểm tra tự động `verify.mjs` và lập bảng đối chiếu mockup.
+- **Lựa chọn:** Thêm bước 16 (`scripts/ui-shots.mjs --verify`) vào `scripts/verify.mjs` với cờ `allowSkip: true` (thoát mã 42 khi thiếu Chrome); xây dựng tài liệu `reports/ui/DOI_CHIEU_MOCKUP.md` đối chiếu chi tiết 7 màn hình.
+- **Lý do:** Bảo đảm kiểm thử trình duyệt tự động trở thành một phần của cổng xác thực, đồng thời không gây báo động giả trên các môi trường thiếu giao diện đồ họa.
+- **Hệ quả:** Toàn bộ 19 bước của verify gate xanh tuyệt đối trên cả môi trường cục bộ và QC2.
+
+## 95. Task UI-08: Dọn dẹp dung lượng đợt UI và Sổ tay kiểm thử thủ công 30 phút
+- **Mục:** Giải phóng dung lượng ổ đĩa sau khi hoàn thành đợt nối giao diện và cung cấp hướng dẫn kiểm thử tay cho chủ dự án.
+- **Lựa chọn:** Xóa chính xác hai thư mục tạm `D:\dandori-qc` và `D:\dandori-target-ui` bằng `Remove-Item -LiteralPath ... -Recurse -Force`; cập nhật mã kiểm thử `DAN-VERIFY-024` và kịch bản 8 bước chi tiết vào `docs/manual-test-checklist.md`.
+- **Lý do:** Bảo đảm ổ D luôn duy trì dung lượng trống vượt mức an toàn 40 GB theo quy định mới, đồng thời chuẩn bị đầy đủ tài liệu cho chủ dự án kiểm tra độc lập.
+- **Hệ quả:** Giải phóng 49.5 GB dung lượng ổ đĩa (dung lượng trống tăng từ 179.4 GB lên 228.9 GB); bảo toàn nguyên vẹn thư mục mã nguồn và target nhị phân của repo.

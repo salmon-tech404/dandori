@@ -57,7 +57,7 @@ const MetadataInputs: React.FC<MetadataProps> = ({ name, setName, role, setRole,
           type="text"
           value={skillTag}
           onChange={(e) => setSkillTag(e.target.value)}
-          placeholder="rust, git, frontend..."
+          placeholder={t("prompt_tags_placeholder")}
           className="w-full rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
         />
       </div>

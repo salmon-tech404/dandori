@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useContext, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { t } from "../../core/i18n";
+import { ProjectContext } from "../../core/project";
+import { Button } from "../../ui/components/Button";
 import type { Task, TaskStatus } from "../../../../../shared/types";
 import { MAIN_COLUMNS, TERMINAL_COLUMNS, type KanbanColumnDef } from "./types";
 import { useKanban, useKanbanFilters } from "./useKanban";
+import { createSampleTasks } from "./sampleTasks";
 import { KanbanColumn } from "./KanbanColumn";
 import { TaskDetailPanel } from "./TaskDetailPanel";
 
@@ -87,6 +91,42 @@ function FilterBar({
   );
 }
 
+function EmptyBoardBanner({
+  loading,
+  onLoad,
+}: {
+  loading: boolean;
+  onLoad: () => void;
+}) {
+  return (
+    <div
+      data-testid="kanban-empty-banner"
+      style={{
+        padding: "12px 16px",
+        backgroundColor: "var(--sf)",
+        border: "1px dashed var(--ln)",
+        borderRadius: "8px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "12px",
+      }}
+    >
+      <span style={{ fontSize: "13px", color: "var(--mu)" }}>
+        {t("kanban_empty_project_tasks")}
+      </span>
+      <Button
+        variant="primary"
+        data-testid="btn-load-sample-tasks"
+        disabled={loading}
+        onClick={onLoad}
+      >
+        {loading ? t("btn_loading_sample_tasks") : t("btn_load_sample_tasks")}
+      </Button>
+    </div>
+  );
+}
+
 function ColumnsList({
   columns,
   tasks,
@@ -120,44 +160,120 @@ function ColumnsList({
   );
 }
 
-export function KanbanBoard({ context }: Props) {
-  const { filters, setFilters } = useKanbanFilters();
-  const {
-    tasks,
-    selectedTask,
-    setSelectedTask,
-    errorMessage,
-    setErrorMessage,
-    moveTask,
-    quickCreateTask,
-  } = useKanban(context?.projectId, context?.initialTasks);
+function useSampleLoader(projectId: string, refetch: () => void) {
+  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
+  const handleLoadSample = async () => {
+    setLoading(true);
+    try {
+      await createSampleTasks(projectId);
+      queryClient.setQueryData(["is-sample-data", projectId], true);
+      queryClient.invalidateQueries({ queryKey: ["kanban-tasks", projectId] });
+      refetch();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { loading, handleLoadSample };
+}
+
+function BoardAlerts({
+  errorMessage,
+  onClearError,
+}: {
+  errorMessage: string | null;
+  onClearError: () => void;
+}) {
+  if (!errorMessage) return null;
+  return (
+    <div data-testid="kanban-error-alert" style={errorAlertStyle}>
+      <span>{errorMessage}</span>
+      <button type="button" onClick={onClearError} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer" }}>
+        <X size={14} />
+      </button>
+    </div>
+  );
+}
+
+function BoardContent({
+  projectId,
+  tasks,
+  errorMessage,
+  onClearError,
+  columns,
+  selectedTaskId,
+  onSelectTask,
+  onMoveTask,
+  onQuickCreate,
+  onRefetch,
+}: {
+  projectId: string;
+  tasks: Task[];
+  errorMessage: string | null;
+  onClearError: () => void;
+  columns: KanbanColumnDef[];
+  selectedTaskId: string | null;
+  onSelectTask: (t: Task) => void;
+  onMoveTask: (id: string, s: TaskStatus) => void;
+  onQuickCreate: (title: string) => void;
+  onRefetch: () => void;
+}) {
+  const { loading, handleLoadSample } = useSampleLoader(projectId, onRefetch);
+
+  return (
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "12px", minWidth: 0 }}>
+      {tasks.length === 0 && <EmptyBoardBanner loading={loading} onLoad={handleLoadSample} />}
+      <BoardAlerts errorMessage={errorMessage} onClearError={onClearError} />
+      <ColumnsList
+        columns={columns}
+        tasks={tasks}
+        selectedTaskId={selectedTaskId}
+        onSelectTask={onSelectTask}
+        onMoveTask={onMoveTask}
+        onQuickCreateTask={onQuickCreate}
+      />
+    </div>
+  );
+}
+
+function useBoardData(context?: { projectId?: string; initialTasks?: Task[] }) {
+  const projectContext = useContext(ProjectContext);
+  const projectId = context?.projectId || projectContext?.currentProject?.id || "p-default";
+  const { filters, setFilters } = useKanbanFilters();
+  const kanban = useKanban(projectId, context?.initialTasks);
   const activeColumns = filters.showCompleted ? [...MAIN_COLUMNS, ...TERMINAL_COLUMNS] : MAIN_COLUMNS;
-  const filteredTasks = filterTasks(tasks, filters.search, filters.agent);
+  const filteredTasks = filterTasks(kanban.tasks, filters.search, filters.agent);
+  return { projectId, filters, setFilters, kanban, activeColumns, filteredTasks };
+}
+
+export function KanbanBoard({ context }: Props) {
+  const { projectId, filters, setFilters, kanban, activeColumns, filteredTasks } = useBoardData(context);
 
   return (
     <div style={boardContainerStyle}>
       <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "12px", minWidth: 0 }}>
         <FilterBar filters={filters} onChange={setFilters} />
-        {errorMessage && (
-          <div data-testid="kanban-error-alert" style={errorAlertStyle}>
-            <span>{errorMessage}</span>
-            <button type="button" onClick={() => setErrorMessage(null)} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer" }}>
-              <X size={14} />
-            </button>
-          </div>
-        )}
-        <ColumnsList
-          columns={activeColumns}
+        <BoardContent
+          projectId={projectId}
           tasks={filteredTasks}
-          selectedTaskId={selectedTask?.id || null}
-          onSelectTask={setSelectedTask}
-          onMoveTask={(taskId, targetStatus) => moveTask({ taskId, status: targetStatus })}
-          onQuickCreateTask={quickCreateTask}
+          errorMessage={kanban.errorMessage}
+          onClearError={() => kanban.setErrorMessage(null)}
+          columns={activeColumns}
+          selectedTaskId={kanban.selectedTask?.id || null}
+          onSelectTask={kanban.setSelectedTask}
+          onMoveTask={(id, s) => kanban.moveTask({ taskId: id, status: s })}
+          onQuickCreate={kanban.quickCreateTask}
+          onRefetch={kanban.refetch}
         />
       </div>
-      {selectedTask && (
-        <TaskDetailPanel task={selectedTask} onClose={() => setSelectedTask(null)} />
+      {kanban.selectedTask && (
+        <TaskDetailPanel
+          task={kanban.selectedTask}
+          onClose={() => kanban.setSelectedTask(null)}
+          onTaskUpdated={kanban.refetch}
+        />
       )}
     </div>
   );

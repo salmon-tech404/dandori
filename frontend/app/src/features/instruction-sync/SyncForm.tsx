@@ -27,9 +27,9 @@ function ProviderSelect({ value, onChange }: { value: string; onChange: (v: stri
         onChange={(e) => onChange(e.target.value)}
         className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
       >
-        <option value="claude">Claude Code (CLAUDE.md)</option>
-        <option value="codex">Codex / Antigravity (AGENTS.md)</option>
-        <option value="cursor">Cursor (.cursorrules)</option>
+        <option value="claude">{t("sync_target_claude")}</option>
+        <option value="codex">{t("sync_target_codex")}</option>
+        <option value="cursor">{t("sync_target_cursor")}</option>
       </select>
     </div>
   );

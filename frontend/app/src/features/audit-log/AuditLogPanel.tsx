@@ -66,7 +66,7 @@ function FilterBar({
         type="text"
         value={filter}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="login_success, approval_granted..."
+        placeholder={t("audit_log_filter_placeholder")}
         className="rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-xs text-neutral-100 placeholder-neutral-500"
       />
       {loading && <span className="text-xs text-neutral-500">{t("loading")}</span>}

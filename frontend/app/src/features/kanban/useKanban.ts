@@ -74,16 +74,8 @@ export function useKanbanFilters() {
   return { filters, setFilters };
 }
 
-export function useKanban(projectId: string = "p-default", initialTasks: Task[] = []) {
+function useKanbanMutations(projectId: string, setErrorMessage: (msg: string | null) => void) {
   const queryClient = useQueryClient();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-
-  const { data: tasks = initialTasks, refetch } = useQuery<Task[]>({
-    queryKey: ["kanban-tasks", projectId],
-    queryFn: () => fetchProjectTasks(projectId),
-    initialData: initialTasks.length > 0 ? initialTasks : undefined,
-  });
 
   const moveTaskMutation = useMutation({
     mutationFn: ({ taskId, status }: { taskId: string; status: TaskStatus }) =>
@@ -105,13 +97,35 @@ export function useKanban(projectId: string = "p-default", initialTasks: Task[] 
   });
 
   return {
+    moveTask: moveTaskMutation.mutate,
+    quickCreateTask: createTaskMutation.mutate,
+  };
+}
+
+export function useKanban(projectId: string = "p-default", initialTasks: Task[] = []) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
+  const { data: tasks = initialTasks, refetch } = useQuery<Task[]>({
+    queryKey: ["kanban-tasks", projectId],
+    queryFn: () => fetchProjectTasks(projectId),
+    initialData: initialTasks.length > 0 ? initialTasks : undefined,
+  });
+
+  const { moveTask, quickCreateTask } = useKanbanMutations(projectId, setErrorMessage);
+
+  const activeTask = selectedTask
+    ? tasks.find((t) => t.id === selectedTask.id) || selectedTask
+    : null;
+
+  return {
     tasks,
-    selectedTask,
+    selectedTask: activeTask,
     setSelectedTask,
     errorMessage,
     setErrorMessage,
     refetch,
-    moveTask: moveTaskMutation.mutate,
-    quickCreateTask: createTaskMutation.mutate,
+    moveTask,
+    quickCreateTask,
   };
 }

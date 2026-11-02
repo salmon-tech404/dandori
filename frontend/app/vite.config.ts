@@ -8,7 +8,7 @@ export default defineConfig({
     host: "127.0.0.1",
     // Giao diện gọi `/api/...` theo đường dẫn tương đối: chuyển tiếp sang máy chủ Dandori (mặc định cổng 3000).
     proxy: {
-      "/api": "http://127.0.0.1:3000",
+      "/api": process.env.VITE_BACKEND_URL || "http://127.0.0.1:3000",
     },
   },
 });

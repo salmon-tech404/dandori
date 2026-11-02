@@ -29,7 +29,7 @@ const VersionList: React.FC<ListProps> = ({ versions, selectedVer, onSelect }) =
             : 'border border-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300'
         }`}
       >
-        <div className="font-semibold">v{v.version}</div>
+        <div className="font-semibold">{t("version_prefix")}{v.version}</div>
         <div className="text-[10px] text-neutral-400">{new Date(v.created_at).toLocaleString()}</div>
       </button>
     ))}
@@ -50,7 +50,7 @@ const VersionDetail: React.FC<DetailProps> = ({ selectedVer, isCurrent, restorin
     <div className="col-span-2 flex flex-col justify-between">
       <div className="flex-1 overflow-y-auto">
         <div className="text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
-          Phiên bản v{selectedVer.version}
+          {t("version_label")}{selectedVer.version}
         </div>
         <pre className="p-3 bg-neutral-50 dark:bg-neutral-950 rounded text-xs font-mono whitespace-pre-wrap text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-800">
           {selectedVer.content}

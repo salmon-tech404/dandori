@@ -72,7 +72,7 @@ function CardHeader({
       {hasTargets && (
         <button
           type="button"
-          aria-label={`Chuyển trạng thái cho ${title}`}
+          aria-label={t("kanban_move_to_aria", { title })}
           style={{ border: "none", background: "none", cursor: "pointer", color: "var(--mu)", fontSize: "11px" }}
           onClick={(e) => {
             e.stopPropagation();

@@ -25,14 +25,14 @@ export function AddAccountModal({ onClose, onSubmit }: AddAccountModalProps): Re
           <div>
             <label style={{ display: "block", fontSize: "13px", marginBottom: "6px", color: "var(--fg)" }}>{t("account_provider")}</label>
             <select className="input-select" value={provider} onChange={(e) => setProvider(e.target.value)} style={{ width: "100%", height: "44px" }}>
-              <option value="claude">{"Anthropic Claude Code"}</option>
-              <option value="agy">{"Google Antigravity / Gemini"}</option>
-              <option value="codex">{"OpenAI Codex"}</option>
+              <option value="claude">{t("account_provider_claude")}</option>
+              <option value="agy">{t("account_provider_agy")}</option>
+              <option value="codex">{t("account_provider_codex")}</option>
             </select>
           </div>
           <div>
             <label style={{ display: "block", fontSize: "13px", marginBottom: "6px", color: "var(--fg)" }}>{t("account_label")}</label>
-            <input type="text" className="input-text" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="ví dụ: Claude Max Quota" required style={{ width: "100%", height: "44px" }} />
+            <input type="text" className="input-text" value={label} onChange={(e) => setLabel(e.target.value)} placeholder={t("account_label_placeholder")} required style={{ width: "100%", height: "44px" }} />
           </div>
           <div>
             <label style={{ display: "block", fontSize: "13px", marginBottom: "6px", color: "var(--fg)" }}>{t("account_priority")}</label>

@@ -50,7 +50,7 @@ function ChannelsGrid({
   onDelete: (id: string) => void;
 }) {
   if (loading && channels.length === 0) {
-    return <div className="py-8 text-center text-xs text-neutral-400">Đang tải...</div>;
+    return <div className="py-8 text-center text-xs text-neutral-400">{t("loading")}</div>;
   }
   if (channels.length === 0) {
     return (

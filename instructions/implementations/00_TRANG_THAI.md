@@ -139,15 +139,15 @@ Lý do: ngày 2026-11-02 mở giao diện thật lần đầu thì vỏ ứng d�
 
 | # | Task | Phụ thuộc | Trạng thái | Commit (chủ dự án) | Báo cáo |
 | :-: | :--- | :--- | :--- | :--- | :--- |
-| UI-00 | Siết kiểm i18n + trợ thủ chụp trình duyệt | P3 | ⏳ Todo | | |
-| UI-01 | Đăng nhập thật | UI-00 | ⏳ Todo | | |
-| UI-02 | Chọn/tạo workspace và dự án thật | UI-01 | ⏳ Todo | | |
-| UI-03 | Danh sách module thật, Cài đặt hoạt động, menu luôn đủ 7 mục | UI-02 | ⏳ Todo | | |
-| UI-04 | Bảng task thật (Kanban) và Giao task | UI-03 | ⏳ Todo | | |
-| UI-05 | Giao việc cho agent và theo dõi chạy | UI-04 | ⏳ Todo | | |
-| UI-06 | Các màn module còn lại với dữ liệu thật | UI-03 | ⏳ Todo | | |
-| UI-07 | Kiểm thử trình duyệt thật trong `verify`, đối chiếu mockup | UI-01…UI-06 | ⏳ Todo | | |
-| UI-08 | **Cổng nối giao diện** | UI-00…UI-07 | ⏳ Todo | | |
+| UI-00 | Siết kiểm i18n + trợ thủ chụp trình duyệt | P3 | ✅ DONE | | [UI-00.md](reports/UI-00.md) |
+| UI-01 | Đăng nhập thật | UI-00 | ✅ DONE | | [UI-01.md](reports/UI-01.md) |
+| UI-02 | Chọn/tạo workspace và dự án thật | UI-01 | ✅ DONE | | [UI-02.md](reports/UI-02.md) |
+| UI-03 | Danh sách module thật, Cài đặt hoạt động, menu luôn đủ 7 mục | UI-02 | ✅ DONE | | [UI-03.md](reports/UI-03.md) |
+| UI-04 | Bảng task thật (Kanban) và Giao task | UI-03 | ✅ DONE | | [UI-04.md](reports/UI-04.md) |
+| UI-05 | Giao việc cho agent và theo dõi chạy | UI-04 | ✅ DONE | | [UI-05.md](reports/UI-05.md) |
+| UI-06 | Các màn module còn lại với dữ liệu thật | UI-03 | 🟡 DONE_WITH_GAPS (giao diện các màn module chưa theo mockup, xem REVIEW_UI) | | [UI-06.md](reports/UI-06.md) |
+| UI-07 | Kiểm thử trình duyệt thật trong `verify`, đối chiếu mockup | UI-01…UI-06 | 🟡 DONE_WITH_GAPS (giao diện các màn module chưa theo mockup, xem REVIEW_UI) | | [UI-07.md](reports/UI-07.md) |
+| UI-08 | **Cổng nối giao diện** | UI-00…UI-07 | ✅ DONE | | [TONG_KET_UI.md](TONG_KET_UI.md) |
 
 ### Giai đoạn 4: nặng và rủi ro (`14_P4_NANG_RUI_RO.md`)
 

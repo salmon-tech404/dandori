@@ -35,9 +35,7 @@ const NoteFields = ({
       />
     </div>
     <div style={{ marginBottom: '16px' }}>
-      <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px', color: 'var(--mu)' }}>
-        Nhãn
-      </label>
+      <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px', color: 'var(--mu)' }}>{t("note_label")}</label>
       <input
         type="text"
         value={tags}

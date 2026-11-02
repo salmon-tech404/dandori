@@ -32,9 +32,9 @@ export const RunHistoryFilter = ({
     </select>
     <select value={agentFilter} onChange={(e) => onAgentChange(e.target.value)} style={selectStyle}>
       <option value="">{t('run_history_filter_all_agents')}</option>
-      <option value="claude">Claude</option>
-      <option value="gemini">Gemini</option>
-      <option value="codex">Codex</option>
+      <option value="claude">{t("provider_claude")}</option>
+      <option value="gemini">{t("provider_gemini")}</option>
+      <option value="codex">{t("provider_codex")}</option>
     </select>
   </div>
 );

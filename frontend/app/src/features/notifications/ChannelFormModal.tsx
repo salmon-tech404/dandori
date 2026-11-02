@@ -36,9 +36,9 @@ function TypeSelect({ type, setType }: { type: string; setType: (v: string) => v
         onChange={(e) => setType(e.target.value)}
         className="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm text-white"
       >
-        <option value="telegram">Telegram</option>
-        <option value="discord">Discord</option>
-        <option value="slack">Slack</option>
+        <option value="telegram">{t("notification_type_telegram")}</option>
+        <option value="discord">{t("notification_type_discord")}</option>
+        <option value="slack">{t("notification_type_slack")}</option>
       </select>
     </div>
   );

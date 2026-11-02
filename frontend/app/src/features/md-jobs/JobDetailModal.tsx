@@ -12,10 +12,10 @@ function renderModalBody(job: MdJobDto) {
       <div>
         <h4 className="text-xs font-semibold text-text-muted uppercase">{t("md_jobs_frontmatter")}</h4>
         <div className="mt-1 p-3 rounded bg-surface-muted font-mono text-xs text-text-secondary space-y-1">
-          <div>name: {job.job_name}</div>
-          <div>schedule: {job.schedule_cron}</div>
-          <div>agent: {job.agent_role}</div>
-          {job.account_id && <div>account: {job.account_id}</div>}
+          <div>{t("job_field_name")} {job.job_name}</div>
+          <div>{t("job_field_schedule")} {job.schedule_cron}</div>
+          <div>{t("job_field_agent")} {job.agent_role}</div>
+          {job.account_id && <div>{t("job_field_account")} {job.account_id}</div>}
         </div>
       </div>
       <div>

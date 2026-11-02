@@ -134,8 +134,16 @@ const steps = [
       "tests/tooling/generate-types.test.mjs",
       "tests/tooling/check-tokens.test.mjs",
       "tests/tooling/check-i18n.test.mjs",
+      "tests/tooling/ui-shots.test.mjs",
     ],
     timeoutMs: 120_000,
+  },
+  {
+    name: "16. Browser UI Verification (scripts/ui-shots.mjs --verify)",
+    command: "node",
+    args: ["scripts/ui-shots.mjs", "--verify"],
+    timeoutMs: 180_000,
+    allowSkip: true,
   },
 ];
 
@@ -166,7 +174,13 @@ function runStep(step) {
       if (timer) clearTimeout(timer);
       const elapsed = ((Date.now() - start) / 1000).toFixed(2);
       if (code === 0) {
-        resolve({ elapsed });
+        resolve({ elapsed, skipped: false });
+      } else if (step.allowSkip && code === 42) {
+        resolve({
+          elapsed,
+          skipped: true,
+          reason: "Chrome khong tim thay tren he thong (bo qua kiem thu trinh duyet)",
+        });
       } else {
         reject(new Error(`Thoát với mã lỗi ${code} sau ${elapsed}s`));
       }
@@ -180,12 +194,18 @@ async function main() {
   console.log("  DANDORI VERIFICATION GATE");
   console.log("===============================================================");
 
+  const skippedSteps = [];
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
     console.log(`\n[${i + 1}/${steps.length}] Bắt đầu: ${step.name}...`);
     try {
-      const { elapsed } = await runStep(step);
-      console.log(`[${i + 1}/${steps.length}] ✓ THÀNH CÔNG: ${step.name} (${elapsed}s)`);
+      const { elapsed, skipped, reason } = await runStep(step);
+      if (skipped) {
+        console.log(`[${i + 1}/${steps.length}] ⚠ BỎ QUA (SKIPPED): ${step.name} (${reason}) (${elapsed}s)`);
+        skippedSteps.push({ name: step.name, reason });
+      } else {
+        console.log(`[${i + 1}/${steps.length}] ✓ THÀNH CÔNG: ${step.name} (${elapsed}s)`);
+      }
     } catch (err) {
       console.error(`\n[${i + 1}/${steps.length}] ✗ THẤT BẠI: ${step.name}`);
       console.error(`Chi tiết lỗi: ${err.message}`);
@@ -197,7 +217,14 @@ async function main() {
 
   const totalElapsed = ((Date.now() - startTime) / 1000).toFixed(2);
   console.log("\n===============================================================");
-  console.log(`  ✓ CỔNG KIỂM TRA VERIFY XANH (Toàn bộ ${steps.length} bước qua trong ${totalElapsed}s)`);
+  if (skippedSteps.length > 0) {
+    console.log(`  ⚠ CỔNG KIỂM TRA VERIFY QUA CÓ BƯỚC BỎ QUA (${skippedSteps.length} bước SKIPPED) trong ${totalElapsed}s:`);
+    for (const s of skippedSteps) {
+      console.log(`    - ${s.name}: ${s.reason}`);
+    }
+  } else {
+    console.log(`  ✓ CỔNG KIỂM TRA VERIFY XANH (Toàn bộ ${steps.length} bước qua trong ${totalElapsed}s)`);
+  }
   console.log("===============================================================");
 }
 

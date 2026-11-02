@@ -33,7 +33,7 @@ const BasicInputs: React.FC<{
         value={name}
         onChange={(e) => onChange({ name: e.target.value })}
         className="w-full border rounded px-2.5 py-1.5 bg-transparent"
-        placeholder="VD: Khung giờ cấm ban ngày"
+        placeholder={t("quiet_hours_name_placeholder")}
       />
     </div>
     <div className="grid grid-cols-2 gap-2">
