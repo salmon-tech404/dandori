@@ -1,0 +1,16 @@
+[package]
+name = "mod-voice-report"
+description = "Module đọc báo cáo bằng giọng nói qua Web Speech API trình duyệt"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+dandori-types = { workspace = true }
+dandori-module-api = { workspace = true }
+axum = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

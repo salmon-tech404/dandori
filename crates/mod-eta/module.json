@@ -1,0 +1,30 @@
+{
+  "id": "eta",
+  "group": "dashboard",
+  "name": "Dự tính thời gian (ETA)",
+  "description": "Dự tính khoảng thời gian hoàn tất tác vụ theo thống kê thực tế và tự đo sai số",
+  "version": "0.1.0",
+  "requires": ["run-history"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "backend": {
+    "crate": "crates/mod-eta"
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "eta-card-badge",
+        "slot": "board.card.badge",
+        "label": "Dự tính hoàn thành",
+        "order": 50
+      },
+      {
+        "id": "eta-task-panel-section",
+        "slot": "board.task-panel.section",
+        "label": "Ước lượng thời gian (ETA)",
+        "order": 50
+      }
+    ]
+  }
+}
