@@ -133,6 +133,22 @@ Cột Phụ thuộc: task phải `DONE` (hoặc `DONE_WITH_GAPS` chấp nhận �
 | P3-14 | `audit-log` | T14 | 🟡 DONE_WITH_GAPS | 2026-11-02 | Chuỗi băm SHA-256, phát hiện can thiệp, router bất biến, UI kiểm tra. Sau kiểm độc lập: admin-only, người ghi lấy từ phiên, tự ghi bật/tắt module, phê duyệt, hạn mức. **Chưa ghi** đăng nhập, kho khóa, ghép thiết bị, push/PR/merge (lõi chưa phát sự kiện) |
 | P3-15 | **Cổng P3** | P3-01…P3-14 | 🟡 DONE_WITH_GAPS | 2026-11-02 | Kịch bản E2E qua đêm đạt, bảo vệ giờ cấm, tóm tắt sáng, audit log hợp lệ; bài kiểm qua đêm thật: CHỜ NGƯỜI DÙNG KIỂM |
 
+### Đợt nối giao diện (`16_NOI_GIAO_DIEN.md`): làm sau P3, trước P4
+
+Lý do: ngày 2026-11-02 mở giao diện thật lần đầu thì vỏ ứng dụng chưa nối với máy chủ (dữ liệu mẫu viết cứng, đăng nhập giả, menu ẩn). Nghiệm thu bằng trình duyệt thật so với mockup. Tài khoản đăng nhập cố định qua `.env` (backend đã xong).
+
+| # | Task | Phụ thuộc | Trạng thái | Commit (chủ dự án) | Báo cáo |
+| :-: | :--- | :--- | :--- | :--- | :--- |
+| UI-00 | Siết kiểm i18n + trợ thủ chụp trình duyệt | P3 | ⏳ Todo | | |
+| UI-01 | Đăng nhập thật | UI-00 | ⏳ Todo | | |
+| UI-02 | Chọn/tạo workspace và dự án thật | UI-01 | ⏳ Todo | | |
+| UI-03 | Danh sách module thật, Cài đặt hoạt động, menu luôn đủ 7 mục | UI-02 | ⏳ Todo | | |
+| UI-04 | Bảng task thật (Kanban) và Giao task | UI-03 | ⏳ Todo | | |
+| UI-05 | Giao việc cho agent và theo dõi chạy | UI-04 | ⏳ Todo | | |
+| UI-06 | Các màn module còn lại với dữ liệu thật | UI-03 | ⏳ Todo | | |
+| UI-07 | Kiểm thử trình duyệt thật trong `verify`, đối chiếu mockup | UI-01…UI-06 | ⏳ Todo | | |
+| UI-08 | **Cổng nối giao diện** | UI-00…UI-07 | ⏳ Todo | | |
+
 ### Giai đoạn 4: nặng và rủi ro (`14_P4_NANG_RUI_RO.md`)
 
 | # | Task | Phụ thuộc | Trạng thái | Commit (chủ dự án) | Báo cáo |

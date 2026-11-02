@@ -30,6 +30,7 @@ Nguồn thiết kế gốc của chủ dự án (chỉ đọc):
 | `11_P1_CHAY_MOT_TASK.md` | Giai đoạn 1: chạy được một task (P1-01…P1-09) |
 | `12_P2_VONG_LAM_VIEC.md` | Giai đoạn 2: vòng làm việc đầy đủ (P2-01…P2-13) |
 | `13_P3_TU_DONG_TRI_THUC.md` | Giai đoạn 3: tự động và tri thức (P3-01…P3-15) |
+| `16_NOI_GIAO_DIEN.md` | Đợt nối giao diện (UI-00…UI-08), làm sau P3 và trước P4: nối vỏ ứng dụng vào máy chủ, nghiệm thu bằng trình duyệt thật so với mockup |
 | `14_P4_NANG_RUI_RO.md` | Giai đoạn 4: nặng và rủi ro (P4-01…P4-10) |
 | `15_P5_PHAT_HANH.md` | Phát hành (P5-01…P5-02) |
 | `00_MAU_BAO_CAO.md`, `00_TRANG_THAI.md` | Mẫu báo cáo, bảng tiến độ |

@@ -3,6 +3,7 @@
 pub mod app;
 pub mod auth;
 pub mod config;
+pub mod dotenv;
 pub mod error;
 pub mod middleware;
 pub mod routes;
@@ -66,6 +67,15 @@ pub async fn init_server_state(
         for mig in m.migrations() {
             sqlx::query(mig.sql).execute(&pool).await?;
         }
+    }
+
+    if let (Some(user), Some(pass)) = (&config.admin_username, &config.admin_password) {
+        auth::ensure_env_admin(&pool, user, pass.expose_secret())
+            .await
+            .map_err(|e| {
+                anyhow::anyhow!("Không thiết lập được tài khoản từ DANDORI_ADMIN_*: {e}")
+            })?;
+        tracing::info!(username = %user, "Đã áp dụng tài khoản quản trị cố định từ môi trường/.env");
     }
 
     let event_bus = Arc::new(dandori_events::EventBus::new(100));

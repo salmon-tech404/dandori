@@ -206,3 +206,62 @@ pub async fn create_session_for_user(
 
     Ok((token, cookie_header))
 }
+
+/// Tạo hoặc đồng bộ tài khoản quản trị cố định lấy từ môi trường/`.env` (bản dùng thử cá nhân).
+///
+/// Môi trường là nguồn sự thật: tài khoản chưa có thì tạo với vai trò `admin`; đã có mà mật khẩu khác thì cập nhật
+/// băm mới, đưa về `admin` và **hủy mọi phiên cũ** của tài khoản đó. Mật khẩu không bao giờ được ghi log.
+///
+/// # Errors
+/// Trả về lỗi chuỗi nếu băm mật khẩu hoặc truy vấn cơ sở dữ liệu thất bại.
+pub async fn ensure_env_admin(
+    pool: &SqlitePool,
+    username: &str,
+    password: &str,
+) -> Result<(), String> {
+    let existing = sqlx::query("SELECT id, password_hash FROM user WHERE username = ?")
+        .bind(username)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let Some(row) = existing else {
+        let hash = hash_password(password)?;
+        sqlx::query(
+            "INSERT INTO user (id, username, password_hash, system_role, created_at) VALUES (?, ?, ?, 'admin', ?)",
+        )
+        .bind(UserId::new().to_string())
+        .bind(username)
+        .bind(hash)
+        .bind(Utc::now().to_rfc3339())
+        .execute(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+        return Ok(());
+    };
+
+    let id: String = row.get("id");
+    let current_hash: String = row.get("password_hash");
+    if verify_password(password, &current_hash) {
+        sqlx::query("UPDATE user SET system_role = 'admin' WHERE id = ?")
+            .bind(&id)
+            .execute(pool)
+            .await
+            .map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+
+    let hash = hash_password(password)?;
+    sqlx::query("UPDATE user SET password_hash = ?, system_role = 'admin' WHERE id = ?")
+        .bind(hash)
+        .bind(&id)
+        .execute(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    sqlx::query("DELETE FROM session WHERE user_id = ?")
+        .bind(&id)
+        .execute(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
