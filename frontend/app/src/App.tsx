@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FeaturesProvider } from "./core/useFeatures";
 import { AppLayout } from "./core/AppLayout";
 import { AuthScreen } from "./core/AuthScreen";
 import { Slot } from "./core/Slot";
 import { SettingsFeaturesScreen } from "./features/settings-features";
+import { MobileScreen } from "./features/mobile";
 import type { Task } from "../../../shared/types";
 
 const queryClient = new QueryClient({
@@ -36,10 +37,11 @@ function AppRoutes() {
       <Route path="/board" element={<div />} />
       <Route path="/agents" element={<div><Slot name="agents.defaults" /></div>} />
       <Route path="/dashboard" element={<div><Slot name="dashboard.kpi" /></div>} />
-      <Route path="/calendar" element={<div><Slot name="calendar.toolbar" /></div>} />
+      <Route path="/calendar" element={<div><Slot name="calendar.toolbar" /><Slot name="calendar.grid" /><Slot name="calendar.panel" /></div>} />
       <Route path="/knowledge" element={<div><Slot name="knowledge.tab" /></div>} />
       <Route path="/integrations" element={<div><Slot name="integrations.card" /></div>} />
       <Route path="/settings" element={<div><SettingsFeaturesScreen /><Slot name="settings.section" /></div>} />
+      <Route path="/m" element={<MobileScreen />} />
       <Route path="/login" element={<AuthScreen onSubmit={async () => { await new Promise((r) => setTimeout(r, 100)); }} />} />
     </Routes>
   );
@@ -47,6 +49,12 @@ function AppRoutes() {
 
 export function AppContent() {
   const [tasks] = useState<Task[]>(INITIAL_TASKS);
+  const location = useLocation();
+
+  if (location.pathname === "/m") {
+    return <MobileScreen />;
+  }
+
   return (
     <AppLayout tasks={tasks}>
       <AppRoutes />

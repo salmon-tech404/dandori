@@ -72,6 +72,14 @@ export const SLOT_CONTRIBUTIONS: Record<string, SlotContribution[]> = {
       load: () => import("../features/test-agent"),
     },
     {
+      moduleId: "eta",
+      id: "eta-card-badge",
+      slot: "board.card.badge",
+      label: "Dự tính hoàn thành",
+      order: 50,
+      load: () => import("../features/eta"),
+    },
+    {
       moduleId: "sample-hello",
       id: "sample-badge",
       slot: "board.card.badge",
@@ -141,6 +149,14 @@ export const SLOT_CONTRIBUTIONS: Record<string, SlotContribution[]> = {
       order: 35,
       load: () => import("../features/doc-agent"),
     },
+    {
+      moduleId: "eta",
+      id: "eta-task-panel-section",
+      slot: "board.task-panel.section",
+      label: "Ước lượng thời gian (ETA)",
+      order: 50,
+      load: () => import("../features/eta"),
+    },
   ],
   "board.task-panel.tab": [
     {
@@ -184,6 +200,36 @@ export const SLOT_CONTRIBUTIONS: Record<string, SlotContribution[]> = {
       load: () => import("../features/cost-tracking"),
     },
   ],
+  "calendar.grid": [
+    {
+      moduleId: "calendar",
+      id: "calendar-grid",
+      slot: "calendar.grid",
+      label: "Lưới lịch tuần",
+      order: 20,
+      load: () => import("../features/calendar"),
+    },
+  ],
+  "calendar.panel": [
+    {
+      moduleId: "md-jobs",
+      id: "md-jobs-panel",
+      slot: "calendar.panel",
+      label: "Job viết bằng Markdown",
+      order: 10,
+      load: () => import("../features/md-jobs"),
+    },
+  ],
+  "calendar.toolbar": [
+    {
+      moduleId: "calendar",
+      id: "calendar-toolbar",
+      slot: "calendar.toolbar",
+      label: "Thanh công cụ lịch",
+      order: 10,
+      load: () => import("../features/calendar"),
+    },
+  ],
   "dashboard.kpi": [
     {
       moduleId: "approval-gate",
@@ -210,6 +256,14 @@ export const SLOT_CONTRIBUTIONS: Record<string, SlotContribution[]> = {
       label: "Thống kê chi phí",
       order: 30,
       load: () => import("../features/cost-tracking"),
+    },
+    {
+      moduleId: "voice-report",
+      id: "voice-report-dashboard-panel",
+      slot: "dashboard.panel",
+      label: "Giọng đọc báo cáo",
+      order: 40,
+      load: () => import("../features/voice-report"),
     },
   ],
   "integrations.card": [
@@ -239,6 +293,30 @@ export const SLOT_CONTRIBUTIONS: Record<string, SlotContribution[]> = {
       order: 20,
       load: () => import("../features/tech-profile"),
     },
+    {
+      moduleId: "skills-md",
+      id: "skills-md-knowledge-tab",
+      slot: "knowledge.tab",
+      label: "Kỹ năng (SKILL.md)",
+      order: 30,
+      load: () => import("../features/skills-md"),
+    },
+    {
+      moduleId: "instruction-sync",
+      id: "instruction-sync-tab",
+      slot: "knowledge.tab",
+      label: "Đồng bộ hướng dẫn",
+      order: 40,
+      load: () => import("../features/instruction-sync"),
+    },
+    {
+      moduleId: "shared-memory",
+      id: "shared-memory-tab",
+      slot: "knowledge.tab",
+      label: "Bộ nhớ chung",
+      order: 50,
+      load: () => import("../features/shared-memory"),
+    },
   ],
   "settings.section": [
     {
@@ -264,6 +342,38 @@ export const SLOT_CONTRIBUTIONS: Record<string, SlotContribution[]> = {
       label: "Tích hợp Git & Quản lý dự án",
       order: 50,
       load: () => import("../features/integrations"),
+    },
+    {
+      moduleId: "auto-lessons",
+      id: "auto-lessons-settings",
+      slot: "settings.section",
+      label: "Tự động rút bài học",
+      order: 55,
+      load: () => import("../features/auto-lessons"),
+    },
+    {
+      moduleId: "notifications",
+      id: "notifications-settings",
+      slot: "settings.section",
+      label: "Kênh thông báo",
+      order: 60,
+      load: () => import("../features/notifications"),
+    },
+    {
+      moduleId: "mobile",
+      id: "mobile-settings",
+      slot: "settings.section",
+      label: "Thiết bị di động",
+      order: 70,
+      load: () => import("../features/mobile"),
+    },
+    {
+      moduleId: "audit-log",
+      id: "audit-log-settings",
+      slot: "settings.section",
+      label: "Nhật ký kiểm toán",
+      order: 80,
+      load: () => import("../features/audit-log"),
     },
   ],
 };
