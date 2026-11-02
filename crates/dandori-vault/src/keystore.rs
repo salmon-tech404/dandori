@@ -7,7 +7,7 @@ use zeroize::Zeroize;
 use crate::error::VaultError;
 
 /// Trait trừu tượng hóa kho khóa lưu trữ khóa chủ (Master Key) 256-bit.
-pub trait MasterKeyStore: Send + Sync {
+pub trait MasterKeyStore: Send + Sync + std::fmt::Debug {
     /// Lấy khóa chủ 256-bit (32 bytes).
     ///
     /// # Errors
@@ -96,7 +96,19 @@ pub struct MemoryKeyStore {
     key: Arc<RwLock<Option<[u8; 32]>>>,
 }
 
+static SHARED_MEMORY_KEY: std::sync::OnceLock<Arc<RwLock<Option<[u8; 32]>>>> =
+    std::sync::OnceLock::new();
+
 impl MemoryKeyStore {
+    /// KeyStore dung chung khoa chu trong tien trinh.
+    #[must_use]
+    pub fn shared() -> Self {
+        let key = SHARED_MEMORY_KEY
+            .get_or_init(|| Arc::new(RwLock::new(None)))
+            .clone();
+        Self { key }
+    }
+
     /// Tạo mới một `MemoryKeyStore` trống.
     #[must_use]
     pub fn new() -> Self {

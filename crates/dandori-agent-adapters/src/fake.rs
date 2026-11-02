@@ -1,6 +1,6 @@
 //! Fake adapter sử dụng fake-agent binary để giả lập CLI agent trong môi trường kiểm thử.
 
-use dandori_agent_port::{AgentAdapter, AgentEvent, AgentPortError, AgentRunSpec};
+use dandori_agent_port::{AgentAdapter, AgentEvent, AgentPortError, AgentRunSpec, BoxFuture};
 use dandori_process::{ProcessEvent, ProcessSpec};
 use serde_json::Value;
 use std::path::PathBuf;
@@ -29,41 +29,46 @@ impl AgentAdapter for FakeAdapter {
         "fake-agent"
     }
 
-    async fn start_run(&self, spec: AgentRunSpec) -> Result<Receiver<AgentEvent>, AgentPortError> {
-        let mut proc_spec = ProcessSpec::new(&self.fake_agent_bin, &spec.working_dir);
+    fn start_run(
+        &self,
+        spec: AgentRunSpec,
+    ) -> BoxFuture<'_, Result<Receiver<AgentEvent>, AgentPortError>> {
+        Box::pin(async move {
+            let mut proc_spec = ProcessSpec::new(&self.fake_agent_bin, &spec.working_dir);
 
-        proc_spec = proc_spec.arg("--scenario").arg(&spec.prompt);
-        proc_spec.custom_env = spec.env;
+            proc_spec = proc_spec.arg("--scenario").arg(&spec.prompt);
+            proc_spec.custom_env = spec.env;
 
-        proc_spec.env_whitelist = vec![
-            "PATH".to_string(),
-            "SystemRoot".to_string(),
-            "TEMP".to_string(),
-            "TMP".to_string(),
-        ];
+            proc_spec.env_whitelist = vec![
+                "PATH".to_string(),
+                "SystemRoot".to_string(),
+                "TEMP".to_string(),
+                "TMP".to_string(),
+            ];
 
-        if let Some(home) = spec.isolated_home {
-            proc_spec = proc_spec.isolated_home(home);
-        }
-        if let Some(t_timeout) = spec.total_timeout {
-            proc_spec = proc_spec.total_timeout(t_timeout);
-        }
-        if let Some(s_timeout) = spec.silent_timeout {
-            proc_spec = proc_spec.silent_timeout(s_timeout);
-        }
+            if let Some(home) = spec.isolated_home {
+                proc_spec = proc_spec.isolated_home(home);
+            }
+            if let Some(t_timeout) = spec.total_timeout {
+                proc_spec = proc_spec.total_timeout(t_timeout);
+            }
+            if let Some(s_timeout) = spec.silent_timeout {
+                proc_spec = proc_spec.silent_timeout(s_timeout);
+            }
 
-        let proc_rx = dandori_process::spawn(proc_spec)
-            .map_err(|e| AgentPortError::ProcessError(e.to_string()))?;
+            let proc_rx = dandori_process::spawn(proc_spec)
+                .map_err(|e| AgentPortError::ProcessError(e.to_string()))?;
 
-        let (tx, rx) = channel::<AgentEvent>(FORWARD_BUFFER);
-        tokio::spawn(forward_events(proc_rx, tx));
+            let (tx, rx) = channel::<AgentEvent>(FORWARD_BUFFER);
+            tokio::spawn(forward_events(proc_rx, tx));
 
-        Ok(rx)
+            Ok(rx)
+        })
     }
 }
 
 async fn forward_events(mut proc_rx: Receiver<ProcessEvent>, tx: Sender<AgentEvent>) {
-    while let Some(ev) = proc_rx.recv().await {
+    while let Some(ev) = crate::next_event(&mut proc_rx, &tx).await {
         match ev {
             ProcessEvent::StdoutLine(line) => {
                 let mapped = parse_line_event(&line);

@@ -2,9 +2,14 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::future::Future;
 use std::path::PathBuf;
+use std::pin::Pin;
 use std::time::Duration;
 use tokio::sync::mpsc::Receiver;
+
+/// Kiểu Future trả về cho các hàm bất đồng bộ của adapter.
+pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
 /// Thông tin tham chiếu tài khoản agent kết nối.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -123,5 +128,5 @@ pub trait AgentAdapter: Send + Sync {
     fn start_run(
         &self,
         spec: AgentRunSpec,
-    ) -> impl std::future::Future<Output = Result<Receiver<AgentEvent>, AgentPortError>> + Send;
+    ) -> BoxFuture<'_, Result<Receiver<AgentEvent>, AgentPortError>>;
 }

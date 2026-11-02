@@ -10,7 +10,12 @@ publish = false
 workspace = true
 
 [dependencies]
-dandori-types = { workspace = true }
 dandori-process = { workspace = true }
+dandori-types = { workspace = true }
+serde = { workspace = true }
 thiserror = { workspace = true }
+tokio = { workspace = true }
 tracing = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

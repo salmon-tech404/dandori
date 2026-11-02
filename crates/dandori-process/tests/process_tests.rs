@@ -233,3 +233,47 @@ async fn test_ac5_cancellation_token_stops_process_fast() {
         "Hủy bằng token phải dừng tiến trình nhanh chóng, elapsed: {elapsed:?}"
     );
 }
+
+/// Hủy một lần chạy làm bên nhận bị hủy: tiến trình con phải bị diệt, không được chạy tiếp ngầm.
+#[cfg(windows)]
+#[tokio::test]
+async fn test_dropping_receiver_kills_running_process() {
+    let dir = tempdir().expect("tempdir");
+    let bin = get_fake_agent_bin();
+    let pid_file = dir.path().join("agent.pid");
+    let scenario = serde_json::json!({
+        "write_pid_file": pid_file.to_string_lossy(),
+        "hang": true
+    })
+    .to_string();
+
+    let spec = ProcessSpec::new(bin, dir.path())
+        .arg("--scenario")
+        .arg(scenario);
+    let rx = spawn(spec).expect("spawn");
+
+    let mut pid = None;
+    for _ in 0..60 {
+        if let Ok(text) = std::fs::read_to_string(&pid_file)
+            && let Ok(p) = text.trim().parse::<u32>()
+        {
+            pid = Some(p);
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    let pid = pid.expect("fake-agent phải ghi pid file");
+    assert!(is_pid_alive(pid), "tiến trình phải đang chạy trước khi hủy");
+
+    drop(rx);
+
+    let mut dead = false;
+    for _ in 0..50 {
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        if !is_pid_alive(pid) {
+            dead = true;
+            break;
+        }
+    }
+    assert!(dead, "bỏ bên nhận phải diệt tiến trình con (PID {pid})");
+}

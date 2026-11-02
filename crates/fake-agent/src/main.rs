@@ -61,6 +61,28 @@ fn load_scenario() -> Scenario {
         raw_json = std::env::var("FAKE_AGENT_SCENARIO").ok();
     }
 
+    if raw_json.is_none() {
+        for arg in args.iter().skip(1) {
+            if arg.contains('{') && arg.contains('}') {
+                raw_json = Some(arg.clone());
+                break;
+            }
+        }
+    }
+
+    if let Some(ref raw) = raw_json {
+        if let Ok(scen) = serde_json::from_str::<Scenario>(raw) {
+            return scen;
+        }
+        if let Some(start) = raw.find('{')
+            && let Some(end) = raw.rfind('}')
+            && end > start
+            && let Ok(scen) = serde_json::from_str::<Scenario>(&raw[start..=end])
+        {
+            return scen;
+        }
+    }
+
     raw_json
         .and_then(|json| serde_json::from_str::<Scenario>(&json).ok())
         .unwrap_or_default()
