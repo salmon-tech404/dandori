@@ -53,6 +53,7 @@ fn get_manifest() -> Manifest {
                 order: 30,
             }],
         },
+        allowed_workdir_files: Vec::new(),
     }
 }
 
