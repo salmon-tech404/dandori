@@ -20,3 +20,5 @@ Thumbs.db
 .DS_Store
 # báo cáo tạm của QC (KHÔNG ignore instructions/implementations/reports/)
 /tmp-qc/
+# tệp thử tạm của agent (không đưa lên kho)
+/scratch/

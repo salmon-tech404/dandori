@@ -410,8 +410,11 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "chrono",
+ "dandori-agent-adapters",
+ "dandori-agent-port",
  "dandori-db",
  "dandori-events",
+ "dandori-git",
  "dandori-module-api",
  "dandori-modules",
  "dandori-registry",
@@ -421,6 +424,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sqlx",
+ "tempfile",
  "tokio",
  "tower",
  "uuid",
@@ -444,7 +448,10 @@ version = "0.1.0"
 dependencies = [
  "dandori-process",
  "dandori-types",
+ "serde",
+ "tempfile",
  "thiserror",
+ "tokio",
  "tracing",
 ]
 
@@ -453,16 +460,19 @@ name = "dandori-module-api"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "chrono",
  "dandori-agent-port",
  "dandori-db",
  "dandori-events",
  "dandori-git",
+ "dandori-process",
  "dandori-types",
  "dandori-vault",
  "futures",
  "serde",
  "serde_json",
  "sqlx",
+ "tempfile",
  "thiserror",
  "tokio",
  "tokio-util",
@@ -475,8 +485,26 @@ version = "0.1.0"
 dependencies = [
  "dandori-module-api",
  "dandori-types",
+ "mod-api-key-fallback",
+ "mod-approval-gate",
  "mod-auth-login",
+ "mod-auto-switch",
+ "mod-cost-tracking",
+ "mod-diff-preview",
+ "mod-doc-agent",
+ "mod-integrations",
+ "mod-kanban",
+ "mod-lead-worker",
+ "mod-live-status",
+ "mod-multi-account",
+ "mod-prompt-library",
+ "mod-quota-tracking",
+ "mod-run-history",
  "mod-sample-hello",
+ "mod-subscription-connect",
+ "mod-tech-profile",
+ "mod-test-agent",
+ "mod-worktree",
 ]
 
 [[package]]
@@ -533,6 +561,7 @@ dependencies = [
  "dandori-registry",
  "dandori-types",
  "dandori-vault",
+ "futures",
  "rand 0.8.8",
  "reqwest",
  "serde",
@@ -546,6 +575,7 @@ dependencies = [
  "tower-http",
  "tracing",
  "tracing-subscriber",
+ "url",
  "uuid",
 ]
 
@@ -1335,6 +1365,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "mod-api-key-fallback"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "mod-approval-gate"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
 name = "mod-auth-login"
 version = "0.1.0"
 dependencies = [
@@ -1355,6 +1418,205 @@ dependencies = [
 ]
 
 [[package]]
+name = "mod-auto-switch"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-cost-tracking"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-diff-preview"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-doc-agent"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-integrations"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "mod-kanban"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "tracing",
+]
+
+[[package]]
+name = "mod-lead-worker"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-live-status"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "futures",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-multi-account"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "mod-prompt-library"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-quota-tracking"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
+name = "mod-run-history"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
 name = "mod-sample-hello"
 version = "0.1.0"
 dependencies = [
@@ -1367,6 +1629,74 @@ dependencies = [
  "tokio",
  "tokio-util",
  "tracing",
+]
+
+[[package]]
+name = "mod-subscription-connect"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-tech-profile"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-test-agent"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-worktree"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]
