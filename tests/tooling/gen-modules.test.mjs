@@ -11,10 +11,28 @@ const repoRoot = path.resolve(__dirname, "../..");
 test("gen-modules: ca xanh khi kiểm tra module trên cây hiện tại", async () => {
   const result = await checkModules();
   assert.equal(result.ok, true, `gen-modules --check phải thành công: ${result.errors.join("; ")}`);
-  assert.equal(result.count, 2);
+  assert.equal(result.count, 20);
   const ids = result.modules.map((m) => m.id);
   assert.ok(ids.includes("auth-login"));
   assert.ok(ids.includes("sample-hello"));
+  assert.ok(ids.includes("subscription-connect"));
+  assert.ok(ids.includes("lead-worker"));
+  assert.ok(ids.includes("worktree"));
+  assert.ok(ids.includes("kanban"));
+  assert.ok(ids.includes("live-status"));
+  assert.ok(ids.includes("prompt-library"));
+  assert.ok(ids.includes("tech-profile"));
+  assert.ok(ids.includes("run-history"));
+  assert.ok(ids.includes("api-key-fallback"));
+  assert.ok(ids.includes("diff-preview"));
+  assert.ok(ids.includes("approval-gate"));
+  assert.ok(ids.includes("test-agent"));
+  assert.ok(ids.includes("doc-agent"));
+  assert.ok(ids.includes("integrations"));
+  assert.ok(ids.includes("multi-account"));
+  assert.ok(ids.includes("quota-tracking"));
+  assert.ok(ids.includes("auto-switch"));
+  assert.ok(ids.includes("cost-tracking"));
 });
 
 test("gen-modules: ca đỏ khi module thiếu module.json", async () => {

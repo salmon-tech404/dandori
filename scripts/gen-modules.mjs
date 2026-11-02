@@ -352,13 +352,14 @@ export async function checkModules(options = {}) {
         fs.readFile(frontendTsPath, "utf8").catch(() => null),
       ]);
 
-      if (currCargo !== expectedCargo) {
+      const norm = (s) => (s ?? "").replace(/\r\n/g, "\n").trim();
+      if (norm(currCargo) !== norm(expectedCargo)) {
         errors.push("crates/dandori-modules/Cargo.toml không đồng bộ với danh sách module thực tế");
       }
-      if (currLib !== expectedLib) {
+      if (norm(currLib) !== norm(expectedLib)) {
         errors.push("crates/dandori-modules/src/lib.rs không đồng bộ với danh sách module thực tế");
       }
-      if (currTs !== expectedTs) {
+      if (norm(currTs) !== norm(expectedTs)) {
         errors.push("frontend/app/src/core/features_generated.ts không đồng bộ với cấu hình giao diện module");
       }
     } catch (err) {

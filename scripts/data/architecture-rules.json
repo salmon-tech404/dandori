@@ -16,7 +16,8 @@
       "dandori-db",
       "dandori-vault",
       "dandori-agent-port",
-      "dandori-git"
+      "dandori-git",
+      "dandori-process"
     ],
     "dandori-registry": [
       "dandori-types",
