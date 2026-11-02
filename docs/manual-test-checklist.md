@@ -32,6 +32,31 @@ Mỗi hạng mục được gán mã định danh duy nhất theo định dạng
 | `DAN-VERIFY-020` | P3-13 | Duyệt thật từ điện thoại qua kênh riêng an toàn của chủ dự án (VPN/Tailscale) | Bật module `mobile`, tạo thiết bị và mở trang `/m` trên điện thoại | Quét mã QR ghép nối trên điện thoại, truy cập trang `/m`, kiểm tra danh sách Cần duyệt, bấm Duyệt/Từ chối một task, xác nhận hành động được ghi nhận đúng tên thiết bị và thời gian | Chờ kiểm (P3) |
 | `DAN-VERIFY-021` | P3-14 | Kiểm tra toàn vẹn chuỗi băm audit log và phát hiện can thiệp dữ liệu | Bật module `audit-log`, thực hiện chuỗi hành động nhạy cảm | Mở tab Nhật ký kiểm toán, bấm 'Kiểm tra toàn vẹn', xác nhận chuỗi băm toàn vẹn (Xanh); thử chỉnh sửa thủ công 1 bản ghi trong file sqlite, bấm kiểm tra lại, xác nhận hệ thống báo Đỏ và chỉ ra đúng số thứ tự bản ghi bị can thiệp | Chờ kiểm (P3) |
 | `DAN-VERIFY-022` | P3-15 | Bài kiểm chạy qua đêm thật (Overnight run) | Bật gói Đầy đủ P0-P3, đưa tối thiểu 5 task vào hàng đợi qua đêm | Chủ dự án đặt hàng đợi thật với CLI thật, thiết lập khung giờ cấm, theo dõi buổi sáng nhận báo cáo tóm tắt, kiểm tra các task hoàn thành/cần duyệt, tuyệt đối không có lệnh tắt máy tự động | Chờ kiểm (P3) |
+| `DAN-VERIFY-023` | UI-00 | Trợ thủ chụp ảnh trình duyệt thật qua CDP (`scripts/ui-shots.mjs`) | Google Chrome có sẵn trên máy, đã biên dịch `target/debug/dandori.exe` | Chạy `node scripts/ui-shots.mjs --smoke` để kiểm tra máy chủ, Vite và Chrome headless kết nối chụp ảnh màn hình giao diện (1440x900 và 390x844), xác nhận ảnh lưu vào `instructions/implementations/reports/ui/` và toàn bộ tiến trình được dọn dẹp sạch sẽ sau khi chạy xong | Chờ kiểm (UI-00) |
+| `DAN-VERIFY-024` | UI-08 | Bài kiểm tay 30 phút toàn diện giao diện thật nối máy chủ | Chạy `dandori.exe` và `pnpm dev`, mở Chrome tại `http://localhost:5173` | Thực hiện 8 bước: đăng nhập qua .env -> tạo workspace/dự án -> kiểm tra 7 menu -> bật module trong Settings -> nạp task mẫu trên Board -> giao việc cho agent giả -> duyệt 7 màn hình -> đăng xuất. | Chờ kiểm (UI-08) |
+
+---
+
+## Hướng dẫn sử dụng Trợ thủ chụp ảnh trình duyệt (`scripts/ui-shots.mjs`)
+
+Trợ thủ `scripts/ui-shots.mjs` sử dụng Node thuần để kết nối Google Chrome qua giao thức Chrome DevTools Protocol (CDP) không phụ thuộc Playwright/Puppeteer.
+
+### Lệnh chạy:
+```powershell
+# Chạy kiểm tra khởi động môi trường và chụp màn hình đầu:
+node scripts/ui-shots.mjs --smoke
+
+# Chạy kiểm tra i18n toàn bộ frontend:
+node scripts/check-i18n.mjs
+```
+
+### Các bước tự động thực hiện:
+1. Tự động cấp phát các cổng trống ngẫu nhiên cho Dandori server, Vite frontend và Chrome CDP.
+2. Khởi tạo thư mục dữ liệu tạm cho SQLite và profile cô lập cho Chrome.
+3. Chạy `target/debug/dandori.exe` với cờ kiểm thử an toàn (`DANDORI_VAULT_BACKEND=memory`, `DANDORI_ENABLE_FAKE_PROVIDER=1`).
+4. Khởi chạy Vite frontend trỏ proxy sang cổng server tạm.
+5. Mở Chrome headless qua CDP và chụp ảnh màn hình ở độ phân giải máy tính (1440x900) và di động (390x844).
+6. Tự động dọn dẹp toàn bộ cây tiến trình (process tree) và thư mục tạm kể cả khi có lỗi phát sinh.
 
 ---
 
@@ -76,3 +101,101 @@ Mỗi hạng mục được gán mã định danh duy nhất theo định dạng
 - [ ] Dữ liệu chi phí và token tiêu thụ khớp với thực tế từ nhà cung cấp CLI/API.
 - [ ] Chủ dự án nghiệm thu và phê duyệt mở cổng Giai đoạn 3 (P3).
 
+
+---
+
+## Bài kiểm tay 30 phút cho chủ dự án (Nghiệm thu Đợt nối giao diện UI-00…UI-08)
+
+> **Mã:** `DAN-VERIFY-024`  
+> **Thời lượng ước tính:** 30 phút.  
+> **Mục tiêu:** Xác minh bằng mắt và thao tác trực tiếp trên trình duyệt thật rằng giao diện Dandori đã kết nối hoàn chỉnh với máy chủ backend, dữ liệu phản ánh chính xác từ SQLite/API, không còn trạng thái giả lập hay dữ liệu tĩnh viết cứng.
+
+### 1. Chuẩn bị môi trường chạy thật
+1. Khởi động Dandori máy chủ trong terminal 1:
+   ```powershell
+   # Sử dụng tài khoản admin được cấu hình trong .env
+   cargo run -p dandori-server
+   ```
+   *Kỳ vọng:* Máy chủ lắng nghe tại cổng `http://127.0.0.1:3000`.
+2. Khởi động giao diện Vite trong terminal 2:
+   ```powershell
+   pnpm --filter app dev
+   ```
+   *Kỳ vọng:* Frontend phục vụ tại `http://localhost:5173`.
+3. Mở Google Chrome hoặc Microsoft Edge tại `http://localhost:5173`.
+
+---
+
+### 2. Kịch bản kiểm thử 8 bước chi tiết
+
+#### Bước 1: Xác thực đăng nhập (3 phút)
+- **Thao tác:**
+  - Mở trang chủ: màn hình Đăng nhập hiển thị đơn giản, không có nút chuyển "Tạo tài khoản chủ" (đã bỏ theo yêu cầu UI-01).
+  - Thử nhập sai mật khẩu -> Bấm "Đăng nhập" -> Quan sát thông báo lỗi an toàn bằng tiếng Việt.
+  - Nhập đúng `DANDORI_ADMIN_USER` và `DANDORI_ADMIN_PASSWORD` từ `.env`.
+- **Kỳ vọng:** Đăng nhập thành công, chuyển hướng vào màn hình ứng dụng chính có thanh bên (sidebar).
+
+#### Bước 2: Tạo Không gian làm việc và Dự án thật (4 phút)
+- **Thao tác:**
+  - Nhấp vào ô chọn dự án trên thanh bên (`ProjectSelector`).
+  - Chọn "Tạo không gian làm việc" -> Đặt tên "Không gian Kiểm thử" -> Tạo.
+  - Chọn "Tạo dự án mới" -> Nhập tên dự án và đường dẫn đến một thư mục không phải Git -> Quan sát lỗi báo rõ "không phải kho lưu trữ Git".
+  - Nhập đường dẫn đến một kho Git hợp lệ trên máy (ví dụ `D:\19-dandori`).
+- **Kỳ vọng:** Dự án được tạo thành công, thanh bên cập nhật tên dự án thật và số lượng repo ("1 repo"). Không còn chữ "Dandori Core" viết cứng.
+
+#### Bước 3: Kiểm tra menu 7 mục và màn hình module bị tắt (3 phút)
+- **Thao tác:**
+  - Quan sát thanh bên trái: đầy đủ 7 mục menu (Board, Agent & tài khoản, Dashboard, Lịch, Prompt & tri thức, Tích hợp, Cài đặt).
+  - Bấm vào mục "Lịch" hoặc "Prompt và tri thức" khi các module này chưa bật.
+- **Kỳ vọng:** Màn hình hiển thị `ModuleDisabledNotice` với thông điệp tiếng Việt "Tính năng chưa được bật", nêu rõ tên module cần bật và cung cấp nút "Mở Cài đặt".
+
+#### Bước 4: Kích hoạt module trong Cài đặt (5 phút)
+- **Thao tác:**
+  - Bấm vào nút "Mở Cài đặt" hoặc chọn mục "Cài đặt: Tính năng" trên thanh bên.
+  - Quan sát chip đếm ở góc trên: hiển thị số lượng thật (ví dụ "Đang bật 2/41").
+  - Bấm vào nút gói mẫu "Đầy đủ".
+  - Hộp thoại xác nhận hiện ra, liệt kê các module sẽ được kích hoạt -> Bấm "Xác nhận".
+- **Kỳ vọng:** Chip trạng thái cập nhật lên "Đang bật 41/41". Không cần tải lại trang (reload), các màn hình khác đã sẵn sàng hoạt động.
+
+#### Bước 5: Nạp task mẫu và kiểm tra Kanban Board (5 phút)
+- **Thao tác:**
+  - Quay lại mục "Board" trên thanh bên.
+  - Nhấn nút "Nạp task mẫu" ở góc trên bảng.
+  - Quan sát 5 cột Kanban: Backlog, Đang chạy, Cần bạn, Đang review, Sẵn sàng merge.
+  - Kéo thả một thẻ task từ "Backlog" sang "Đang chạy" hoặc bấm vào thẻ để mở Panel chi tiết task bên phải.
+  - Bấm nút "Giao task" ở đầu bảng -> Nhập tiêu đề và mô tả task mới -> Tạo task.
+- **Kỳ vọng:** Task mới xuất hiện ngay tại cột Backlog. Panel chi tiết hiển thị đầy đủ thông tin task, các tab mở rộng từ module và lịch sử chạy.
+
+#### Bước 6: Giao việc cho Agent và quan sát chạy trực tiếp (5 phút)
+- **Thao tác:**
+  - Vào "Agent và tài khoản" trên thanh bên -> Thêm tài khoản agent kiểm thử (hoặc dùng tài khoản sẵn có).
+  - Mở lại thẻ task trên Board -> Bấm nút "Giao cho agent".
+  - Quan sát trạng thái chuyển sang đang chạy và khung nhật ký (Live Logs) cập nhật.
+  - Thử bấm nút "Hủy lần chạy".
+- **Kỳ vọng:** Nhật ký hiển thị thuần văn bản (an toàn không thực thi script), lần chạy dừng khi bấm Hủy mà không treo giao diện.
+
+#### Bước 7: Duyệt qua các màn hình chức năng (4 phút)
+- **Thao tác:**
+  - Vào "Dashboard": quan sát 4 thẻ KPI thống kê và danh sách lần chạy.
+  - Vào "Lịch": quan sát lưới thời gian và danh sách tác vụ định kỳ.
+  - Vào "Prompt và tri thức": bấm chuyển đổi giữa các tab (Thư viện prompt, Kỹ năng, Bộ nhớ dùng chung, Bài học).
+  - Vào "Tích hợp": kiểm tra cấu hình webhook và mở thử hộp thoại ghép thiết bị di động.
+  - Mở route `http://localhost:5173/m`: kiểm tra giao diện di động rút gọn với nút bấm lớn chuẩn 44px.
+- **Kỳ vọng:** Mọi màn hình hiển thị trơn tru, không có lỗi console (mở F12 kiểm tra tab Console).
+
+#### Bước 8: Đăng xuất và Bảo mật lưu trữ (1 phút)
+- **Thao tác:**
+  - Nhấp vào nút "Đăng xuất" ở cuối thanh bên.
+  - Mở DevTools (F12) > Application > Local Storage / Session Storage.
+- **Kỳ vọng:** Ứng dụng quay trở về màn hình Đăng nhập. Không có mật khẩu, token hay phiên nhạy cảm nào được lưu trữ trong LocalStorage/SessionStorage.
+
+---
+
+### 3. Quy trình Báo cáo Lỗi khi phát hiện sai lệch
+Nếu phát hiện bất kỳ điểm nào không đúng kỳ vọng hoặc khác biệt so với mockup không có trong bảng đối chiếu:
+1. Mở Console (F12) chụp ảnh màn hình lỗi kèm log console.
+2. Ghi lại:
+   - Bước thực hiện gây ra lỗi.
+   - Kết quả thực tế so với kết quả kỳ vọng.
+   - Trích xuất log máy chủ backend nếu có thông báo 500.
+3. Gửi thông tin vào mục phản hồi để Agent tiến hành rà soát và khắc phục.
