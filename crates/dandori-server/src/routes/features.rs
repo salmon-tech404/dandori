@@ -132,23 +132,87 @@ async fn resolve_user_registry_role(
     }
 }
 
+/// Người dùng có được xem trạng thái hiệu lực của `workspace`/`project` này không.
+///
+/// Quản trị hệ thống: luôn được. Người khác: workspace (nếu khác `default`) phải là workspace họ là thành viên,
+/// và dự án (nếu khác `default`) phải thuộc một workspace họ là thành viên.
+async fn can_view_scope(state: &AppState, user: &AuthUser, ws_id: &str, proj_id: &str) -> bool {
+    if user.is_admin() {
+        return true;
+    }
+    let ws_repo = WorkspaceRepo::new(&state.db);
+    let is_member = |ws: WorkspaceId| async move {
+        matches!(ws_repo.get_member(&ws, &user.id).await, Ok(Some(_)))
+    };
+
+    if ws_id != "default" {
+        let Ok(ws) = WorkspaceId::from_str(ws_id) else {
+            return false;
+        };
+        if !is_member(ws).await {
+            return false;
+        }
+    }
+    if proj_id != "default" {
+        let Ok(pid) = dandori_types::ProjectId::from_str(proj_id) else {
+            return false;
+        };
+        let project = dandori_db::ProjectRepo::new(&state.db)
+            .get_project_by_id(&pid)
+            .await;
+        let Ok(Some(project)) = project else {
+            return false;
+        };
+        if !is_member(project.workspace_id).await {
+            return false;
+        }
+    }
+    true
+}
+
 /// `GET /api/v1/features/effective` - Truy vấn trạng thái hiệu lực của module.
 pub async fn get_effective_state(
     State(state): State<AppState>,
     Extension(req_id): Extension<RequestId>,
-    _auth_user: AuthUser,
+    auth_user: AuthUser,
     Query(query): Query<EffectiveQuery>,
 ) -> Response {
-    let module_id = query
-        .module_id
-        .unwrap_or_else(|| "sample-hello".to_string());
     let ws_id = query.workspace.as_deref().unwrap_or("default");
     let proj_id = query.project.as_deref().unwrap_or("default");
 
+    // Trạng thái bật/tắt của một workspace/dự án chỉ dành cho thành viên của nó (hoặc quản trị hệ thống).
+    if !can_view_scope(&state, &auth_user, ws_id, proj_id).await {
+        return ApiError::Forbidden(
+            "Không có quyền xem trạng thái tính năng của phạm vi này".to_string(),
+        )
+        .into_response_with_id(&req_id.0);
+    }
     let registry = state.lifecycle_manager.registry();
-    match registry.effective_state(&module_id, ws_id, proj_id).await {
-        Ok(eff) => Json(json!({ "effective": eff })).into_response(),
-        Err(e) => ApiError::Internal(e.to_string()).into_response_with_id(&req_id.0),
+
+    if let Some(module_id) = query.module_id {
+        match registry.effective_state(&module_id, ws_id, proj_id).await {
+            Ok(eff) => Json(json!({ "effective": eff })).into_response(),
+            Err(e) => ApiError::Internal(e.to_string()).into_response_with_id(&req_id.0),
+        }
+    } else {
+        let repo = FeatureRepo::new(&state.db);
+        let modules = match repo.list_modules().await {
+            Ok(m) => m,
+            Err(e) => return ApiError::Internal(e.to_string()).into_response_with_id(&req_id.0),
+        };
+        let mut list = Vec::with_capacity(modules.len());
+        for m in modules {
+            match registry
+                .effective_state(m.id.as_str(), ws_id, proj_id)
+                .await
+            {
+                Ok(eff) => list.push(eff),
+                Err(e) => {
+                    return ApiError::Internal(e.to_string()).into_response_with_id(&req_id.0);
+                }
+            }
+        }
+        Json(json!({ "effective": list })).into_response()
     }
 }
 

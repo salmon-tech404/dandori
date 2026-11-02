@@ -652,8 +652,20 @@ async fn test_ac5_registry_three_tier_permissions() {
     .await;
     assert_eq!(status_reg_plan, StatusCode::FORBIDDEN);
 
-    // 3. Tra cứu effective state
+    // 3. Tra cứu effective state: quản trị hệ thống xem được mọi phạm vi
     let (status_eff, body_eff) = send_req(
+        &app,
+        "GET",
+        "/api/v1/features/effective?module_id=sample-hello&workspace=ws_1&project=proj_1",
+        Some(&cookie_sys),
+        None,
+    )
+    .await;
+    assert_eq!(status_eff, StatusCode::OK);
+    assert!(body_eff.get("effective").is_some());
+
+    // Người dùng thường không được dò trạng thái của workspace/dự án không phải của mình
+    let (status_eff_reg, _) = send_req(
         &app,
         "GET",
         "/api/v1/features/effective?module_id=sample-hello&workspace=ws_1&project=proj_1",
@@ -661,8 +673,7 @@ async fn test_ac5_registry_three_tier_permissions() {
         None,
     )
     .await;
-    assert_eq!(status_eff, StatusCode::OK);
-    assert!(body_eff.get("effective").is_some());
+    assert_eq!(status_eff_reg, StatusCode::FORBIDDEN);
 }
 
 #[tokio::test]
@@ -735,4 +746,131 @@ async fn test_project_default_branch_must_be_a_valid_ref_name() {
     )
     .await;
     assert_eq!(status_ok, StatusCode::OK);
+}
+
+#[tokio::test]
+async fn test_get_all_effective_features() {
+    let (app, _pool, _bus) = setup_test_server().await.unwrap();
+
+    let req_init = Request::builder()
+        .method("POST")
+        .uri("/api/v1/auth/setup-owner")
+        .header(header::CONTENT_TYPE, "application/json")
+        .body(Body::from(
+            json!({ "username": "admin", "password": "password123" }).to_string(),
+        ))
+        .unwrap();
+    let resp_init = app.clone().oneshot(req_init).await.unwrap();
+    let cookie = resp_init
+        .headers()
+        .get(header::SET_COOKIE)
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .split(';')
+        .next()
+        .unwrap()
+        .to_string();
+
+    let (status, body) = send_req(
+        &app,
+        "GET",
+        "/api/v1/features/effective",
+        Some(&cookie),
+        None,
+    )
+    .await;
+
+    assert_eq!(status, StatusCode::OK);
+    let list = body["effective"]
+        .as_array()
+        .expect("effective should be an array");
+    assert!(!list.is_empty(), "effective list should not be empty");
+    assert!(
+        list.iter()
+            .any(|item| item["module_id"] == "sample-hello" || item["module_id"] == "auth-login"),
+        "expected core modules in effective list"
+    );
+}
+
+#[tokio::test]
+#[expect(
+    clippy::too_many_lines,
+    reason = "integration test scenario covering acceptance criteria"
+)]
+async fn test_review_effective_state_is_scoped_to_workspace_members() {
+    let (app, _pool, _bus) = setup_test_server().await.unwrap();
+
+    let req_init = Request::builder()
+        .method("POST")
+        .uri("/api/v1/auth/setup-owner")
+        .header(header::CONTENT_TYPE, "application/json")
+        .body(Body::from(
+            json!({ "username": "admin_e", "password": "password123" }).to_string(),
+        ))
+        .unwrap();
+    let resp_init = app.clone().oneshot(req_init).await.unwrap();
+    let cookie_admin = resp_init
+        .headers()
+        .get(header::SET_COOKIE)
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .split(';')
+        .next()
+        .unwrap()
+        .to_string();
+
+    // Người dùng thường không thuộc workspace nào.
+    let (st, _) = send_req(
+        &app,
+        "POST",
+        "/api/v1/auth/users",
+        Some(&cookie_admin),
+        Some(json!({ "username": "outsider_e", "password": "password123", "system_role": "user" })),
+    )
+    .await;
+    assert_eq!(st, StatusCode::OK);
+    let cookie_out = login_user(&app, "outsider_e", "password123").await;
+
+    let (st, ws) = send_req(
+        &app,
+        "POST",
+        "/api/v1/workspaces",
+        Some(&cookie_admin),
+        Some(json!({ "name": "WS E" })),
+    )
+    .await;
+    assert_eq!(st, StatusCode::OK);
+    let ws_id = ws["workspace"]["id"].as_str().unwrap();
+
+    let uri = format!("/api/v1/features/effective?workspace={ws_id}");
+
+    // Quản trị hệ thống xem được.
+    let (st, _) = send_req(&app, "GET", &uri, Some(&cookie_admin), None).await;
+    assert_eq!(st, StatusCode::OK);
+
+    // Người ngoài workspace: bị chặn (trước đây ai đăng nhập cũng xem được trạng thái của mọi workspace).
+    let (st, _) = send_req(&app, "GET", &uri, Some(&cookie_out), None).await;
+    assert_eq!(st, StatusCode::FORBIDDEN);
+    let (st, _) = send_req(
+        &app,
+        "GET",
+        "/api/v1/features/effective?workspace=khong-phai-uuid",
+        Some(&cookie_out),
+        None,
+    )
+    .await;
+    assert_eq!(st, StatusCode::FORBIDDEN);
+
+    // Phạm vi mặc định (không chỉ định workspace) vẫn xem được: đó là trạng thái cấp hệ thống.
+    let (st, _) = send_req(
+        &app,
+        "GET",
+        "/api/v1/features/effective",
+        Some(&cookie_out),
+        None,
+    )
+    .await;
+    assert_eq!(st, StatusCode::OK);
 }
