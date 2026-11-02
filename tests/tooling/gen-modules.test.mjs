@@ -11,7 +11,7 @@ const repoRoot = path.resolve(__dirname, "../..");
 test("gen-modules: ca xanh khi kiểm tra module trên cây hiện tại", async () => {
   const result = await checkModules();
   assert.equal(result.ok, true, `gen-modules --check phải thành công: ${result.errors.join("; ")}`);
-  assert.equal(result.count, 20);
+  assert.equal(result.count, 34);
   const ids = result.modules.map((m) => m.id);
   assert.ok(ids.includes("auth-login"));
   assert.ok(ids.includes("sample-hello"));
@@ -33,6 +33,18 @@ test("gen-modules: ca xanh khi kiểm tra module trên cây hiện tại", async
   assert.ok(ids.includes("quota-tracking"));
   assert.ok(ids.includes("auto-switch"));
   assert.ok(ids.includes("cost-tracking"));
+  assert.ok(ids.includes("calendar"));
+  assert.ok(ids.includes("md-jobs"));
+  assert.ok(ids.includes("quiet-hours"));
+  assert.ok(ids.includes("overnight-queue"));
+  assert.ok(ids.includes("reports"));
+  assert.ok(ids.includes("voice-report"));
+  assert.ok(ids.includes("eta"));
+  assert.ok(ids.includes("skills-md"));
+  assert.ok(ids.includes("instruction-sync"));
+  assert.ok(ids.includes("shared-memory"));
+  assert.ok(ids.includes("auto-lessons"));
+  assert.ok(ids.includes("notifications"));
 });
 
 test("gen-modules: ca đỏ khi module thiếu module.json", async () => {
