@@ -1,0 +1,28 @@
+{
+  "$schema": "../../schemas/module-manifest.schema.json",
+  "id": "kanban",
+  "name": "Bảng Kanban",
+  "description": "Bảng nhiệm vụ theo trạng thái",
+  "version": "0.1.0",
+  "group": "dashboard",
+  "scopes": ["workspace", "project"],
+  "risk": "low",
+  "effort": "medium",
+  "requires": [],
+  "ui": {
+    "contributes": [
+      {
+        "id": "kanban-board",
+        "slot": "board.columns",
+        "label": "Bảng Kanban",
+        "order": 10
+      },
+      {
+        "id": "kanban-header-chip",
+        "slot": "board.header.chip",
+        "label": "Chỉ số trạng thái",
+        "order": 10
+      }
+    ]
+  }
+}

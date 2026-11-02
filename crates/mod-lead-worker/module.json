@@ -1,0 +1,30 @@
+{
+  "id": "lead-worker",
+  "group": "orchestration",
+  "name": "Phân công Lead và Worker",
+  "description": "Chọn Lead (PM) và Worker cho từng task theo vai trò và dự án",
+  "version": "0.1.0",
+  "requires": ["subscription-connect"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "lead-worker-defaults",
+        "slot": "agents.defaults",
+        "label": "Vai trò mặc định",
+        "order": 10
+      },
+      {
+        "id": "lead-worker-task-panel",
+        "slot": "board.task-panel.section",
+        "label": "Phân công",
+        "order": 20
+      }
+    ]
+  }
+}

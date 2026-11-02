@@ -1,0 +1,24 @@
+{
+  "id": "prompt-library",
+  "group": "knowledge",
+  "name": "Thư viện prompt",
+  "description": "Thư viện prompt gắn theo vai trò agent và kỹ năng",
+  "version": "0.1.0",
+  "requires": ["lead-worker"],
+  "scopes": ["workspace", "project"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "prompt-library-tab",
+        "slot": "knowledge.tab",
+        "label": "Prompt",
+        "order": 10
+      }
+    ]
+  }
+}

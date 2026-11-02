@@ -1,0 +1,24 @@
+{
+  "id": "subscription-connect",
+  "group": "accounts",
+  "name": "Kết nối tài khoản subscription",
+  "description": "Kết nối tài khoản AI thông qua CLI chính thức với HOME riêng biệt",
+  "version": "0.1.0",
+  "requires": [],
+  "scopes": ["system"],
+  "effort": "light",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {},
+  "ui": {
+    "contributes": [
+      {
+        "id": "subscription-accounts",
+        "slot": "agents.accounts",
+        "label": "Tài khoản subscription",
+        "order": 10
+      }
+    ]
+  }
+}
