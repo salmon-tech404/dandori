@@ -50,13 +50,13 @@ Chủ dự án (hoặc Claude thay mặt, theo lời chủ dự án) ghi `ĐỒN
 | Giai đoạn | Báo cáo | Kết quả |
 | :--- | :--- | :--- |
 | P0 | `reports/REVIEW_P0.md` | **ĐẠT** sau kiểm lần 2 (Claude, 2026-10-31, kèm các sửa của Claude); còn mở: biên dịch Linux/macOS (DAN-VERIFY-008) |
-| P1 | `reports/REVIEW_P1.md` | chưa |
-| P2 | `reports/REVIEW_P2.md` | chưa |
+| P1 | `reports/REVIEW_P1.md` | **ĐẠT (tự động)** sau kiểm độc lập của Claude 2026-11-01 kèm 15 sửa lỗi; **`DAN-VERIFY-003/004` ĐÃ ĐẠT với Claude (chủ dự án chạy thật 2026-11-01)**; `agy` chưa chạy thật |
+| P2 | `reports/REVIEW_P2.md` | **ĐẠT (tự động)** sau kiểm độc lập của Claude 2026-11-02 kèm 13 sửa lỗi (vault dùng kho khóa hệ điều hành, token tích hợp vào vault, SSRF, phân quyền). **Còn mở:** P2-07 `pr-merge` chờ chủ dự án đọc ADR 0007; bài kiểm một tuần; kết nối thật GitHub/GitLab/Linear |
 | P3 | `reports/REVIEW_P3.md` | chưa |
 | P4 | `reports/REVIEW_P4.md` | chưa |
 | P5 | `reports/REVIEW_P5.md` | chưa |
 
-## Task (71)
+## Task (65)
 
 Cột Phụ thuộc: task phải `DONE` (hoặc `DONE_WITH_GAPS` chấp nhận được) trước. `[CỔNG]` = cổng chủ dự án. **Cổng GĐ** = điểm dừng bắt buộc chờ Claude kiểm.
 
@@ -85,33 +85,33 @@ Cột Phụ thuộc: task phải `DONE` (hoặc `DONE_WITH_GAPS` chấp nhận �
 
 | # | Task | Phụ thuộc | Trạng thái | Commit (chủ dự án) | Báo cáo |
 | :-: | :--- | :--- | :--- | :--- | :--- |
-| P1-01 | Lõi chạy task, điểm mở rộng | T14B | ⏳ Todo | | |
-| P1-02 | `subscription-connect` + adapter CLI | P1-01 | ⏳ Todo | | |
-| P1-03 | `lead-worker` | P1-02 | ⏳ Todo | | |
-| P1-04 | `worktree` + `dandori-git` | P1-01 | ⏳ Todo | | |
-| P1-05 | `kanban` | T14 | ⏳ Todo | | |
-| P1-06 | `live-status` | P1-01 | ⏳ Todo | | |
-| P1-07 | `prompt-library` | P1-03 | ⏳ Todo | | |
-| P1-08 | `tech-profile` | P1-07 | ⏳ Todo | | |
-| P1-09 | **Cổng P1** | P1-02…P1-08 | ⏳ Todo | | |
+| P1-01 | Lõi chạy task, điểm mở rộng | T14B | ✅ DONE | | `reports/P1-01.md` |
+| P1-02 | `subscription-connect` + adapter CLI | P1-01 | ✅ DONE | | `reports/P1-02.md` |
+| P1-03 | `lead-worker` | P1-02 | ✅ DONE | | `reports/P1-03.md` |
+| P1-04 | `worktree` + `dandori-git` | P1-01 | ✅ DONE | | `reports/P1-04.md` |
+| P1-05 | `kanban` | T14 | ✅ DONE | | `reports/P1-05.md` |
+| P1-06 | `live-status` | P1-01 | ✅ DONE | | `reports/P1-06.md` |
+| P1-07 | `prompt-library` | P1-03 | ✅ DONE | | `reports/P1-07.md` |
+| P1-08 | `tech-profile` | P1-07 | ✅ DONE | | `reports/P1-08.md` |
+| P1-09 | **Cổng P1** | P1-02…P1-08 | ✅ DONE | | `reports/P1-09.md` |
 
 ### Giai đoạn 2: vòng làm việc (`12_P2_VONG_LAM_VIEC.md`)
 
 | # | Task | Phụ thuộc | Trạng thái | Commit (chủ dự án) | Báo cáo |
 | :-: | :--- | :--- | :--- | :--- | :--- |
-| P2-01 | `run-history` | P1-09 | ⏳ Todo | | |
-| P2-02 | `diff-preview` | P1-04 | ⏳ Todo | | |
-| P2-03 | `approval-gate` + `TransitionGuard` | P1-09 | ⏳ Todo | | |
-| P2-04 | `test-agent` | P1-09 | ⏳ Todo | | |
-| P2-05 | `doc-agent` | P1-09 | ⏳ Todo | | |
-| P2-06 | `integrations` + `GitHostProvider` | T14 | ⏳ Todo | | |
-| P2-07 | `pr-merge` (tự merge `[CỔNG]`) | P1-04, P2-06 (nên P2-03) | ⏳ Todo | | |
-| P2-08 | `multi-account` | P1-02 | ⏳ Todo | | |
-| P2-09 | `quota-tracking` | P1-02 | ⏳ Todo | | |
-| P2-10 | `auto-switch` | P2-08, P2-09 | ⏳ Todo | | |
-| P2-11 | `api-key-fallback` | T14 | ⏳ Todo | | |
-| P2-12 | `cost-tracking` | P1-06 | ⏳ Todo | | |
-| P2-13 | **Cổng P2** | P2-01…P2-12 | ⏳ Todo | | |
+| P2-01 | `run-history` | P1-09 | ✅ DONE | | `reports/P2-01.md` |
+| P2-02 | `diff-preview` | P1-04 | ✅ DONE | | `reports/P2-02.md` |
+| P2-03 | `approval-gate` + `TransitionGuard` | P1-09 | ✅ DONE | | `reports/P2-03.md` |
+| P2-04 | `test-agent` | P1-09 | ✅ DONE | | `reports/P2-04.md` |
+| P2-05 | `doc-agent` | P1-09 | ✅ DONE | 2026-11-01 | Agent tài liệu tự chạy khi task ready_to_merge, anti-loop, cờ cảnh báo tệp ngoài mẫu |
+| P2-06 | `integrations` + `GitHostProvider` | T14 | ✅ DONE | | `reports/P2-06.md` |
+| P2-07 | `pr-merge` (tự merge `[CỔNG]`) | P1-04, P2-06 (nên P2-03) | ⏳ SKIPPED_AWAITING_OWNER | | `docs/adr/0007-auto-merge.md` |
+| P2-08 | `multi-account` | P1-02 | ✅ DONE | | `reports/P2-08.md` |
+| P2-09 | `quota-tracking` | P1-02 | ✅ DONE | | `reports/P2-09.md` |
+| P2-10 | `auto-switch` | P2-08, P2-09 | ✅ DONE | | `reports/P2-10.md` |
+| P2-11 | `api-key-fallback` | T14 | ✅ DONE | | `reports/P2-11.md` |
+| P2-12 | `cost-tracking` | P1-06 | ✅ DONE | | `reports/P2-12.md` |
+| P2-13 | **Cổng P2** | P2-01…P2-12 | 🟡 DONE_WITH_GAPS (phần tự động đạt; bài kiểm một tuần: CHỜ NGƯỜI DÙNG KIỂM) | | `reports/P2-13.md` |
 
 ### Giai đoạn 3: tự động và tri thức (`13_P3_TU_DONG_TRI_THUC.md`)
 
@@ -162,3 +162,20 @@ Danh sách đầy đủ ở `docs/manual-test-checklist.md` (T02 tạo khung, c�
 ## Nhật ký
 
 - _(Chủ dự án và Claude ghi sự kiện quan trọng kèm thời gian từ lệnh `date`.)_
+
+## Backlog ý tưởng và nợ kỹ thuật (chưa giao việc)
+
+Ghi nhận ngày 2026-11-01; chi tiết và nguồn ở `docs/y-tuong/bo-nho-va-tim-ma-nguon.md`.
+
+| Mã | Việc | Gắn vào |
+| :-: | :--- | :--- |
+| B-01 | `code-map`: bản đồ repo tree-sitter + gợi ý `tệp:dòng` từ test hỏng | đầu P3 |
+| B-02 | `context-budget`: lời nhắc xếp phần ổn định lên đầu, mô hình/effort theo vai trò, trần chi phí | sau P2-12 |
+| B-03 | "Bản đồ não": tóm tắt sau mỗi lần chạy, mục lục, chọn nút liên quan | P3-10, P3-11, P4-07 |
+| B-04 | Đo chi phí thật bằng `-ExtraArgs` trong script thử | trước B-01/B-02 |
+| B-05 | Chạy thật `agy`, sửa bộ đọc đầu ra | trước khi dùng `agy` |
+| B-06 | Giới hạn chạy đồng thời có thể bị vượt khi yêu cầu sát nhau | khi rảnh |
+| B-07 | Dọn cảnh báo `ts-rs` khi build | khi rảnh |
+| B-08 | Biên dịch và kiểm Linux/macOS | trước P5 |
+| B-09 | Mở giao diện trên trình duyệt thật | trước P5 |
+| B-10 | Che khóa riêng nhiều dòng trong đầu ra agent | P3-10 |
