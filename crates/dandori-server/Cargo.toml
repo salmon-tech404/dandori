@@ -5,6 +5,8 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 publish = false
+# Có hai chương trình (dandori và generate_types); `cargo run -p dandori-server` chạy máy chủ.
+default-run = "dandori"
 
 [[bin]]
 name = "dandori"
@@ -45,3 +47,5 @@ anyhow = { workspace = true }
 [dev-dependencies]
 tempfile = { workspace = true }
 reqwest = { workspace = true }
+futures = { workspace = true }
+url = { workspace = true }

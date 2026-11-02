@@ -1,12 +1,14 @@
 //! Các route xử lý nhiệm vụ (Task) và máy trạng thái Kanban (T11).
 
 use std::str::FromStr;
+use std::sync::Arc;
 
 use axum::extract::{Path, Query, State};
 use axum::response::{IntoResponse, Response};
 use axum::{Extension, Json};
 use chrono::Utc;
 use dandori_db::{ProjectRepo, TaskRepo};
+use dandori_module_api::{GuardDecision, TransitionActor, TransitionGuard};
 use dandori_types::{
     Envelope, EventPayload, EventScope, Project, ProjectId, Task, TaskId, TaskStatus,
 };
@@ -42,9 +44,13 @@ pub struct CreateTaskRequest {
 #[serde(deny_unknown_fields)]
 pub struct UpdateTaskRequest {
     /// Tiêu đề mới của nhiệm vụ.
-    pub title: String,
+    pub title: Option<String>,
     /// Mô tả mới của nhiệm vụ.
-    pub description: String,
+    pub description: Option<String>,
+    /// Agent điều phối được chỉ định (Lead).
+    pub lead_agent: Option<String>,
+    /// Agent thực thi được chỉ định (Worker).
+    pub worker_agent: Option<String>,
 }
 
 /// Yêu cầu chuyển trạng thái nhiệm vụ.
@@ -214,6 +220,37 @@ pub async fn get_task(
     }
 }
 
+async fn validate_update_agents(
+    state: &AppState,
+    lead: &str,
+    worker: &str,
+) -> Result<(), ApiError> {
+    validate_agent_ready(state, lead).await?;
+    validate_agent_ready(state, worker).await?;
+    Ok(())
+}
+
+async fn persist_updated_task(
+    state: &AppState,
+    task: &Task,
+    title: &str,
+    description: &str,
+    lead: &str,
+    worker: &str,
+) -> Result<Task, ApiError> {
+    let task_repo = TaskRepo::new(&state.db);
+    task_repo
+        .update_task_full(&task.project_id, &task.id, title, description, lead, worker)
+        .await
+        .map_err(|e| ApiError::Internal(e.to_string()))?;
+
+    task_repo
+        .get_task_by_id(&task.id)
+        .await
+        .map_err(|e| ApiError::Internal(e.to_string()))?
+        .ok_or_else(|| ApiError::NotFound("Nhiệm vụ".to_string()))
+}
+
 /// `PATCH /api/v1/tasks/:id` - Cập nhật tiêu đề và mô tả nhiệm vụ.
 pub async fn update_task(
     State(state): State<AppState>,
@@ -235,25 +272,57 @@ pub async fn update_task(
         Err(err) => return err.into_response_with_id(&req_id.0),
     };
 
-    let title = payload.title.trim();
+    let title = payload.title.as_deref().unwrap_or(&task.title).trim();
     if title.is_empty() {
         return ApiError::BadRequest("Tiêu đề nhiệm vụ không được để trống".to_string())
             .into_response_with_id(&req_id.0);
     }
+    let description = payload.description.as_deref().unwrap_or(&task.description);
+    let lead_agent = payload
+        .lead_agent
+        .as_deref()
+        .unwrap_or(&task.lead_agent)
+        .trim();
+    let worker_agent = payload
+        .worker_agent
+        .as_deref()
+        .unwrap_or(&task.worker_agent)
+        .trim();
 
-    let task_repo = TaskRepo::new(&state.db);
-    if let Err(e) = task_repo
-        .update_task(&task.project_id, &task_id, title, &payload.description)
-        .await
-    {
-        return ApiError::Internal(e.to_string()).into_response_with_id(&req_id.0);
+    if let Err(err) = validate_update_agents(&state, lead_agent, worker_agent).await {
+        return err.into_response_with_id(&req_id.0);
     }
 
-    match task_repo.get_task_by_id(&task_id).await {
-        Ok(Some(updated)) => Json(json!({ "task": updated })).into_response(),
-        Ok(None) => ApiError::NotFound("Nhiệm vụ".to_string()).into_response_with_id(&req_id.0),
-        Err(e) => ApiError::Internal(e.to_string()).into_response_with_id(&req_id.0),
+    match persist_updated_task(&state, &task, title, description, lead_agent, worker_agent).await {
+        Ok(updated) => Json(json!({ "task": updated })).into_response(),
+        Err(err) => err.into_response_with_id(&req_id.0),
     }
+}
+
+async fn evaluate_guards(
+    guards: &[Arc<dyn TransitionGuard>],
+    task: &Task,
+    current: TaskStatus,
+    target: TaskStatus,
+    actor: &TransitionActor,
+) -> Result<Option<(String, String)>, ApiError> {
+    for guard in guards {
+        match guard.check(task, current, target, actor).await {
+            Ok(GuardDecision::Allow) => {}
+            Ok(GuardDecision::Deny { reason, .. }) => {
+                return Err(ApiError::BadRequest(format!(
+                    "Chuyển trạng thái bị từ chối: {reason}"
+                )));
+            }
+            Ok(GuardDecision::NeedsApproval { kind, reason }) => {
+                return Ok(Some((kind, reason)));
+            }
+            Err(e) => {
+                return Err(ApiError::Internal(format!("Lỗi kiểm tra guard: {e}")));
+            }
+        }
+    }
+    Ok(None)
 }
 
 async fn execute_task_transition(
@@ -261,6 +330,7 @@ async fn execute_task_transition(
     task: &Task,
     project: &Project,
     target_status: TaskStatus,
+    actor: TransitionActor,
 ) -> Result<Task, ApiError> {
     let current_status = TaskStatus::from_str(&task.status).map_err(ApiError::Internal)?;
 
@@ -272,9 +342,19 @@ async fn execute_task_transition(
         )));
     }
 
+    let guards = state.lifecycle_manager.get_transition_guards().await;
+    let needs_approval =
+        evaluate_guards(&guards, task, current_status, target_status, &actor).await?;
+
+    let final_status = if needs_approval.is_some() {
+        TaskStatus::NeedsHuman
+    } else {
+        target_status
+    };
+
     let task_repo = TaskRepo::new(&state.db);
     task_repo
-        .update_task_status(&task.project_id, &task.id, target_status.as_str())
+        .update_task_status(&task.project_id, &task.id, final_status.as_str())
         .await
         .map_err(|e| ApiError::Internal(e.to_string()))?;
 
@@ -284,9 +364,21 @@ async fn execute_task_transition(
         EventPayload::TaskStatusChanged {
             task_id: task.id,
             old_status: current_status.as_str().to_string(),
-            new_status: target_status.as_str().to_string(),
+            new_status: final_status.as_str().to_string(),
         },
     ));
+
+    if let Some((gate_id, reason)) = needs_approval {
+        state.event_bus.publish(Envelope::new(
+            Utc::now(),
+            EventScope::task(project.workspace_id, task.project_id, task.id),
+            EventPayload::ApprovalRequested {
+                gate_id,
+                task_id: task.id,
+                reason,
+            },
+        ));
+    }
 
     task_repo
         .get_task_by_id(&task.id)
@@ -323,7 +415,8 @@ pub async fn update_task_status(
         }
     };
 
-    match execute_task_transition(&state, &task, &project, target_status).await {
+    let actor = TransitionActor::User(auth_user.id.to_string());
+    match execute_task_transition(&state, &task, &project, target_status, actor).await {
         Ok(updated) => Json(json!({ "task": updated })).into_response(),
         Err(err) => err.into_response_with_id(&req_id.0),
     }
@@ -355,4 +448,79 @@ pub async fn delete_task(
     }
 
     Json(json!({ "status": "deleted" })).into_response()
+}
+
+async fn validate_agent_ready(state: &AppState, agent: &str) -> Result<(), ApiError> {
+    if agent.trim().is_empty() {
+        return Ok(());
+    }
+    let accounts = dandori_db::AgentAccountRepo::new(&state.db)
+        .list_accounts()
+        .await
+        .map_err(|e| ApiError::Internal(e.to_string()))?;
+
+    let is_ready = accounts.iter().any(|acc| {
+        acc.enabled && acc.status == "ready" && acc.provider.eq_ignore_ascii_case(agent.trim())
+    });
+
+    if !is_ready {
+        return Err(ApiError::BadRequest(format!(
+            "Nhà cung cấp '{}' không có tài khoản nào ở trạng thái sẵn sàng (ready)",
+            agent.trim()
+        )));
+    }
+    Ok(())
+}
+
+/// `POST /api/v1/tasks/:id/dispatch` - Giao việc cho agent Worker (P1-03 AC3).
+pub async fn dispatch_task(
+    State(state): State<AppState>,
+    Extension(req_id): Extension<RequestId>,
+    auth_user: AuthUser,
+    Path(task_str): Path<String>,
+) -> Response {
+    let task_id = match TaskId::from_str(&task_str) {
+        Ok(id) => id,
+        Err(_) => {
+            return ApiError::BadRequest("ID nhiệm vụ không hợp lệ".to_string())
+                .into_response_with_id(&req_id.0);
+        }
+    };
+
+    let (_, _) = match get_task_and_verify_access(&state, &auth_user, &task_id).await {
+        Ok(res) => res,
+        Err(err) => return err.into_response_with_id(&req_id.0),
+    };
+
+    match state
+        .run_service
+        .start_run(
+            task_id,
+            dandori_agent_port::AgentRole::Worker,
+            auth_user.id,
+            Vec::new(),
+        )
+        .await
+    {
+        Ok(run) => (
+            axum::http::StatusCode::CREATED,
+            Json(json!({
+                "run_id": run.id,
+                "status": run.status,
+                "agent": run.agent,
+                "account": run.account
+            })),
+        )
+            .into_response(),
+        Err(crate::run_service::RunServiceError::WorkdirProviderMissing) => {
+            ApiError::WorkdirProviderMissing.into_response_with_id(&req_id.0)
+        }
+        Err(crate::run_service::RunServiceError::WorkdirError(msg)) => {
+            ApiError::BadRequest(msg).into_response_with_id(&req_id.0)
+        }
+        Err(crate::run_service::RunServiceError::NoAvailableAccount) => {
+            ApiError::NoAvailableAccount.into_response_with_id(&req_id.0)
+        }
+        Err(e) => crate::routes::runs::map_start_run_error(e).into_response_with_id(&req_id.0),
+    }
 }

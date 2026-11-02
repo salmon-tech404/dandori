@@ -4,5 +4,6 @@ pub mod auth;
 pub mod features;
 pub mod health;
 pub mod projects;
+pub mod runs;
 pub mod tasks;
 pub mod workspaces;

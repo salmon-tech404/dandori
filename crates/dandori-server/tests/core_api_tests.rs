@@ -664,3 +664,75 @@ async fn test_ac5_registry_three_tier_permissions() {
     assert_eq!(status_eff, StatusCode::OK);
     assert!(body_eff.get("effective").is_some());
 }
+
+#[tokio::test]
+#[expect(
+    clippy::too_many_lines,
+    reason = "integration test scenario covering acceptance criteria"
+)]
+async fn test_project_default_branch_must_be_a_valid_ref_name() {
+    let (app, _pool, _bus) = setup_test_server().await.unwrap();
+
+    let req_init = Request::builder()
+        .method("POST")
+        .uri("/api/v1/auth/setup-owner")
+        .header(header::CONTENT_TYPE, "application/json")
+        .body(Body::from(
+            json!({ "username": "admin", "password": "password123" }).to_string(),
+        ))
+        .unwrap();
+    let resp_init = app.clone().oneshot(req_init).await.unwrap();
+    let cookie = resp_init
+        .headers()
+        .get(header::SET_COOKIE)
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .split(';')
+        .next()
+        .unwrap()
+        .to_string();
+    let (_, body_ws) = send_req(
+        &app,
+        "POST",
+        "/api/v1/workspaces",
+        Some(&cookie),
+        Some(json!({ "name": "Branch WS" })),
+    )
+    .await;
+    let ws_id = body_ws["workspace"]["id"].as_str().unwrap();
+
+    let repo = tempfile::tempdir().unwrap();
+    std::fs::create_dir_all(repo.path().join(".git")).unwrap();
+
+    // Tên bắt đầu bằng "-" sẽ bị git hiểu là tùy chọn khi tạo worktree.
+    for bad in ["--detach", "-f", "a b", "x..y"] {
+        let (status, _) = send_req(
+            &app,
+            "POST",
+            &format!("/api/v1/workspaces/{ws_id}/projects"),
+            Some(&cookie),
+            Some(json!({
+                "name": "Bad branch",
+                "repo_path": repo.path().to_str().unwrap(),
+                "default_branch": bad
+            })),
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST, "{bad:?} phải bị từ chối");
+    }
+
+    let (status_ok, _) = send_req(
+        &app,
+        "POST",
+        &format!("/api/v1/workspaces/{ws_id}/projects"),
+        Some(&cookie),
+        Some(json!({
+            "name": "Good branch",
+            "repo_path": repo.path().to_str().unwrap(),
+            "default_branch": "release/1.0"
+        })),
+    )
+    .await;
+    assert_eq!(status_ok, StatusCode::OK);
+}
