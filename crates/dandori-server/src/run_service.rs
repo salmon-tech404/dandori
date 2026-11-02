@@ -249,6 +249,30 @@ impl RunService {
             .update_task_workdir(&task.project_id, &task.id, Some(&path_str))
             .await;
 
+        // 6b. Trang trí thư mục làm việc qua các WorkdirDecorator (P3-09)
+        let decorators = self.lifecycle_manager.get_workdir_decorators().await;
+        if !decorators.is_empty() {
+            let ws_id = match ProjectRepo::new(&self.db)
+                .get_project_by_id(&task.project_id)
+                .await
+            {
+                Ok(Some(p)) => p.workspace_id.to_string(),
+                _ => String::new(),
+            };
+            let dec_context = dandori_module_api::DecoratorContext {
+                workspace_id: ws_id,
+                project_id: task.project_id.to_string(),
+                task_id: task.id.to_string(),
+                role: role.clone(),
+                provider: Some(account.provider.clone()),
+            };
+            for decorator in decorators {
+                if let Err(e) = decorator.decorate(&workdir.path, &dec_context).await {
+                    tracing::warn!("Lỗi khi trang trí worktree cho task {}: {}", task.id, e);
+                }
+            }
+        }
+
         // 7. Lắp ráp nội dung prompt từ task và các PromptContributor
         let prompt = self.assemble_prompt(&task, &role).await;
 
