@@ -580,6 +580,10 @@ fn make_subscription_connect_module() -> FeatureModule {
     sub_mod
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "Đăng ký danh mục các module nhóm Dashboard"
+)]
 fn make_dashboard_modules() -> Vec<FeatureModule> {
     vec![
         make_mod(
@@ -627,9 +631,40 @@ fn make_dashboard_modules() -> Vec<FeatureModule> {
             "low",
             "medium",
         ),
+        make_mod(
+            "reports",
+            "dashboard",
+            "Báo cáo tổng kết",
+            "Báo cáo tổng kết ngày và tuần xác định, không số liệu bịa, xuất Markdown",
+            &["run-history"],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "voice-report",
+            "dashboard",
+            "Giọng đọc báo cáo",
+            "Đọc báo cáo tổng kết bằng Web Speech API có sẵn của trình duyệt",
+            &["reports"],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "eta",
+            "dashboard",
+            "Dự tính thời gian (ETA)",
+            "Dự tính khoảng thời gian hoàn tất tác vụ theo thống kê thực tế và tự đo sai số",
+            &["run-history"],
+            "low",
+            "medium",
+        ),
     ]
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "Hàm tổng hợp danh sách module knowledge"
+)]
 fn make_knowledge_modules() -> Vec<FeatureModule> {
     vec![
         make_mod(
@@ -649,6 +684,42 @@ fn make_knowledge_modules() -> Vec<FeatureModule> {
             &["lead-worker"],
             "low",
             "medium",
+        ),
+        make_mod(
+            "skills-md",
+            "knowledge",
+            "Skill đđ̣c tả SKILL.md",
+            "Quản lý và nhúng skill theo chuẩn SKILL.md vào prompt agent",
+            &["prompt-library"],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "instruction-sync",
+            "knowledge",
+            "Đồng bộ tệp hướng dẫn CLI",
+            "Đồng bộ AGENTS.md, CLAUDE.md từ hồ sơ kỹ thuật và skill vào worktree",
+            &["tech-profile", "skills-md"],
+            "medium",
+            "medium",
+        ),
+        make_mod(
+            "shared-memory",
+            "knowledge",
+            "Bộ nhớ dùng chung",
+            "Bộ nhớ chia sẻ giữa các agent, chống nhiễm độc bộ nhớ và lọc khóa riêng đa dòng (B-10)",
+            &["prompt-library"],
+            "medium",
+            "medium",
+        ),
+        make_mod(
+            "auto-lessons",
+            "knowledge",
+            "Tự động rút bài học",
+            "Tự động trích xuất và đề xuất bài học vào bộ nhớ chung sau khi task hoàn thành",
+            &["shared-memory"],
+            "low",
+            "light",
         ),
     ]
 }
@@ -696,6 +767,33 @@ fn make_runtime_modules() -> Vec<FeatureModule> {
             "medium",
         ),
         make_mod(
+            "notifications",
+            "integrations",
+            "Kênh thông báo",
+            "Gửi thông báo sự kiện qua Telegram, Discord và Slack với bảo vệ SSRF và kho khóa",
+            &[],
+            "low",
+            "light",
+        ),
+        make_mod(
+            "mobile",
+            "dashboard",
+            "Truy cập di động",
+            "Theo dõi tiến trình và phê duyệt từ thiết bị di động an toàn",
+            &[],
+            "medium",
+            "medium",
+        ),
+        make_mod(
+            "audit-log",
+            "safety",
+            "Nhật ký kiểm toán",
+            "Nhật ký kiểm toán có tính toàn vẹn với chuỗi băm mật mã",
+            &[],
+            "low",
+            "medium",
+        ),
+        make_mod(
             "integrations",
             "integrations",
             "Tích hợp Git & Quản lý dự án",
@@ -730,7 +828,49 @@ fn default_feature_modules() -> Vec<FeatureModule> {
     mods.extend(make_runtime_modules());
     mods.extend(make_knowledge_modules());
     mods.extend(make_dashboard_modules());
+    mods.extend(make_scheduling_modules());
     mods
+}
+
+fn make_scheduling_modules() -> Vec<FeatureModule> {
+    vec![
+        make_mod(
+            "calendar",
+            "scheduling",
+            "Calendar để lên lịch task định kỳ",
+            "Lên lịch task định kỳ theo biểu thức cron hoặc khoảng đều",
+            &["subscription-connect"],
+            "low",
+            "medium",
+        ),
+        make_mod(
+            "md-jobs",
+            "scheduling",
+            "Job viết bằng file Markdown",
+            "Tự động phát hiện các công việc định kỳ từ tệp Markdown trong kho mã nguồn và kiểm soát phê duyệt",
+            &["calendar"],
+            "medium",
+            "medium",
+        ),
+        make_mod(
+            "quiet-hours",
+            "scheduling",
+            "Khung giờ cấm chạy",
+            "Quản lý khung giờ cấm chạy cho các tác vụ tự động và bảo vệ người dùng",
+            &["calendar"],
+            "low",
+            "light",
+        ),
+        make_mod(
+            "overnight-queue",
+            "scheduling",
+            "Hàng đợi qua đêm",
+            "Thực thi hàng đợi các task qua đêm tuần tự có giới hạn song song, dừng an toàn và tóm tắt sáng hôm sau",
+            &["calendar", "quiet-hours"],
+            "medium",
+            "medium",
+        ),
+    ]
 }
 
 fn make_account_modules() -> Vec<FeatureModule> {

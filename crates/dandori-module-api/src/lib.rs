@@ -13,6 +13,7 @@ pub mod login_probe;
 pub mod manifest;
 pub mod module;
 pub mod net_policy;
+pub mod safe_http;
 pub mod secrets;
 pub mod table;
 
@@ -34,10 +35,11 @@ pub use dandori_vault::{
     SqliteSecretStorage, Vault, VaultError, default_key_store,
 };
 pub use extension::{
-    CiState, CiStatusSummary, CreatePullRequestPayload, GitHostError, GitHostProvider,
-    GuardDecision, GuardError, MergeMethod, MergeResult, PromptContributor, PromptPart,
-    PullRequestState, ReleaseReason, RemotePullRequest, SystemSource, TaskRunner, TransitionActor,
-    TransitionGuard, Workdir, WorkdirError, WorkdirProvider,
+    CiState, CiStatusSummary, CreatePullRequestPayload, DecoratorContext, DecoratorError,
+    DecoratorResult, GitHostError, GitHostProvider, GuardDecision, GuardError, MergeMethod,
+    MergeResult, PromptContributor, PromptPart, PullRequestState, ReleaseReason, RemotePullRequest,
+    SystemSource, TaskRunner, TransitionActor, TransitionGuard, Workdir, WorkdirDecorator,
+    WorkdirError, WorkdirProvider, safe_write_worktree_file,
 };
 pub use login_probe::{
     LoginProbe, probe_claude_login, probe_login_status, supports_home_isolation,
@@ -47,7 +49,15 @@ pub use manifest::{
     UiContribution, UiDeclaration,
 };
 pub use module::{BoxFuture, Migration, Module, ModuleSubscription, WorkerSpec};
-pub use net_policy::{allow_local_endpoints, set_allow_local_endpoints_for_tests};
+pub use net_policy::{
+    allow_local_endpoints, is_valid_allowed_origin_entry, origin_host, origin_host_matches,
+    set_allow_local_endpoints_for_tests,
+};
+pub use safe_http::{
+    SsrfError, build_safe_client, build_safe_client_with_timeout, is_ip_blocked, read_limited_text,
+    resolve_and_check, sanitize_error_message, validate_domain_in_allowlist, validate_host_safety,
+    validate_redirect_target,
+};
 pub use secrets::{
     MIN_SECRET_TOKEN_LEN, SECRET_PREFIXES, contains_secret_like, matched_secret_prefix,
     redact_secrets, secret_token_end,

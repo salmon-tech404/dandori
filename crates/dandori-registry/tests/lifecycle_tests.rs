@@ -33,6 +33,7 @@ static SAMPLE_HELLO_MANIFEST: LazyLock<Manifest> = LazyLock::new(|| Manifest {
     requires_worker_restart: true,
     settings: Default::default(),
     ui: Default::default(),
+    allowed_workdir_files: Vec::new(),
 });
 
 static SAMPLE_MIGRATIONS: [Migration; 1] = [Migration {
@@ -395,6 +396,7 @@ async fn test_migration_failure_rollback() -> Result<(), Box<dyn Error>> {
         requires_worker_restart: false,
         settings: Default::default(),
         ui: Default::default(),
+        allowed_workdir_files: Vec::new(),
     };
 
     let broken = Arc::new(FaultyModule {
@@ -509,6 +511,7 @@ fn create_mock_manifest(id: &'static str, requires: Vec<String>) -> Manifest {
         requires_worker_restart: false,
         settings: Default::default(),
         ui: Default::default(),
+        allowed_workdir_files: Vec::new(),
     }
 }
 

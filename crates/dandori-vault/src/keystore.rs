@@ -1,7 +1,7 @@
 //! Giao diện và các hiện thực kho lưu trữ khóa chủ (01_KIEN_TRUC.md mục 6.2).
 
 use std::sync::Arc;
-use tokio::sync::RwLock;
+use std::sync::RwLock;
 use zeroize::Zeroize;
 
 use crate::error::VaultError;
@@ -130,8 +130,8 @@ impl MasterKeyStore for MemoryKeyStore {
     fn get_master_key(&self) -> Result<[u8; 32], VaultError> {
         let mut lock = self
             .key
-            .try_write()
-            .map_err(|_| VaultError::MasterKeyUnavailable("Khóa bộ nhớ đang bận".into()))?;
+            .write()
+            .map_err(|_| VaultError::MasterKeyUnavailable("Khóa bộ nhớ bị hỏng".into()))?;
 
         if let Some(k) = *lock {
             return Ok(k);
@@ -146,8 +146,8 @@ impl MasterKeyStore for MemoryKeyStore {
     fn set_master_key(&self, key: &[u8; 32]) -> Result<(), VaultError> {
         let mut lock = self
             .key
-            .try_write()
-            .map_err(|_| VaultError::MasterKeyUnavailable("Khóa bộ nhớ đang bận".into()))?;
+            .write()
+            .map_err(|_| VaultError::MasterKeyUnavailable("Khóa bộ nhớ bị hỏng".into()))?;
         *lock = Some(*key);
         Ok(())
     }

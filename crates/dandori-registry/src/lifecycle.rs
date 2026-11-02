@@ -1,6 +1,7 @@
 //! Quản lý vòng đời thực thi thật sự của các module (T07 & 01_KIEN_TRUC.md mục 4.3, 4.4).
 
 use std::collections::HashMap;
+use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -10,9 +11,9 @@ use chrono::Utc;
 use dandori_events::EventBus;
 use dandori_module_api::{
     GitHostProvider, Module, ModuleContext, PromptContributor, TaskRunner, TransitionGuard,
-    WorkdirProvider,
+    WorkdirDecorator, WorkdirProvider,
 };
-use dandori_types::{Envelope, EventPayload, EventScope, FeatureModuleId};
+use dandori_types::{Envelope, EventPayload, EventScope, FeatureModuleId, WorkspaceId};
 use sqlx::SqlitePool;
 use tokio::sync::RwLock;
 use tokio_util::sync::CancellationToken;
@@ -21,6 +22,17 @@ use tower::ServiceExt;
 use crate::error::RegistryError;
 use crate::registry::FeatureRegistry;
 use crate::types::{ChangeRequest, RegistryRole, RegistryScope};
+
+/// Phạm vi sự kiện tương ứng với phạm vi thay đổi tính năng: gắn workspace để các module (nhật ký kiểm toán...)
+/// biết sự kiện thuộc workspace nào. Phạm vi hệ thống không thuộc workspace nào.
+fn event_scope_for(scope: &RegistryScope) -> EventScope {
+    let ws = match scope {
+        RegistryScope::System => return EventScope::empty(),
+        RegistryScope::Workspace(ws) => ws,
+        RegistryScope::Project { workspace_id, .. } => workspace_id,
+    };
+    WorkspaceId::from_str(ws).map_or_else(|_| EventScope::empty(), EventScope::workspace)
+}
 
 /// Đại diện cho một phiên bản module đang chạy trong bộ nhớ.
 #[derive(Debug)]
@@ -32,6 +44,7 @@ struct ActiveModuleInstance {
     prompt_contributor: Option<Arc<dyn PromptContributor>>,
     transition_guard: Option<Arc<dyn TransitionGuard>>,
     git_host_provider: Option<Arc<dyn GitHostProvider>>,
+    workdir_decorator: Option<Arc<dyn WorkdirDecorator>>,
 }
 
 /// Trình quản lý vòng đời thực thi (bật/tắt thật) cho các module Dandori.
@@ -46,6 +59,7 @@ pub struct FeatureLifecycleManager {
     test_prompt_contributors: Arc<RwLock<Vec<Arc<dyn PromptContributor>>>>,
     test_transition_guards: Arc<RwLock<Vec<Arc<dyn TransitionGuard>>>>,
     test_git_host_providers: Arc<RwLock<Vec<Arc<dyn GitHostProvider>>>>,
+    test_workdir_decorators: Arc<RwLock<Vec<Arc<dyn WorkdirDecorator>>>>,
     task_runner: Arc<std::sync::RwLock<Option<Arc<dyn TaskRunner>>>>,
 }
 
@@ -63,6 +77,7 @@ impl FeatureLifecycleManager {
             test_prompt_contributors: Arc::new(RwLock::new(Vec::new())),
             test_transition_guards: Arc::new(RwLock::new(Vec::new())),
             test_git_host_providers: Arc::new(RwLock::new(Vec::new())),
+            test_workdir_decorators: Arc::new(RwLock::new(Vec::new())),
             task_runner: Arc::new(std::sync::RwLock::new(None)),
         }
     }
@@ -231,6 +246,32 @@ impl FeatureLifecycleManager {
         lock.push(provider);
     }
 
+    /// Lấy danh sách toàn bộ các điểm mở rộng `WorkdirDecorator` đang hoạt động (P3-09).
+    pub async fn get_workdir_decorators(&self) -> Vec<Arc<dyn WorkdirDecorator>> {
+        let mut decorators = Vec::new();
+        {
+            let lock = self.active_modules.read().await;
+            for inst in lock.values() {
+                if let Some(ref wd) = inst.workdir_decorator {
+                    decorators.push(wd.clone());
+                }
+            }
+        }
+        {
+            let test_lock = self.test_workdir_decorators.read().await;
+            for wd in test_lock.iter() {
+                decorators.push(wd.clone());
+            }
+        }
+        decorators
+    }
+
+    /// Đăng ký một `WorkdirDecorator` phục vụ kiểm thử đơn vị hoặc giả lập (P3-09).
+    pub async fn register_workdir_decorator_for_test(&self, decorator: Arc<dyn WorkdirDecorator>) {
+        let mut lock = self.test_workdir_decorators.write().await;
+        lock.push(decorator);
+    }
+
     /// Đếm số tác vụ worker hoặc subscription đang hoạt động (phục vụ kiểm tra RS-ASYNC-004).
     pub async fn active_task_count(&self) -> usize {
         let lock = self.active_modules.read().await;
@@ -346,6 +387,7 @@ impl FeatureLifecycleManager {
         let prompt_contributor = module.prompt_contributor(&ctx);
         let transition_guard = module.transition_guard(&ctx);
         let git_host_provider = module.git_host_provider(&ctx);
+        let workdir_decorator = module.workdir_decorator(&ctx);
         let worker_handles = self.spawn_workers(module, &ctx, &cancel_token);
         let subscription_handles = self.spawn_subscriptions(module, &cancel_token);
 
@@ -360,6 +402,7 @@ impl FeatureLifecycleManager {
                 prompt_contributor,
                 transition_guard,
                 git_host_provider,
+                workdir_decorator,
             },
         );
 
@@ -453,7 +496,7 @@ impl FeatureLifecycleManager {
             let payload = EventPayload::ModuleEnabled {
                 module_id: FeatureModuleId::new(mid),
             };
-            let env = Envelope::new(Utc::now(), EventScope::empty(), payload);
+            let env = Envelope::new(Utc::now(), event_scope_for(scope), payload);
             self.event_bus.publish(env);
         }
         Ok(())
@@ -526,7 +569,7 @@ impl FeatureLifecycleManager {
         let payload = EventPayload::ModuleDisabled {
             module_id: FeatureModuleId::new(mid),
         };
-        let env = Envelope::new(Utc::now(), EventScope::empty(), payload);
+        let env = Envelope::new(Utc::now(), event_scope_for(scope), payload);
         self.event_bus.publish(env);
 
         Ok(())
@@ -607,20 +650,9 @@ impl FeatureLifecycleManager {
         let req_id = uuid::Uuid::new_v4().to_string();
         let session_token = extract_session_token(&req);
 
-        // 1. Kiểm tra xác thực phiên trước khi kiểm tra trạng thái module (T10 AC4 / T14B mục 2)
-        if !verify_token_session(&self.pool, session_token.as_deref()).await {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(serde_json::json!({
-                    "error": {
-                        "code": "unauthorized",
-                        "message": "Phiên đăng nhập không hợp lệ hoặc đã hết hạn",
-                        "request_id": req_id
-                    }
-                })),
-            )
-                .into_response();
-        }
+        let Some(caller) = authenticate_caller(&self.pool, session_token.as_deref()).await else {
+            return unauth_response(&req_id);
+        };
 
         let path = req.uri().path().to_string();
         let rest = path
@@ -633,18 +665,12 @@ impl FeatureLifecycleManager {
             _ => return (StatusCode::NOT_FOUND, "Not found").into_response(),
         };
 
+        if let Some(resp) = check_caller_scope(caller, module_id, &req_id) {
+            return resp;
+        }
+
         if !self.is_module_active(module_id).await {
-            return (
-                StatusCode::FORBIDDEN,
-                axum::Json(serde_json::json!({
-                    "error": {
-                        "code": "module_disabled",
-                        "message": "module đang tắt",
-                        "request_id": req_id
-                    }
-                })),
-            )
-                .into_response();
+            return module_disabled_response(&req_id);
         }
 
         let module = {
@@ -694,34 +720,117 @@ impl FeatureLifecycleManager {
     }
 }
 
-fn extract_session_token(req: &axum::extract::Request) -> Option<String> {
-    let cookie_header = req
-        .headers()
-        .get(axum::http::header::COOKIE)?
-        .to_str()
-        .ok()?;
-    for pair in cookie_header.split(';') {
-        let mut parts = pair.trim().splitn(2, '=');
-        let key = parts.next()?.trim();
-        let val = parts.next()?.trim();
-        if key == "dandori_session" && !val.is_empty() {
-            return Some(val.to_string());
-        }
-    }
-    None
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum CallerKind {
+    WebUser,
+    MobileDevice,
 }
 
-async fn verify_token_session(pool: &SqlitePool, token: Option<&str>) -> bool {
-    let Some(token) = token else {
-        return false;
-    };
+fn unauth_response(req_id: &str) -> axum::response::Response {
+    (
+        StatusCode::UNAUTHORIZED,
+        axum::Json(serde_json::json!({
+            "error": {
+                "code": "unauthorized",
+                "message": "Phiên đăng nhập không hợp lệ hoặc đã hết hạn",
+                "request_id": req_id
+            }
+        })),
+    )
+        .into_response()
+}
+
+fn module_disabled_response(req_id: &str) -> axum::response::Response {
+    (
+        StatusCode::FORBIDDEN,
+        axum::Json(serde_json::json!({
+            "error": {
+                "code": "module_disabled",
+                "message": "module đang tắt",
+                "request_id": req_id
+            }
+        })),
+    )
+        .into_response()
+}
+
+fn check_caller_scope(
+    caller: CallerKind,
+    module_id: &str,
+    req_id: &str,
+) -> Option<axum::response::Response> {
+    if caller == CallerKind::MobileDevice && module_id != "mobile" {
+        Some(
+            (
+                StatusCode::FORBIDDEN,
+                axum::Json(serde_json::json!({
+                    "error": {
+                        "code": "forbidden_scope",
+                        "message": "Thiết bị di động chỉ được phép truy cập module mobile",
+                        "request_id": req_id
+                    }
+                })),
+            )
+                .into_response(),
+        )
+    } else {
+        None
+    }
+}
+
+fn extract_session_token(req: &axum::extract::Request) -> Option<String> {
+    if let Some(cookie_header) = req
+        .headers()
+        .get(axum::http::header::COOKIE)
+        .and_then(|h| h.to_str().ok())
+    {
+        for pair in cookie_header.split(';') {
+            let mut parts = pair.trim().splitn(2, '=');
+            let key = parts.next()?.trim();
+            let val = parts.next()?.trim();
+            if key == "dandori_session" && !val.is_empty() {
+                return Some(val.to_string());
+            }
+        }
+    }
+
+    req.headers()
+        .get(axum::http::header::AUTHORIZATION)
+        .and_then(|h| h.to_str().ok())
+        .and_then(|h| h.strip_prefix("Bearer "))
+        .map(str::trim)
+        .filter(|t| !t.is_empty())
+        .map(ToString::to_string)
+}
+
+async fn authenticate_caller(pool: &SqlitePool, token: Option<&str>) -> Option<CallerKind> {
+    let token = token?;
     let token_hash = dandori_db::hash_session_token(token);
     let now_str = Utc::now().to_rfc3339();
-    let row = sqlx::query("SELECT id FROM session WHERE token_hash = ? AND expires_at > ?")
-        .bind(token_hash)
-        .bind(now_str)
+
+    let user_row = sqlx::query("SELECT id FROM session WHERE token_hash = ? AND expires_at > ?")
+        .bind(&token_hash)
+        .bind(&now_str)
         .fetch_optional(pool)
         .await;
 
-    matches!(row, Ok(Some(_)))
+    if matches!(user_row, Ok(Some(_))) {
+        return Some(CallerKind::WebUser);
+    }
+
+    if token.starts_with("mob_") {
+        let mob_row = sqlx::query(
+            "SELECT id FROM m_mobile_device WHERE token_hash = ? AND is_revoked = 0 AND expires_at > ?",
+        )
+        .bind(&token_hash)
+        .bind(&now_str)
+        .fetch_optional(pool)
+        .await;
+
+        if matches!(mob_row, Ok(Some(_))) {
+            return Some(CallerKind::MobileDevice);
+        }
+    }
+
+    None
 }

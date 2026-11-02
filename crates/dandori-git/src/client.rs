@@ -184,6 +184,57 @@ impl GitClient {
         Ok(code == 0)
     }
 
+    /// Lấy đường dẫn thực tế của một tệp hoặc thư mục trong cấu trúc Git (`git rev-parse --git-path <path>`).
+    ///
+    /// # Errors
+    /// Trả về `GitError` nếu lệnh git thất bại.
+    pub async fn git_path(&self, rel_path: &str) -> Result<PathBuf, GitError> {
+        let (code, stdout, stderr) = self
+            .run_git(
+                &self.repo_path,
+                &["rev-parse", "--git-path", rel_path],
+                DEFAULT_GIT_TIMEOUT,
+            )
+            .await?;
+        if code != 0 {
+            return Err(GitError::CommandFailed { code, stderr });
+        }
+        let trimmed = stdout.trim();
+        let path = if Path::new(trimmed).is_absolute() {
+            PathBuf::from(trimmed)
+        } else {
+            self.repo_path.join(trimmed)
+        };
+        Ok(path)
+    }
+
+    /// Thêm một mẫu đường dẫn vào tệp loại trừ cục bộ của repository/worktree (`info/exclude`).
+    ///
+    /// # Errors
+    /// Trả về `GitError` nếu không thể xác định đường dẫn hoặc ghi tệp.
+    pub async fn add_local_exclude(&self, pattern: &str) -> Result<(), GitError> {
+        let exclude_file = self.git_path("info/exclude").await?;
+        if let Some(parent) = exclude_file.parent() {
+            let _ = tokio::fs::create_dir_all(parent).await;
+        }
+        let mut content = if exclude_file.exists() {
+            tokio::fs::read_to_string(&exclude_file)
+                .await
+                .unwrap_or_default()
+        } else {
+            String::new()
+        };
+        if !content.lines().any(|line| line.trim() == pattern.trim()) {
+            if !content.is_empty() && !content.ends_with('\n') {
+                content.push('\n');
+            }
+            content.push_str(pattern.trim());
+            content.push('\n');
+            tokio::fs::write(&exclude_file, content).await?;
+        }
+        Ok(())
+    }
+
     /// Kiểm tra xem một nhánh cục bộ có tồn tại hay không.
     ///
     /// # Errors

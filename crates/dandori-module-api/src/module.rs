@@ -121,4 +121,9 @@ pub trait Module: fmt::Debug + Send + Sync {
     fn git_host_provider(&self, _ctx: &ModuleContext) -> Option<Arc<dyn GitHostProvider>> {
         None
     }
+
+    /// Điểm mở rộng WorkdirDecorator nếu module cung cấp (P3-09).
+    fn workdir_decorator(&self, _ctx: &ModuleContext) -> Option<Arc<dyn crate::WorkdirDecorator>> {
+        None
+    }
 }

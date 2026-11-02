@@ -27,6 +27,9 @@ futures = { workspace = true }
 ts-rs = { workspace = true }
 sqlx = { workspace = true }
 chrono = { workspace = true }
+reqwest = { workspace = true }
+tracing = { workspace = true }
+url = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

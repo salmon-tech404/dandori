@@ -330,6 +330,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "217698eaf96b4a3f0bc4f3662aaa55bdf913cd54d7204591faa790070c6d0853"
 
 [[package]]
+name = "croner"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c344b0690c1ad1c7176fe18eb173e0c927008fdaaa256e40dfd43ddd149c0843"
+dependencies = [
+ "chrono",
+]
+
+[[package]]
 name = "crossbeam-queue"
 version = "0.3.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -469,6 +478,7 @@ dependencies = [
  "dandori-types",
  "dandori-vault",
  "futures",
+ "reqwest",
  "serde",
  "serde_json",
  "sqlx",
@@ -476,7 +486,9 @@ dependencies = [
  "thiserror",
  "tokio",
  "tokio-util",
+ "tracing",
  "ts-rs",
+ "url",
 ]
 
 [[package]]
@@ -487,23 +499,37 @@ dependencies = [
  "dandori-types",
  "mod-api-key-fallback",
  "mod-approval-gate",
+ "mod-audit-log",
  "mod-auth-login",
+ "mod-auto-lessons",
  "mod-auto-switch",
+ "mod-calendar",
  "mod-cost-tracking",
  "mod-diff-preview",
  "mod-doc-agent",
+ "mod-eta",
+ "mod-instruction-sync",
  "mod-integrations",
  "mod-kanban",
  "mod-lead-worker",
  "mod-live-status",
+ "mod-md-jobs",
+ "mod-mobile",
  "mod-multi-account",
+ "mod-notifications",
+ "mod-overnight-queue",
  "mod-prompt-library",
+ "mod-quiet-hours",
  "mod-quota-tracking",
+ "mod-reports",
  "mod-run-history",
  "mod-sample-hello",
+ "mod-shared-memory",
+ "mod-skills-md",
  "mod-subscription-connect",
  "mod-tech-profile",
  "mod-test-agent",
+ "mod-voice-report",
  "mod-worktree",
 ]
 
@@ -1398,6 +1424,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "mod-audit-log"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sha2",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
 name = "mod-auth-login"
 version = "0.1.0"
 dependencies = [
@@ -1418,11 +1463,49 @@ dependencies = [
 ]
 
 [[package]]
+name = "mod-auto-lessons"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "ts-rs",
+ "uuid",
+]
+
+[[package]]
 name = "mod-auto-switch"
 version = "0.1.0"
 dependencies = [
  "axum",
  "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-calendar"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "croner",
  "dandori-module-api",
  "dandori-types",
  "serde",
@@ -1483,6 +1566,43 @@ dependencies = [
  "tokio",
  "tokio-util",
  "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-eta"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-instruction-sync"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sha2",
+ "sqlx",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "ts-rs",
  "uuid",
 ]
 
@@ -1555,6 +1675,43 @@ dependencies = [
 ]
 
 [[package]]
+name = "mod-md-jobs"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "croner",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sha2",
+ "sqlx",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "mod-mobile"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sha2",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
 name = "mod-multi-account"
 version = "0.1.0"
 dependencies = [
@@ -1566,6 +1723,45 @@ dependencies = [
  "sqlx",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "mod-notifications"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "mod-overnight-queue"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -1585,6 +1781,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "mod-quiet-hours"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
 name = "mod-quota-tracking"
 version = "0.1.0"
 dependencies = [
@@ -1598,6 +1812,24 @@ dependencies = [
  "tokio",
  "tokio-util",
  "tracing",
+]
+
+[[package]]
+name = "mod-reports"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -1629,6 +1861,45 @@ dependencies = [
  "tokio",
  "tokio-util",
  "tracing",
+]
+
+[[package]]
+name = "mod-shared-memory"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "ts-rs",
+ "uuid",
+]
+
+[[package]]
+name = "mod-skills-md"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dandori-module-api",
+ "dandori-types",
+ "serde",
+ "serde_json",
+ "sha2",
+ "sqlx",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "ts-rs",
+ "uuid",
 ]
 
 [[package]]
@@ -1680,6 +1951,16 @@ dependencies = [
  "tokio-util",
  "tracing",
  "uuid",
+]
+
+[[package]]
+name = "mod-voice-report"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "dandori-module-api",
+ "dandori-types",
+ "serde_json",
 ]
 
 [[package]]
