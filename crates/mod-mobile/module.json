@@ -1,0 +1,27 @@
+{
+  "id": "mobile",
+  "name": "Truy cập di động",
+  "description": "Theo dõi tiến trình và phê duyệt từ thiết bị di động an toàn",
+  "version": "0.1.0",
+  "group": "dashboard",
+  "scope": "workspace",
+  "default_state": "disabled",
+  "effort_tier": "T2",
+  "risk_tier": "R2",
+  "permissions": ["network"],
+  "settings": {
+    "allowed_origins": [],
+    "read_only": false,
+    "token_ttl_hours": 720
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "mobile-settings",
+        "slot": "settings.section",
+        "label": "Thiết bị di động",
+        "order": 70
+      }
+    ]
+  }
+}

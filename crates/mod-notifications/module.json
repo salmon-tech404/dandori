@@ -1,0 +1,35 @@
+{
+  "id": "notifications",
+  "name": "Kênh thông báo",
+  "description": "Gửi thông báo sự kiện qua Telegram, Discord và Slack với bảo vệ SSRF và kho khóa",
+  "version": "0.1.0",
+  "group": "integrations",
+  "requires": [],
+  "scopes": ["workspace"],
+  "effort": "low",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
+  "settings": {
+    "rate_limit_per_minute": {
+      "type": "integer",
+      "default": 10,
+      "description": "Số lượng thông báo tối đa mỗi phút trên một kênh"
+    },
+    "dedup_window_seconds": {
+      "type": "integer",
+      "default": 300,
+      "description": "Cửa sổ thời gian gộp thông báo trùng lặp (giây)"
+    }
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "notifications-settings",
+        "slot": "settings.section",
+        "label": "Kênh thông báo",
+        "order": 60
+      }
+    ]
+  }
+}

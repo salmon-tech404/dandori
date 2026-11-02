@@ -1,0 +1,25 @@
+{
+  "id": "audit-log",
+  "name": "Nhật ký kiểm toán",
+  "description": "Nhật ký kiểm toán có tính toàn vẹn với chuỗi băm mật mã",
+  "version": "0.1.0",
+  "group": "safety",
+  "scope": "workspace",
+  "default_state": "disabled",
+  "effort_tier": "T2",
+  "risk_tier": "R1",
+  "permissions": [],
+  "settings": {
+    "retention_days": 90
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "audit-log-settings",
+        "slot": "settings.section",
+        "label": "Nhật ký kiểm toán",
+        "order": 80
+      }
+    ]
+  }
+}
