@@ -457,6 +457,7 @@ export async function runUi01Scenario(env) {
 
   // 5. Đăng xuất -> quay về màn đăng nhập
   console.log("Kiểm tra đăng xuất...");
+  await env.cdp.click('button[aria-label="Tài khoản và cài đặt"]');
   await env.cdp.click('button[aria-label="Đăng xuất"]');
   await env.cdp.waitForSelector("form");
   console.log("=== Kịch bản UI-01 hoàn tất thành công! ===");
