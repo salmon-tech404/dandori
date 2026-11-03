@@ -935,6 +935,30 @@ fn make_advanced_account_modules() -> Vec<FeatureModule> {
     ]
 }
 
+/// Gói "Đầy đủ": mọi module KHÔNG thuộc nhóm rủi ro cao, sắp theo thứ tự phụ thuộc (module cần bật trước đứng trước).
+/// Module rủi ro cao (ví dụ dự phòng khóa API) và module phụ thuộc vào chúng phải được bật riêng, có xác nhận rủi ro.
+fn full_pack_modules() -> Vec<String> {
+    let all = default_feature_modules();
+    let mut chosen: Vec<String> = Vec::new();
+    loop {
+        let before = chosen.len();
+        for m in &all {
+            let id = m.id.as_str();
+            if m.risk == "high" || chosen.iter().any(|c| c == id) {
+                continue;
+            }
+            // Chỉ nhận khi mọi module phụ thuộc đã nằm trong gói (nghĩa là không phụ thuộc vào module rủi ro cao).
+            if m.requires.iter().all(|r| chosen.iter().any(|c| c == r)) {
+                chosen.push(id.to_string());
+            }
+        }
+        if chosen.len() == before {
+            break;
+        }
+    }
+    chosen
+}
+
 fn default_feature_packs() -> Vec<FeaturePack> {
     let base_modules: Vec<String> = vec![
         "sample-hello".into(),
@@ -952,8 +976,7 @@ fn default_feature_packs() -> Vec<FeaturePack> {
     small_team.push("multi-account".into());
     small_team.push("approval-gate".into());
 
-    let mut full = small_team.clone();
-    full.push("calendar".into());
+    let full = full_pack_modules();
 
     vec![
         FeaturePack {

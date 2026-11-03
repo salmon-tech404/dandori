@@ -75,6 +75,9 @@ pub async fn init_server_state(
             .map_err(|e| {
                 anyhow::anyhow!("Không thiết lập được tài khoản từ DANDORI_ADMIN_*: {e}")
             })?;
+        auth::ensure_default_workspace(&pool, user)
+            .await
+            .map_err(|e| anyhow::anyhow!("Không tạo được workspace mặc định: {e}"))?;
         tracing::info!(username = %user, "Đã áp dụng tài khoản quản trị cố định từ môi trường/.env");
     }
 

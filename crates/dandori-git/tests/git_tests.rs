@@ -355,3 +355,18 @@ async fn test_add_local_exclude_ignores_file_in_status() {
         .expect("status after");
     assert!(!status_after.iter().any(|s| s.contains("AGENTS.md")));
 }
+
+#[tokio::test]
+async fn test_list_branches_returns_local_branches_sorted() {
+    let (dir, client) = setup_git_repo().await;
+    fs::write(dir.path().join("README.md"), "x").expect("ghi tệp");
+    client.commit_all("init").await.expect("commit");
+    let wt_parent = tempdir().expect("wt tempdir");
+    client
+        .worktree_add(&wt_parent.path().join("wt"), "feature/x", "main")
+        .await
+        .expect("tạo nhánh bằng worktree");
+
+    let branches = client.list_branches().await.expect("list branches");
+    assert_eq!(branches, vec!["feature/x".to_string(), "main".to_string()]);
+}

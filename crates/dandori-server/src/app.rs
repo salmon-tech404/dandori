@@ -4,7 +4,7 @@ use axum::Router;
 use axum::routing::{delete, get, post};
 
 use crate::middleware::{check_origin, set_request_id};
-use crate::routes::{auth, features, health, projects, runs, tasks, workspaces};
+use crate::routes::{auth, features, fs_browse, health, projects, runs, tasks, workspaces};
 use crate::state::AppState;
 
 fn make_workspace_router() -> Router<AppState> {
@@ -56,6 +56,8 @@ fn make_entity_router() -> Router<AppState> {
             post(tasks::update_task_status).patch(tasks::update_task_status),
         )
         .route("/tasks/{id}/dispatch", post(tasks::dispatch_task))
+        .route("/fs/dirs", get(fs_browse::list_dirs))
+        .route("/fs/git-branches", get(fs_browse::git_branches))
 }
 
 fn make_features_router() -> Router<AppState> {

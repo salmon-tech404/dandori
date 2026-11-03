@@ -10,7 +10,7 @@ use dandori_vault::SecretBox;
 pub struct ServerConfig {
     /// Địa chỉ IP lắng nghe (BẮT BUỘC là 127.0.0.1, tuyệt đối không được 0.0.0.0).
     pub host: String,
-    /// Cổng lắng nghe (mặc định 3000).
+    /// Cổng lắng nghe (mặc định 3100; đổi bằng `DANDORI_PORT`).
     pub port: u16,
     /// Thư mục lưu trữ dữ liệu bền vững.
     pub data_dir: PathBuf,
@@ -47,7 +47,7 @@ impl Default for ServerConfig {
 
         Self {
             host: "127.0.0.1".to_string(),
-            port: 3000,
+            port: 3100,
             data_dir,
             enable_fake_provider: false,
             vault_in_memory: false,

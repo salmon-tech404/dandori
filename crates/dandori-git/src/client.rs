@@ -252,6 +252,32 @@ impl GitClient {
         Ok(code == 0)
     }
 
+    /// Liệt kê tên các nhánh cục bộ (tối đa 200; bỏ qua tên không hợp lệ).
+    ///
+    /// # Errors
+    /// Trả về `GitError::CommandFailed` nếu lệnh git thất bại.
+    pub async fn list_branches(&self) -> Result<Vec<String>, GitError> {
+        let (code, stdout, stderr) = self
+            .run_git(
+                &self.repo_path,
+                &["for-each-ref", "--format=%(refname:short)", "refs/heads"],
+                DEFAULT_GIT_TIMEOUT,
+            )
+            .await?;
+        if code != 0 {
+            return Err(GitError::CommandFailed { code, stderr });
+        }
+        let mut names: Vec<String> = stdout
+            .lines()
+            .map(str::trim)
+            .filter(|n| validate_ref_name(n).is_ok())
+            .map(ToString::to_string)
+            .collect();
+        names.sort();
+        names.truncate(200);
+        Ok(names)
+    }
+
     /// Thêm một worktree mới cùng nhánh mới dựa trên commit/nhánh cơ sở.
     ///
     /// # Errors

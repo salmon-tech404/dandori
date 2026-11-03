@@ -571,3 +571,54 @@ async fn test_core_module_cannot_be_disabled() {
         RegistryError::CoreModuleCannotBeDisabled(id) if id == "auth-login"
     ));
 }
+
+#[tokio::test]
+async fn test_full_pack_has_every_non_high_risk_module_in_dependency_order() {
+    let (pool, _registry) = create_test_registry().await.expect("test registry");
+    let repo = dandori_db::repo::FeatureRepo::new(pool.inner());
+    let modules = repo.list_modules().await.expect("list modules");
+    let packs = repo.list_packs().await.expect("list packs");
+    let full = packs
+        .iter()
+        .find(|p| p.id.as_str() == "full")
+        .expect("gói full");
+
+    // Gói "Đầy đủ" không còn chỉ có 12 module: gồm mọi module không rủi ro cao.
+    assert!(
+        full.modules.len() > 12,
+        "gói Đầy đủ chỉ có {} module",
+        full.modules.len()
+    );
+    assert!(full.modules.iter().any(|m| m == "calendar"));
+
+    let risk_of = |id: &str| {
+        modules
+            .iter()
+            .find(|m| m.id.as_str() == id)
+            .map(|m| m.risk.clone())
+            .unwrap_or_default()
+    };
+    for (idx, id) in full.modules.iter().enumerate() {
+        assert_ne!(
+            risk_of(id),
+            "high",
+            "module rủi ro cao '{id}' không được nằm trong gói Đầy đủ"
+        );
+        // Mọi module phụ thuộc phải đứng TRƯỚC trong danh sách (để áp dụng gói không bị lỗi thứ tự).
+        let requires = modules
+            .iter()
+            .find(|m| m.id.as_str() == id)
+            .map(|m| m.requires.clone())
+            .unwrap_or_default();
+        for r in requires {
+            let pos = full.modules.iter().position(|x| *x == r);
+            assert!(pos.is_some_and(|p| p < idx), "'{id}' cần '{r}' đứng trước");
+        }
+    }
+    // Module rủi ro cao vẫn phải bật riêng.
+    assert!(
+        modules
+            .iter()
+            .any(|m| m.risk == "high" && !full.modules.contains(&m.id.to_string()))
+    );
+}

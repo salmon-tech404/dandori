@@ -169,3 +169,41 @@ async fn test_env_admin_is_created_synced_and_old_sessions_are_revoked() {
     let resp = app3.clone().oneshot(req).await.unwrap();
     assert_ne!(resp.status(), StatusCode::OK);
 }
+
+#[tokio::test]
+async fn test_env_admin_gets_one_default_workspace_and_can_create_a_project() {
+    let dir = tempfile::tempdir().unwrap();
+    let cfg = config_with(dir.path(), "minh", "mat-khau-1");
+
+    // Khởi động hai lần: workspace mặc định chỉ tạo MỘT lần.
+    let (state, _lm) = init_server_state(&cfg).await.unwrap();
+    let pool = state.db.clone();
+    let (_state2, _lm2) = init_server_state(&cfg).await.unwrap();
+    let count: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM workspace_member m JOIN user u ON u.id = m.user_id WHERE u.username = 'minh' AND m.role = 'admin'",
+    )
+    .fetch_one(&pool)
+    .await
+    .unwrap();
+    assert_eq!(
+        count, 1,
+        "tài khoản cố định phải có đúng một workspace mặc định"
+    );
+
+    // Qua API: tài khoản thấy workspace của mình (nên nút "Tạo dự án" không còn bị vô hiệu hóa).
+    let app = create_app(state);
+    let (st, cookie) = login(&app, "minh", "mat-khau-1").await;
+    assert_eq!(st, StatusCode::OK);
+    let req = Request::builder()
+        .uri("/api/v1/workspaces")
+        .header(header::COOKIE, cookie.unwrap())
+        .body(Body::empty())
+        .unwrap();
+    let resp = app.clone().oneshot(req).await.unwrap();
+    assert_eq!(resp.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(resp.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let v: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_eq!(v["workspaces"].as_array().map(Vec::len), Some(1), "{v}");
+}
