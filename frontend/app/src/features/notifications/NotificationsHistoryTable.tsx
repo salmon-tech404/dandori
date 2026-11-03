@@ -6,23 +6,21 @@ interface Props {
 }
 
 function HistoryRow({ r }: { r: NotificationHistoryRecord }) {
-  const badgeCls =
-    r.status === "sent"
-      ? "bg-emerald-950 text-emerald-400"
-      : r.status === "failed"
-        ? "bg-rose-950 text-rose-400"
-        : "bg-amber-950 text-amber-400";
+  const isSent = r.status === "sent";
+  const isFailed = r.status === "failed";
+  const bg = isSent ? "var(--grb)" : isFailed ? "var(--rdb)" : "var(--orb)";
+  const color = isSent ? "var(--gr)" : isFailed ? "var(--rd)" : "var(--or)";
 
   return (
-    <tr className="hover:bg-neutral-800/30">
-      <td className="px-3 py-2 font-medium text-neutral-200">{r.title}</td>
-      <td className="px-3 py-2 uppercase text-neutral-400">{r.event_type}</td>
-      <td className="px-3 py-2">
-        <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${badgeCls}`}>
+    <tr style={{ borderBottom: "1px solid var(--ln)", color: "var(--fg)", fontSize: "var(--fs-13)" }}>
+      <td style={{ padding: "var(--sp-8) var(--sp-12)", fontWeight: 500 }}>{r.title}</td>
+      <td style={{ padding: "var(--sp-8) var(--sp-12)", textTransform: "uppercase", fontSize: "11px", color: "var(--mu)", fontWeight: 600 }}>{r.event_type}</td>
+      <td style={{ padding: "var(--sp-8) var(--sp-12)" }}>
+        <span style={{ padding: "2px 8px", borderRadius: "var(--radius-pill)", fontSize: "var(--fs-12)", fontWeight: 600, backgroundColor: bg, color }}>
           {r.status}
         </span>
       </td>
-      <td className="px-3 py-2 text-neutral-400">
+      <td style={{ padding: "var(--sp-8) var(--sp-12)", color: "var(--mu)" }}>
         {new Date(r.created_at).toLocaleString()}
       </td>
     </tr>
@@ -32,24 +30,24 @@ function HistoryRow({ r }: { r: NotificationHistoryRecord }) {
 export function NotificationsHistoryTable({ records }: Props) {
   if (records.length === 0) {
     return (
-      <div className="py-6 text-center text-sm text-neutral-400">
+      <div style={{ borderRadius: "var(--radius-8)", border: "1px solid var(--ln)", backgroundColor: "var(--sf2)", padding: "var(--sp-24)", textAlign: "center", fontSize: "var(--fs-13)", color: "var(--mu)" }}>
         {t("notifications_empty_history")}
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-xs text-neutral-300">
-        <thead className="border-b border-neutral-700 bg-neutral-800/50 text-neutral-400">
-          <tr>
-            <th className="px-3 py-2">{t("notifications_col_title")}</th>
-            <th className="px-3 py-2">{t("notifications_col_event")}</th>
-            <th className="px-3 py-2">{t("notifications_col_status")}</th>
-            <th className="px-3 py-2">{t("notifications_col_time")}</th>
+    <div style={{ overflowX: "auto", borderRadius: "var(--radius-8)", border: "1px solid var(--ln)" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "var(--fs-13)" }}>
+        <thead>
+          <tr style={{ backgroundColor: "var(--sf2)", color: "var(--mu)", borderBottom: "1px solid var(--ln)" }}>
+            <th style={{ padding: "var(--sp-8) var(--sp-12)", fontWeight: 600 }}>{t("notifications_col_title")}</th>
+            <th style={{ padding: "var(--sp-8) var(--sp-12)", fontWeight: 600 }}>{t("notifications_col_event")}</th>
+            <th style={{ padding: "var(--sp-8) var(--sp-12)", fontWeight: 600 }}>{t("notifications_col_status")}</th>
+            <th style={{ padding: "var(--sp-8) var(--sp-12)", fontWeight: 600 }}>{t("notifications_col_time")}</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-800">
+        <tbody>
           {records.map((r) => (
             <HistoryRow key={r.id} r={r} />
           ))}

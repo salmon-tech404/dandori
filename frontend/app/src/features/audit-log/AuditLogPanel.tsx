@@ -1,4 +1,5 @@
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
 import { AuditLogTable } from "./AuditLogTable";
 import type { VerifyResult } from "./types";
 import { useAuditLog } from "./useAuditLog";
@@ -13,35 +14,45 @@ function HeaderActions({
   onExport: () => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <button
+    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--sp-8)" }}>
+      <Button
+        variant="secondary"
+        size="sm"
         onClick={onVerify}
         disabled={verifying}
-        className="rounded bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
+        loading={verifying}
+        style={{ color: "var(--gr)" }}
       >
-        {verifying ? t("audit_log_verifying") : t("audit_log_verify_btn")}
-      </button>
-      <button
+        {t("audit_log_verify_btn")}
+      </Button>
+      <Button
+        variant="primary"
+        size="sm"
         onClick={onExport}
-        className="rounded bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500"
       >
         {t("audit_log_export_btn")}
-      </button>
+      </Button>
     </div>
   );
 }
 
 function VerifyStatusBanner({ result }: { result: VerifyResult | null }) {
   if (!result) return null;
+  const isOk = result.is_valid;
   return (
     <div
-      className={`mb-6 rounded p-3 text-xs font-medium ${
-        result.is_valid
-          ? "border border-emerald-800 bg-emerald-950/40 text-emerald-300"
-          : "border border-rose-800 bg-rose-950/40 text-rose-300"
-      }`}
+      style={{
+        marginBottom: "var(--sp-16)",
+        borderRadius: "var(--radius-8)",
+        padding: "var(--sp-12)",
+        fontSize: "var(--fs-13)",
+        fontWeight: 500,
+        border: `1px solid ${isOk ? "var(--gr)" : "var(--rd)"}`,
+        backgroundColor: isOk ? "var(--grb)" : "var(--rdb)",
+        color: isOk ? "var(--gr)" : "var(--rd)",
+      }}
     >
-      {result.is_valid
+      {isOk
         ? t("audit_log_chain_valid", { count: result.records_checked })
         : t("audit_log_chain_invalid", {
             seq: result.broken_at_sequence ?? 0,
@@ -60,16 +71,26 @@ function FilterBar({
   loading: boolean;
 }) {
   return (
-    <div className="mb-4 flex items-center gap-3">
-      <label className="text-xs text-neutral-400">{t("audit_log_filter_action")}</label>
+    <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-12)", marginBottom: "var(--sp-16)" }}>
+      <label style={{ fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("audit_log_filter_action")}</label>
       <input
         type="text"
         value={filter}
         onChange={(e) => onChange(e.target.value)}
         placeholder={t("audit_log_filter_placeholder")}
-        className="rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-xs text-neutral-100 placeholder-neutral-500"
+        style={{
+          height: "var(--btn-height)",
+          padding: "0 12px",
+          fontSize: "var(--fs-13)",
+          fontFamily: "var(--font-sans)",
+          color: "var(--fg)",
+          backgroundColor: "var(--sf2)",
+          border: "1px solid var(--ln)",
+          borderRadius: "var(--radius-8)",
+          outline: "none",
+        }}
       />
-      {loading && <span className="text-xs text-neutral-500">{t("loading")}</span>}
+      {loading && <span style={{ fontSize: "var(--fs-12)", color: "var(--mu)" }}>{t("loading")}</span>}
     </div>
   );
 }
@@ -88,23 +109,29 @@ export function AuditLogPanel({ workspaceId }: { workspaceId?: string }) {
   } = useAuditLog(ws);
 
   return (
-    <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-6">
-      <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-lg font-bold text-neutral-100">{t("audit_chain_title")}</h2>
-          <p className="text-xs text-neutral-400">{t("audit_log_desc")}</p>
+    <div style={{ backgroundColor: "var(--sf)", borderRadius: "var(--radius-10)", border: "1px solid var(--ln)", padding: "var(--sp-16)", marginBottom: "var(--sp-16)" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)", marginBottom: "var(--sp-16)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "var(--sp-12)" }}>
+          <div>
+            <h2 style={{ margin: "0 0 2px 0", fontSize: "var(--fs-16)", fontWeight: 600, color: "var(--fg)" }}>{t("audit_chain_title")}</h2>
+            <p style={{ margin: 0, fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("audit_log_desc")}</p>
+          </div>
+          <HeaderActions
+            onVerify={() => void verify()}
+            verifying={verifying}
+            onExport={() => void exportLogs()}
+          />
         </div>
-        <HeaderActions
-          onVerify={() => void verify()}
-          verifying={verifying}
-          onExport={() => void exportLogs()}
-        />
       </div>
-      <div className="mb-6 rounded border border-amber-900/60 bg-amber-950/30 p-3 text-xs text-amber-300/90">
+
+      <VerifyStatusBanner result={verifyResult} />
+
+      <div style={{ fontSize: "var(--fs-12)", color: "var(--or)", backgroundColor: "var(--orb)", border: "1px solid var(--or)", padding: "var(--sp-12)", borderRadius: "var(--radius-8)", marginBottom: "var(--sp-16)", lineHeight: 1.5 }}>
         {t("audit_log_limitation_notice")}
       </div>
-      <VerifyStatusBanner result={verifyResult} />
+
       <FilterBar filter={actionFilter} onChange={setActionFilter} loading={loading} />
+
       <AuditLogTable entries={entries} />
     </div>
   );

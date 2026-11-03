@@ -1,9 +1,12 @@
-import { FC, FormEvent, useState, ReactNode } from "react";
+import { FC, FormEvent, useEffect, useMemo, useState, ReactNode } from "react";
+import { FolderOpen } from "lucide-react";
 import { t } from "./i18n";
 import { useProject } from "./project";
 import { Button } from "../ui/components/Button";
 import { Input } from "../ui/components/Input";
-import { getSafeErrorMessage } from "./api";
+import { apiClient, getSafeErrorMessage } from "./api";
+import { DirectoryPicker } from "./DirectoryPicker";
+import { BranchSelect } from "./BranchSelect";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -118,11 +121,40 @@ export const CreateWorkspaceModal: FC<ModalProps> = ({ isOpen, onClose }) => {
   );
 };
 
+/** Nhánh để chọn: nhánh của kho đang chọn + nhánh đã dùng ở các dự án khác (lưu trong hệ thống) + "main". */
+function useBranchOptions(repoPath: string, projects: Array<{ default_branch?: string }> | undefined, current: string) {
+  const [fromRepo, setFromRepo] = useState<string[]>([]);
+  const [added, setAdded] = useState<string[]>([]);
+
+  useEffect(() => {
+    const path = repoPath.trim();
+    if (!path) {
+      setFromRepo([]);
+      return undefined;
+    }
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      apiClient<{ branches: string[] }>(`/api/v1/fs/git-branches?path=${encodeURIComponent(path)}`)
+        .then((res) => { if (!cancelled) setFromRepo(res.branches); })
+        .catch(() => { if (!cancelled) setFromRepo([]); });
+    }, 400);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [repoPath]);
+
+  const options = useMemo(() => {
+    const used = (projects || []).map((p) => p.default_branch).filter((b): b is string => Boolean(b));
+    return Array.from(new Set(["main", ...fromRepo, ...used, ...added, current].filter(Boolean)));
+  }, [fromRepo, projects, added, current]);
+
+  return { options, add: (b: string) => setAdded((prev) => [...prev, b]) };
+}
+
 function useProjectModalLogic(onClose: () => void) {
-  const { createProject, currentWorkspace } = useProject();
+  const { createProject, currentWorkspace, projects } = useProject();
   const [name, setName] = useState("");
   const [repoPath, setRepoPath] = useState("");
   const [defaultBranch, setDefaultBranch] = useState("main");
+  const branchOptions = useBranchOptions(repoPath, projects, defaultBranch);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -150,6 +182,8 @@ function useProjectModalLogic(onClose: () => void) {
     setRepoPath,
     defaultBranch,
     setDefaultBranch,
+    branchOptions: branchOptions.options,
+    addBranchOption: branchOptions.add,
     loading,
     error,
     handleSubmit,
@@ -159,18 +193,10 @@ function useProjectModalLogic(onClose: () => void) {
 
 type ProjectModalLogic = ReturnType<typeof useProjectModalLogic>;
 
-function ProjectModalForm({ logic, onClose }: { logic: ProjectModalLogic; onClose: () => void }) {
+function RepoPathField({ logic }: { logic: ProjectModalLogic }) {
+  const [picking, setPicking] = useState(false);
   return (
-    <form onSubmit={logic.handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)" }}>
-      <Input
-        label={t("project_name_label")}
-        type="text"
-        required
-        data-testid="project-name-input"
-        value={logic.name}
-        onChange={(e) => logic.setName(e.target.value)}
-        disabled={logic.loading}
-      />
+    <div style={{ display: "flex", alignItems: "flex-end", gap: "var(--sp-8)" }}>
       <Input
         label={t("repo_path_label")}
         type="text"
@@ -181,13 +207,41 @@ function ProjectModalForm({ logic, onClose }: { logic: ProjectModalLogic; onClos
         onChange={(e) => logic.setRepoPath(e.target.value)}
         disabled={logic.loading}
       />
+      <Button type="button" variant="secondary" size="icon" aria-label={t("pick_folder")} title={t("pick_folder")} disabled={logic.loading} onClick={() => setPicking(true)} icon={<FolderOpen size={16} />} />
+      {picking && (
+        <DirectoryPicker
+          initialPath={logic.repoPath.trim()}
+          onClose={() => setPicking(false)}
+          onSelect={(p) => { logic.setRepoPath(p); setPicking(false); }}
+        />
+      )}
+    </div>
+  );
+}
+
+function ProjectModalForm({ logic, onClose }: { logic: ProjectModalLogic; onClose: () => void }) {
+  return (
+    <form onSubmit={logic.handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)" }}>
+      {!logic.currentWorkspace && (
+        <div role="alert" data-testid="no-workspace-note" style={{ padding: "var(--sp-8)", color: "var(--rd)", backgroundColor: "var(--rdb)", borderRadius: "var(--radius-6)", fontSize: "var(--fs-13)" }}>
+          {t("project_need_workspace")}
+        </div>
+      )}
       <Input
-        label={t("default_branch_label")}
+        label={t("project_name_label")}
         type="text"
-        value={logic.defaultBranch}
-        onChange={(e) => logic.setDefaultBranch(e.target.value)}
+        required
+        data-testid="project-name-input"
+        value={logic.name}
+        onChange={(e) => logic.setName(e.target.value)}
         disabled={logic.loading}
       />
+      <RepoPathField logic={logic} />
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-4)" }}>
+        <span style={{ fontSize: "var(--fs-13)", fontWeight: 500, color: "var(--mu)" }}>{t("default_branch_label")}</span>
+        <BranchSelect value={logic.defaultBranch} options={logic.branchOptions} onChange={logic.setDefaultBranch} onAddOption={logic.addBranchOption} disabled={logic.loading} />
+        <span style={{ fontSize: "var(--fs-12)", color: "var(--mu)" }}>{t("branch_from_repo_hint")}</span>
+      </div>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "var(--sp-8)", marginTop: "var(--sp-8)" }}>
         <Button type="button" variant="ghost" onClick={onClose} disabled={logic.loading}>
           {t("btn_cancel")}

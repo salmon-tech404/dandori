@@ -4,6 +4,13 @@ import { useFeatures } from "./useFeatures";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ProjectContext } from "./project";
 
+/** Mọi màn module nhận `context` và cả `workspaceId`/`projectId` thành thuộc tính riêng (nhiều màn khai báo theo kiểu này). */
+export type SlotComponent = React.ComponentType<{
+  context?: Record<string, unknown>;
+  workspaceId?: string;
+  projectId?: string;
+}>;
+
 export interface SlotProps {
   name: string;
   context?: Record<string, unknown>;
@@ -14,28 +21,38 @@ export interface SlotProps {
 interface LoadedContribution {
   id: string;
   label: string;
-  Component: React.ComponentType<{ context?: Record<string, unknown> }>;
+  Component: SlotComponent;
 }
 
 async function loadContribution(contrib: SlotContribution): Promise<LoadedContribution | null> {
   try {
     const mod = (await contrib.load()) as {
       default?: unknown;
-      contributions?: Record<string, React.ComponentType<{ context?: Record<string, unknown> }>>;
+      contributions?: Record<string, SlotComponent>;
     };
-    let Comp: React.ComponentType<{ context?: Record<string, unknown> }> | undefined;
+    let Comp: SlotComponent | undefined;
     if (typeof mod.default === "function") {
-      Comp = mod.default as React.ComponentType<{ context?: Record<string, unknown> }>;
+      Comp = mod.default as SlotComponent;
     } else if (mod.contributions && typeof mod.contributions[contrib.id] === "function") {
       Comp = mod.contributions[contrib.id];
     } else if (mod.default && typeof (mod.default as Record<string, unknown>)[contrib.id] === "function") {
-      Comp = (mod.default as Record<string, unknown>)[contrib.id] as React.ComponentType<{ context?: Record<string, unknown> }>;
+      Comp = (mod.default as Record<string, unknown>)[contrib.id] as SlotComponent;
     }
     if (Comp) return { id: contrib.id, label: contrib.label, Component: Comp };
   } catch (err) {
     console.error(`Không thể nạp ô cắm ${contrib.id}:`, err);
   }
   return null;
+}
+
+/** Lấy workspaceId/projectId (nếu có) từ context để truyền thành thuộc tính riêng cho màn module. */
+function idsFromContext(context?: Record<string, unknown>): { workspaceId?: string; projectId?: string } {
+  const ws = context?.workspaceId;
+  const proj = context?.projectId;
+  return {
+    workspaceId: typeof ws === "string" ? ws : undefined,
+    projectId: typeof proj === "string" ? proj : undefined,
+  };
 }
 
 function TabButton({
@@ -107,6 +124,7 @@ function TabbedSlotLayout({
   loaded: LoadedContribution[];
   context?: Record<string, unknown>;
 }) {
+  const ids = idsFromContext(context);
   const [activeTabId, setActiveTabId] = useState<string>(loaded[0]?.id || "");
   const currentTab = loaded.find((t) => t.id === activeTabId) || loaded[0];
   if (!currentTab) return null;
@@ -115,22 +133,23 @@ function TabbedSlotLayout({
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       <TabBar loaded={loaded} activeTabId={currentTab.id} onSelectTab={setActiveTabId} />
       <ErrorBoundary key={currentTab.id} name={currentTab.label}>
-        <currentTab.Component context={context} />
+        <currentTab.Component context={context} {...ids} />
       </ErrorBoundary>
     </div>
   );
 }
 
-export const Slot: FC<SlotProps> = ({ name, context: ownContext, fallback = null, asTabs = false }) => {
-  const { isModuleEnabled } = useFeatures();
-  // Mọi màn module nhận workspace/dự án hiện tại từ ngữ cảnh chung; không để màn tự dùng id "default" (gây 404).
+/** Mọi màn module nhận workspace/dự án hiện tại từ ngữ cảnh chung; không để màn tự dùng id "default" (gây 404). */
+function useMergedContext(ownContext?: Record<string, unknown>): Record<string, unknown> {
   const project = useContext(ProjectContext);
   const workspaceId = project?.currentWorkspace?.id;
   const projectId = project?.currentProject?.id;
-  const context = useMemo(
-    () => ({ workspaceId, projectId, ...ownContext }),
-    [workspaceId, projectId, ownContext],
-  );
+  return useMemo(() => ({ workspaceId, projectId, ...ownContext }), [workspaceId, projectId, ownContext]);
+}
+
+export const Slot: FC<SlotProps> = ({ name, context: ownContext, fallback = null, asTabs = false }) => {
+  const { isModuleEnabled } = useFeatures();
+  const context = useMergedContext(ownContext);
   const [loaded, setLoaded] = useState<LoadedContribution[]>([]);
   const activeContribs = (SLOT_CONTRIBUTIONS[name] || [])
     .filter((c) => isModuleEnabled(c.moduleId))
@@ -150,6 +169,7 @@ export const Slot: FC<SlotProps> = ({ name, context: ownContext, fallback = null
     };
   }, [name, JSON.stringify(activeContribs.map((c) => c.id))]);
 
+  const ids = idsFromContext(context);
   if (activeContribs.length === 0) return <>{fallback}</>;
   if (asTabs && loaded.length > 1) {
     return <TabbedSlotLayout loaded={loaded} context={context} />;
@@ -159,7 +179,7 @@ export const Slot: FC<SlotProps> = ({ name, context: ownContext, fallback = null
     <>
       {loaded.map(({ id, label, Component }) => (
         <ErrorBoundary key={id} name={label}>
-          <Component context={context} />
+          <Component context={context} {...ids} />
         </ErrorBoundary>
       ))}
     </>

@@ -80,8 +80,10 @@ function useFeatureLoader(
   const loadData = useCallback(async () => {
     if (initialModules.length > 0) return;
     try {
-      const wsId = currentWorkspace?.id;
-      const projId = currentProject?.id;
+      // Mỗi tab phạm vi hiển thị trạng thái đặt ở ĐÚNG phạm vi đó: hệ thống không gắn workspace/dự án,
+      // workspace chỉ gắn workspace, dự án gắn cả hai.
+      const wsId = scope === "system" ? undefined : currentWorkspace?.id;
+      const projId = scope === "project" ? currentProject?.id : undefined;
       const [modRes, packRes, auditRes, effRes] = await Promise.all([
         apiClient<{ modules: RawModule[] }>("/api/v1/features/modules"),
         apiClient<{ packs: FeaturePackItem[] }>("/api/v1/features/packs").catch(() => ({ packs: [] })),
@@ -97,7 +99,7 @@ function useFeatureLoader(
     } catch {
       // ignore
     }
-  }, [initialModules.length, currentWorkspace?.id, currentProject?.id, setModules, setPacks, setAudits]);
+  }, [initialModules.length, scope, currentWorkspace?.id, currentProject?.id, setModules, setPacks, setAudits]);
 
   useEffect(() => {
     loadData();

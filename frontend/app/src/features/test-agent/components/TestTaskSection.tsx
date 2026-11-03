@@ -18,12 +18,12 @@ const FlaggedFilesList: React.FC<{ filesJson: string }> = ({ filesJson }) => {
   if (!files || files.length === 0) return null;
 
   return (
-    <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs">
-      <div className="font-semibold text-amber-800 flex items-center gap-1">
-        <AlertTriangle className="w-3.5 h-3.5" />
+    <div style={{ marginTop: "var(--sp-8)", padding: "var(--sp-8)", backgroundColor: "var(--orb)", border: "1px solid var(--or)", borderRadius: "var(--radius-6)", fontSize: "var(--fs-12)" }}>
+      <div style={{ fontWeight: 600, color: "var(--or)", display: "flex", alignItems: "center", gap: "var(--sp-4)" }}>
+        <AlertTriangle size={14} />
         <span>{t("test_agent_flagged_warning")}</span>
       </div>
-      <ul className="list-disc list-inside mt-1 text-amber-700">
+      <ul style={{ listStyle: "disc", paddingLeft: "var(--sp-16)", margin: "var(--sp-4) 0 0 0", color: "var(--or)" }}>
         {files.map((f) => (
           <li key={f}>{f}</li>
         ))}
@@ -34,20 +34,21 @@ const FlaggedFilesList: React.FC<{ filesJson: string }> = ({ filesJson }) => {
 
 const TestRunCard: React.FC<{ run: TestAgentRun }> = ({ run }) => {
   const isPassed = run.status === "passed";
-  const badgeClass = isPassed ? "text-green-700 bg-green-100" : "text-red-700 bg-red-100";
+  const badgeBg = isPassed ? "var(--grb)" : "var(--rdb)";
+  const badgeFg = isPassed ? "var(--gr)" : "var(--rd)";
   const label = isPassed ? t("test_agent_status_passed") : t("test_agent_status_failed");
 
   return (
-    <div className="p-3 border rounded mb-2 bg-white text-sm">
-      <div className="flex items-center justify-between">
-        <span className={`px-2 py-0.5 rounded text-xs font-semibold ${badgeClass}`}>
+    <div style={{ padding: "var(--sp-12)", border: "1px solid var(--ln)", borderRadius: "var(--radius-8)", marginBottom: "var(--sp-8)", backgroundColor: "var(--sf)", fontSize: "var(--fs-13)" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ padding: "2px 8px", borderRadius: "var(--radius-pill)", fontSize: "var(--fs-12)", fontWeight: 600, backgroundColor: badgeBg, color: badgeFg }}>
           {label}
         </span>
-        <span className="text-xs text-neutral-500">
+        <span style={{ fontSize: "var(--fs-12)", color: "var(--mu)" }}>
           {t("test_agent_exit_code")}: {run.exit_code ?? "-"}
         </span>
       </div>
-      {run.summary && <p className="mt-2 text-neutral-700">{run.summary}</p>}
+      {run.summary && <p style={{ margin: "var(--sp-8) 0 0 0", color: "var(--fg)" }}>{run.summary}</p>}
       <FlaggedFilesList filesJson={run.flagged_files} />
     </div>
   );
@@ -65,14 +66,14 @@ export const TestTaskSection: React.FC<TestTaskSectionProps> = ({ taskId }) => {
       .finally(() => setLoading(false));
   }, [taskId]);
 
-  if (loading) return <div className="text-xs text-neutral-500">{t("test_agent_loading")}</div>;
+  if (loading) return <div style={{ fontSize: "var(--fs-12)", color: "var(--mu)" }}>{t("test_agent_loading")}</div>;
   if (runs.length === 0) {
-    return <div className="text-xs text-neutral-500">{t("test_agent_no_runs")}</div>;
+    return <div style={{ fontSize: "var(--fs-12)", color: "var(--mu)" }}>{t("test_agent_no_runs")}</div>;
   }
 
   return (
-    <div className="space-y-2">
-      <h4 className="font-semibold text-sm mb-2">{t("test_agent_title")}</h4>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
+      <h4 style={{ margin: "0 0 var(--sp-8) 0", fontSize: "var(--fs-14)", fontWeight: 600, color: "var(--fg)" }}>{t("test_agent_title")}</h4>
       {runs.map((r) => (
         <TestRunCard key={r.id} run={r} />
       ))}

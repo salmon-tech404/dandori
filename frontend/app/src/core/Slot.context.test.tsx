@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { FeaturesProvider } from "./useFeatures";
 import { ProjectContext, type ProjectContextType } from "./project";
 import { Slot } from "./Slot";
@@ -69,13 +69,31 @@ describe("Slot: ngữ cảnh workspace/dự án hiện tại", () => {
     );
   });
 
-  it("không có ProjectProvider thì vẫn hiển thị (không ném lỗi)", async () => {
+  it("không có ProjectProvider thì vẫn hiển thị hướng dẫn chọn dự án (không ném lỗi, không gọi API giả)", async () => {
     const calls = stubFetch();
     render(
       <FeaturesProvider initialModules={["lead-worker"]}>
         <Slot name="agents.defaults" />
       </FeaturesProvider>,
     );
-    await waitFor(() => expect(calls.length).toBeGreaterThan(0));
+    expect(await screen.findByText("Chưa chọn dự án")).toBeDefined();
+    expect(calls.length).toBe(0);
+  });
+});
+
+describe("Slot: truyền workspaceId thành thuộc tính riêng cho màn khai báo theo kiểu đó", () => {
+  it("màn Thiết bị di động gọi API với workspace thật, không dùng id 'default'", async () => {
+    const calls = stubFetch();
+    render(
+      <FeaturesProvider initialModules={["mobile"]}>
+        <ProjectContext.Provider value={projectValue()}>
+          <Slot name="settings.section" />
+        </ProjectContext.Provider>
+      </FeaturesProvider>,
+    );
+    await waitFor(() =>
+      expect(calls.some((u) => u.includes("/mobile/workspaces/ws-real/"))).toBe(true),
+    );
+    expect(calls.some((u) => u.includes("/workspaces/default/"))).toBe(false);
   });
 });

@@ -46,7 +46,7 @@ describe("AC2: Sidebar Menu Visibility based on Active Slots", () => {
     expect(screen.getByText("Lịch")).toBeDefined();
     expect(screen.getByText("Prompt và tri thức")).toBeDefined();
     expect(screen.getByText("Tích hợp")).toBeDefined();
-    expect(screen.getByText("Cài đặt: Tính năng")).toBeDefined();
+    expect(screen.getByText("Cài đặt")).toBeDefined();
   });
 
   it("shows navigation menu item when at least one module for that screen is enabled", () => {

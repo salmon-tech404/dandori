@@ -146,6 +146,6 @@ describe("UI-01: Session Invalidation & Integration", () => {
     );
     await waitFor(() => expect(screen.getByText("Đăng nhập Dandori")).toBeDefined());
     expect(screen.queryByText("Dandori Core")).toBeNull();
-    expect(screen.queryByText("Cài đặt: Tính năng")).toBeNull();
+    expect(screen.queryByText("Cài đặt")).toBeNull();
   });
 });

@@ -62,7 +62,9 @@ const IntegrationsScreen = () => (
 const SettingsScreen = () => (
   <div style={screenWrapperStyle}>
     <SettingsFeaturesScreen />
-    <Slot name="settings.section" />
+    <div style={{ maxWidth: "1000px", margin: "var(--sp-24) auto 0 auto" }}>
+      <Slot name="settings.section" />
+    </div>
   </div>
 );
 

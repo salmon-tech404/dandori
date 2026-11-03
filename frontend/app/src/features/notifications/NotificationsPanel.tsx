@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
 import { ChannelCard } from "./ChannelCard";
 import { ChannelFormModal } from "./ChannelFormModal";
 import { NotificationsHistoryTable } from "./NotificationsHistoryTable";
@@ -12,18 +13,18 @@ interface Props {
 
 function PanelHeader({ onOpenModal }: { onOpenModal: () => void }) {
   return (
-    <div className="flex items-center justify-between">
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--sp-12)" }}>
       <div>
-        <h2 className="text-lg font-bold text-white">{t("notifications_title")}</h2>
-        <p className="text-xs text-neutral-400">{t("notifications_desc")}</p>
+        <h2 style={{ margin: "0 0 2px 0", fontSize: "var(--fs-16)", fontWeight: 600, color: "var(--fg)" }}>{t("notifications_title")}</h2>
+        <p style={{ margin: 0, fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("notifications_desc")}</p>
       </div>
-      <button
-        type="button"
+      <Button
+        variant="primary"
+        size="sm"
         onClick={onOpenModal}
-        className="rounded bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500"
       >
         {t("notifications_add_channel")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -31,9 +32,14 @@ function PanelHeader({ onOpenModal }: { onOpenModal: () => void }) {
 function TestResultBanner({ result }: { result: string | null }) {
   if (!result) return null;
   const isOk = result === "success";
-  const cls = isOk ? "bg-emerald-950/80 text-emerald-300" : "bg-rose-950/80 text-rose-300";
+  const bg = isOk ? "var(--grb)" : "var(--rdb)";
+  const color = isOk ? "var(--gr)" : "var(--rd)";
   const msg = isOk ? t("notifications_test_success") : `${t("notifications_test_failed")}: ${result}`;
-  return <div className={`rounded p-3 text-xs ${cls}`}>{msg}</div>;
+  return (
+    <div style={{ borderRadius: "var(--radius-8)", padding: "var(--sp-8) var(--sp-12)", fontSize: "var(--fs-13)", fontWeight: 500, backgroundColor: bg, color, marginBottom: "var(--sp-16)" }}>
+      {msg}
+    </div>
+  );
 }
 
 function ChannelsGrid({
@@ -50,17 +56,17 @@ function ChannelsGrid({
   onDelete: (id: string) => void;
 }) {
   if (loading && channels.length === 0) {
-    return <div className="py-8 text-center text-xs text-neutral-400">{t("loading")}</div>;
+    return <div style={{ padding: "var(--sp-24)", textAlign: "center", fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("loading")}</div>;
   }
   if (channels.length === 0) {
     return (
-      <div className="rounded border border-dashed border-neutral-700 py-8 text-center text-xs text-neutral-400">
+      <div style={{ borderRadius: "var(--radius-8)", border: "1px dashed var(--ln)", padding: "var(--sp-24)", textAlign: "center", fontSize: "var(--fs-13)", color: "var(--mu)", marginBottom: "var(--sp-16)" }}>
         {t("notifications_empty")}
       </div>
     );
   }
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "var(--sp-12)", marginBottom: "var(--sp-16)" }}>
       {channels.map((ch) => (
         <ChannelCard
           key={ch.id}
@@ -70,6 +76,17 @@ function ChannelsGrid({
           onDelete={onDelete}
         />
       ))}
+    </div>
+  );
+}
+
+function NotificationsHistorySection({ history }: { history: import("./types").NotificationHistoryRecord[] }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
+      <h3 style={{ margin: "0 0 var(--sp-4) 0", fontSize: "var(--fs-14)", fontWeight: 600, color: "var(--fg)" }}>
+        {t("notifications_history_title")}
+      </h3>
+      <NotificationsHistoryTable records={history} />
     </div>
   );
 }
@@ -89,7 +106,7 @@ export function NotificationsPanel({ workspaceId }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <div className="space-y-6 p-4">
+    <div style={{ backgroundColor: "var(--sf)", borderRadius: "var(--radius-10)", border: "1px solid var(--ln)", padding: "var(--sp-16)", marginBottom: "var(--sp-16)" }}>
       <PanelHeader onOpenModal={() => setModalOpen(true)} />
       <TestResultBanner result={testResult} />
       <ChannelsGrid
@@ -99,13 +116,17 @@ export function NotificationsPanel({ workspaceId }: Props) {
         onTest={testChannel}
         onDelete={removeChannel}
       />
-      <div className="rounded border border-neutral-800 bg-neutral-900/60 p-4">
-        <h3 className="mb-3 text-sm font-semibold text-neutral-200">
-          {t("notifications_history_title")}
-        </h3>
-        <NotificationsHistoryTable records={history} />
-      </div>
-      <ChannelFormModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSubmit={addChannel} />
+      <NotificationsHistorySection history={history} />
+      {modalOpen && (
+        <ChannelFormModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSubmit={async (data) => {
+            await addChannel(data);
+            setModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

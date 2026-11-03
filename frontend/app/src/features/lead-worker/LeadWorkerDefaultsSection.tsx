@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from "react";
 import { t } from "../../core/i18n";
 import { RoleDefaultItem } from "./types";
 import { useProjectDefaults } from "./useLeadWorker";
+import { EmptyState } from "../../ui/components/EmptyState";
 
 interface BadgeProps {
   prov: string;
@@ -42,8 +43,7 @@ function moveInList(items: RoleDefaultItem[], role: string, index: number, dir: 
   });
 }
 
-export const LeadWorkerDefaultsSection: FC<{ context?: Record<string, unknown> }> = ({ context }) => {
-  const projectId = (context?.projectId as string) || "default";
+function LeadWorkerDefaultsForm({ projectId }: { projectId: string }) {
   const { fetchDefaults, saveDefaults, loading, error } = useProjectDefaults(projectId);
   const [defaults, setDefaults] = useState<RoleDefaultItem[]>([]);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
@@ -71,4 +71,11 @@ export const LeadWorkerDefaultsSection: FC<{ context?: Record<string, unknown> }
       </button>
     </div>
   );
+}
+
+export const LeadWorkerDefaultsSection: FC<{ context?: Record<string, unknown> }> = ({ context }) => {
+  const projectId = typeof context?.projectId === "string" ? context.projectId : "";
+  // Chưa có dự án thì không gọi API với id giả (trước đây hiện chữ "HTTP 404").
+  if (!projectId) return <EmptyState title={t("need_project_title")} description={t("need_project_desc")} />;
+  return <LeadWorkerDefaultsForm projectId={projectId} />;
 };

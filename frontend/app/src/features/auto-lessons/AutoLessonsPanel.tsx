@@ -19,26 +19,26 @@ export const AutoLessonsPanel: React.FC<AutoLessonsPanelProps> = ({
     useAutoLessons(projectId);
 
   if (loading && !config) {
-    return <div className="p-4 text-sm text-muted-foreground">{t("loading")}</div>;
+    return <div style={{ padding: "var(--sp-16)", fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("loading")}</div>;
   }
 
   return (
-    <div className="space-y-6 p-4">
+    <div style={{ backgroundColor: "var(--sf)", borderRadius: "var(--radius-10)", border: "1px solid var(--ln)", padding: "var(--sp-16)", marginBottom: "var(--sp-16)", display: "flex", flexDirection: "column", gap: "var(--sp-16)" }}>
       <div>
-        <h2 className="text-lg font-semibold">{t("auto_lessons_title")}</h2>
-        <p className="text-xs text-muted-foreground">
+        <h2 style={{ margin: "0 0 2px 0", fontSize: "var(--fs-16)", fontWeight: 600, color: "var(--fg)" }}>{t("auto_lessons_title")}</h2>
+        <p style={{ margin: 0, fontSize: "var(--fs-13)", color: "var(--mu)" }}>
           {t("auto_lessons_desc")}
         </p>
       </div>
 
-      {error && <div className="text-sm text-destructive">{error}</div>}
+      {error && <div style={{ fontSize: "var(--fs-13)", color: "var(--rd)" }}>{error}</div>}
 
       {config && (
         <AutoLessonsConfigForm config={config} onSave={saveConfig} />
       )}
 
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium">
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
+        <h3 style={{ margin: "0 0 var(--sp-4) 0", fontSize: "var(--fs-14)", fontWeight: 600, color: "var(--fg)" }}>
           {t("auto_lessons_history_title")}
         </h3>
         <AutoLessonsHistoryTable runs={runs} />

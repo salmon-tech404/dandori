@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { t } from "../../../core/i18n";
+import { Button } from "../../../ui/components/Button";
 import { testAgentApi } from "../api/testAgentApi";
 import type { TestAgentConfig } from "../types";
 
@@ -14,27 +15,50 @@ interface FormState {
   timeout: number;
 }
 
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  height: "var(--btn-height)",
+  padding: "0 12px",
+  fontSize: "var(--fs-13)",
+  fontFamily: "var(--font-sans)",
+  color: "var(--fg)",
+  backgroundColor: "var(--sf)",
+  border: "1px solid var(--ln)",
+  borderRadius: "var(--radius-8)",
+  outline: "none",
+  boxSizing: "border-box",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: "var(--fs-12)",
+  fontWeight: 500,
+  color: "var(--mu)",
+  marginBottom: "var(--sp-4)",
+};
+
 const BasicFields: React.FC<{
   enabled: boolean;
   cmd: string;
   onChange: (f: Partial<FormState>) => void;
 }> = ({ enabled, cmd, onChange }) => (
-  <div className="space-y-3">
-    <label className="flex items-center gap-2">
+  <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)", marginBottom: "var(--sp-12)" }}>
+    <label style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", cursor: "pointer", fontSize: "var(--fs-14)", color: "var(--fg)" }}>
       <input
         type="checkbox"
         checked={enabled}
         onChange={(e) => onChange({ enabled: e.target.checked })}
+        style={{ width: "16px", height: "16px", cursor: "pointer" }}
       />
-      <span>{t("test_agent_enabled_label")}</span>
+      <span style={{ fontWeight: 500 }}>{t("test_agent_enabled_label")}</span>
     </label>
     <div>
-      <label className="block text-xs font-medium text-neutral-600 mb-1">
+      <label style={labelStyle}>
         {t("test_agent_command_label")}
       </label>
       <input
         type="text"
-        className="w-full border rounded px-2 py-1 text-xs"
+        style={inputStyle}
         placeholder={t("test_agent_command_placeholder")}
         value={cmd}
         onChange={(e) => onChange({ suggestedCommand: e.target.value })}
@@ -48,29 +72,29 @@ const NumericFields: React.FC<{
   timeout: number;
   onChange: (f: Partial<FormState>) => void;
 }> = ({ maxRuns, timeout, onChange }) => (
-  <div className="grid grid-cols-2 gap-2">
+  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--sp-12)", marginBottom: "var(--sp-16)" }}>
     <div>
-      <label className="block text-xs font-medium text-neutral-600 mb-1">
+      <label style={labelStyle}>
         {t("test_agent_max_runs_label")}
       </label>
       <input
         type="number"
         min={1}
         max={5}
-        className="w-full border rounded px-2 py-1 text-xs"
+        style={inputStyle}
         value={maxRuns}
         onChange={(e) => onChange({ maxRuns: Number(e.target.value) })}
       />
     </div>
     <div>
-      <label className="block text-xs font-medium text-neutral-600 mb-1">
+      <label style={labelStyle}>
         {t("test_agent_timeout_label")}
       </label>
       <input
         type="number"
         min={30}
         max={3600}
-        className="w-full border rounded px-2 py-1 text-xs"
+        style={inputStyle}
         value={timeout}
         onChange={(e) => onChange({ timeout: Number(e.target.value) })}
       />
@@ -122,19 +146,23 @@ export const TestAgentSettings: React.FC<TestAgentSettingsProps> = ({ projectId 
   const { form, setForm, saving, msg, handleSave } = useTestAgentForm(projectId);
 
   return (
-    <div className="p-4 bg-white border rounded space-y-4 text-sm">
-      <h3 className="font-semibold text-base">{t("test_agent_settings_title")}</h3>
+    <div style={{ backgroundColor: "var(--sf)", borderRadius: "var(--radius-10)", border: "1px solid var(--ln)", padding: "var(--sp-16)", marginBottom: "var(--sp-16)" }}>
+      <h3 style={{ margin: "0 0 var(--sp-16) 0", fontSize: "var(--fs-16)", fontWeight: 600, color: "var(--fg)" }}>
+        {t("test_agent_settings_title")}
+      </h3>
       <BasicFields enabled={form.enabled} cmd={form.suggestedCommand} onChange={(p) => setForm((prev) => ({ ...prev, ...p }))} />
       <NumericFields maxRuns={form.maxRuns} timeout={form.timeout} onChange={(p) => setForm((prev) => ({ ...prev, ...p }))} />
-      {msg && <div className="text-xs text-green-600 font-medium">{msg}</div>}
-      <button
+      {msg && <div style={{ fontSize: "var(--fs-13)", color: "var(--gr)", fontWeight: 500, marginBottom: "var(--sp-12)" }}>{msg}</div>}
+      <Button
         type="button"
+        variant="primary"
+        size="sm"
         disabled={saving}
+        loading={saving}
         onClick={handleSave}
-        className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50"
       >
-        {saving ? t("test_agent_saving") : t("test_agent_save_btn")}
-      </button>
+        {t("test_agent_save_btn")}
+      </Button>
     </div>
   );
 };

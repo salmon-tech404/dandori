@@ -4,3 +4,6 @@ export * from "./ConfirmDialog";
 export * from "./Tooltip";
 export * from "./StatusBadge";
 export * from "./Table";
+export * from "./Switch";
+export * from "./Avatar";
+export * from "./EmptyState";

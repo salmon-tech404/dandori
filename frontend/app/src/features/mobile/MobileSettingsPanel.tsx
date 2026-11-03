@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
 import {
   createDevice,
   deleteDevice,
@@ -20,21 +21,25 @@ function DeviceActionsCell({
   onDelete: (id: string) => void;
 }) {
   return (
-    <td className="flex gap-2 px-3 py-2">
+    <td style={{ padding: "var(--sp-8) var(--sp-12)", display: "flex", gap: "var(--sp-8)" }}>
       {!d.is_revoked && (
-        <button
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={() => onRevoke(d.id)}
-          className="rounded bg-amber-950 px-2 py-1 text-xs text-amber-300 hover:bg-amber-900"
+          style={{ color: "var(--or)" }}
         >
           {t("mobile_revoke_btn")}
-        </button>
+        </Button>
       )}
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => onDelete(d.id)}
-        className="rounded bg-rose-950 px-2 py-1 text-xs text-rose-300 hover:bg-rose-900"
+        style={{ color: "var(--rd)" }}
       >
         {t("mobile_delete_btn")}
-      </button>
+      </Button>
     </td>
   );
 }
@@ -49,19 +54,24 @@ function DeviceRow({
   onDelete: (id: string) => void;
 }) {
   return (
-    <tr className="hover:bg-neutral-800/30">
-      <td className="px-3 py-2 font-medium text-neutral-200">{d.name}</td>
-      <td className="px-3 py-2">
+    <tr style={{ borderBottom: "1px solid var(--ln)", color: "var(--fg)" }}>
+      <td style={{ padding: "var(--sp-8) var(--sp-12)", fontWeight: 500 }}>{d.name}</td>
+      <td style={{ padding: "var(--sp-8) var(--sp-12)" }}>
         <span
-          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-            d.is_revoked ? "bg-rose-950 text-rose-400" : "bg-emerald-950 text-emerald-400"
-          }`}
+          style={{
+            padding: "2px 8px",
+            borderRadius: "var(--radius-pill)",
+            fontSize: "var(--fs-12)",
+            fontWeight: 600,
+            backgroundColor: d.is_revoked ? "var(--rdb)" : "var(--grb)",
+            color: d.is_revoked ? "var(--rd)" : "var(--gr)",
+          }}
         >
           {d.is_revoked ? t("mobile_status_revoked") : t("mobile_status_active")}
         </span>
       </td>
-      <td className="px-3 py-2 text-neutral-400">{d.read_only ? t("mobile_yes") : t("mobile_no")}</td>
-      <td className="px-3 py-2 text-neutral-400">
+      <td style={{ padding: "var(--sp-8) var(--sp-12)", color: "var(--mu)" }}>{d.read_only ? t("mobile_yes") : t("mobile_no")}</td>
+      <td style={{ padding: "var(--sp-8) var(--sp-12)", color: "var(--mu)" }}>
         {d.last_used_at ? new Date(d.last_used_at).toLocaleDateString() : t("mobile_never")}
       </td>
       <DeviceActionsCell d={d} onRevoke={onRevoke} onDelete={onDelete} />
@@ -71,20 +81,13 @@ function DeviceRow({
 
 function ModalActions({ onClose }: { onClose: () => void }) {
   return (
-    <div className="flex justify-end gap-2">
-      <button
-        type="button"
-        onClick={onClose}
-        className="rounded px-3 py-1.5 text-xs text-neutral-400 hover:bg-neutral-800"
-      >
+    <div style={{ display: "flex", justifyContent: "flex-end", gap: "var(--sp-8)", marginTop: "var(--sp-16)" }}>
+      <Button type="button" variant="secondary" size="sm" onClick={onClose}>
         {t("mobile_cancel_btn")}
-      </button>
-      <button
-        type="submit"
-        className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white hover:bg-indigo-500"
-      >
+      </Button>
+      <Button type="submit" variant="primary" size="sm">
         {t("mobile_save_btn")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -124,19 +127,19 @@ function CreateDeviceModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-lg bg-neutral-900 p-6 shadow-xl">
-        <h3 className="mb-4 text-base font-semibold text-neutral-100">{t("mobile_add_device_title")}</h3>
+    <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: "var(--sp-16)" }}>
+      <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: "400px", borderRadius: "var(--radius-10)", backgroundColor: "var(--sf)", border: "1px solid var(--ln)", padding: "var(--sp-24)", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+        <h3 style={{ margin: "0 0 var(--sp-16) 0", fontSize: "var(--fs-16)", fontWeight: 600, color: "var(--fg)" }}>{t("mobile_add_device_title")}</h3>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t("mobile_device_name_placeholder")}
-          className="mb-3 w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100"
+          style={{ width: "100%", height: "var(--btn-height)", padding: "0 12px", fontSize: "var(--fs-13)", fontFamily: "var(--font-sans)", color: "var(--fg)", backgroundColor: "var(--sf2)", border: "1px solid var(--ln)", borderRadius: "var(--radius-8)", outline: "none", boxSizing: "border-box", marginBottom: "var(--sp-12)" }}
           required
         />
-        <label className="mb-4 flex items-center gap-2 text-xs text-neutral-300">
-          <input type="checkbox" checked={ro} onChange={(e) => setRo(e.target.checked)} />
+        <label style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", fontSize: "var(--fs-13)", color: "var(--fg)", cursor: "pointer", marginBottom: "var(--sp-16)" }}>
+          <input type="checkbox" checked={ro} onChange={(e) => setRo(e.target.checked)} style={{ width: "16px", height: "16px", cursor: "pointer" }} />
           {t("mobile_read_only_opt")}
         </label>
         <ModalActions onClose={onClose} />
@@ -147,20 +150,17 @@ function CreateDeviceModal({
 
 function TokenDisplayModal({ res, onClose }: { res: CreateDeviceResponse; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="w-full max-w-md rounded-lg bg-neutral-900 p-6 shadow-xl">
-        <h3 className="mb-2 text-base font-semibold text-emerald-400">{t("mobile_pair_success_title")}</h3>
-        <p className="mb-4 text-xs text-neutral-300">{t("mobile_pair_success_desc")}</p>
-        <div className="mb-4 rounded bg-neutral-950 p-3 font-mono text-xs text-amber-300 break-all">
+    <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: "var(--sp-16)" }}>
+      <div style={{ width: "100%", maxWidth: "420px", borderRadius: "var(--radius-10)", backgroundColor: "var(--sf)", border: "1px solid var(--ln)", padding: "var(--sp-24)", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+        <h3 style={{ margin: "0 0 var(--sp-8) 0", fontSize: "var(--fs-16)", fontWeight: 600, color: "var(--gr)" }}>{t("mobile_pair_success_title")}</h3>
+        <p style={{ margin: "0 0 var(--sp-16) 0", fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("mobile_pair_success_desc")}</p>
+        <div style={{ padding: "var(--sp-12)", borderRadius: "var(--radius-8)", backgroundColor: "var(--sf2)", fontFamily: "var(--font-mono)", fontSize: "var(--fs-12)", color: "var(--fg)", wordBreak: "break-all", marginBottom: "var(--sp-16)" }}>
           {res.token}
         </div>
-        <div className="flex justify-end">
-          <button
-            onClick={onClose}
-            className="rounded bg-indigo-600 px-4 py-2 text-xs text-white hover:bg-indigo-500"
-          >
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button variant="primary" size="sm" onClick={onClose}>
             {t("mobile_done_btn")}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -200,18 +200,18 @@ function DevicesTable({
   onReload: () => void;
 }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-xs text-neutral-300">
-        <thead className="border-b border-neutral-800 bg-neutral-950 text-neutral-400">
-          <tr>
-            <th className="px-3 py-2">{t("mobile_col_device")}</th>
-            <th className="px-3 py-2">{t("mobile_col_status")}</th>
-            <th className="px-3 py-2">{t("mobile_col_read_only")}</th>
-            <th className="px-3 py-2">{t("mobile_col_last_used")}</th>
-            <th className="px-3 py-2">{t("mobile_col_actions")}</th>
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "var(--fs-13)" }}>
+        <thead>
+          <tr style={{ backgroundColor: "var(--sf2)", color: "var(--mu)", borderBottom: "1px solid var(--ln)" }}>
+            <th style={{ padding: "var(--sp-8) var(--sp-12)", fontWeight: 600 }}>{t("mobile_col_device")}</th>
+            <th style={{ padding: "var(--sp-8) var(--sp-12)", fontWeight: 600 }}>{t("mobile_col_status")}</th>
+            <th style={{ padding: "var(--sp-8) var(--sp-12)", fontWeight: 600 }}>{t("mobile_col_read_only")}</th>
+            <th style={{ padding: "var(--sp-8) var(--sp-12)", fontWeight: 600 }}>{t("mobile_col_last_used")}</th>
+            <th style={{ padding: "var(--sp-8) var(--sp-12)", fontWeight: 600 }}>{t("mobile_col_actions")}</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-800">
+        <tbody>
           {devices.map((d) => (
             <DeviceRow
               key={d.id}
@@ -222,6 +222,20 @@ function DevicesTable({
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function MobilePanelHeader({ onOpenModal }: { onOpenModal: () => void }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--sp-12)" }}>
+      <div>
+        <h2 style={{ margin: "0 0 2px 0", fontSize: "var(--fs-16)", fontWeight: 600, color: "var(--fg)" }}>{t("mobile_settings_title")}</h2>
+        <p style={{ margin: 0, fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("mobile_settings_desc")}</p>
+      </div>
+      <Button variant="primary" size="sm" onClick={onOpenModal}>
+        {t("mobile_add_device_btn")}
+      </Button>
     </div>
   );
 }
@@ -243,23 +257,12 @@ export function MobileSettingsPanel({ workspaceId }: { workspaceId?: string }) {
   };
 
   return (
-    <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-bold text-neutral-100">{t("mobile_settings_title")}</h2>
-          <p className="text-xs text-neutral-400">{t("mobile_settings_desc")}</p>
-        </div>
-        <button
-          onClick={() => setModalOpen(true)}
-          className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white hover:bg-indigo-500"
-        >
-          {t("mobile_add_device_btn")}
-        </button>
-      </div>
+    <div style={{ backgroundColor: "var(--sf)", borderRadius: "var(--radius-10)", border: "1px solid var(--ln)", padding: "var(--sp-16)", marginBottom: "var(--sp-16)" }}>
+      <MobilePanelHeader onOpenModal={() => setModalOpen(true)} />
 
-      <div className="mb-6 flex items-center gap-3 rounded bg-neutral-950 p-3">
-        <input type="checkbox" id="ro-toggle" checked={cfg?.read_only || false} onChange={toggleRo} />
-        <label htmlFor="ro-toggle" className="text-xs text-neutral-300">
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", padding: "var(--sp-12)", borderRadius: "var(--radius-8)", backgroundColor: "var(--sf2)", marginBottom: "var(--sp-16)" }}>
+        <input type="checkbox" id="ro-toggle" checked={cfg?.read_only || false} onChange={toggleRo} style={{ width: "16px", height: "16px", cursor: "pointer" }} />
+        <label htmlFor="ro-toggle" style={{ fontSize: "var(--fs-13)", color: "var(--fg)", cursor: "pointer" }}>
           {t("mobile_workspace_read_only")}
         </label>
       </div>

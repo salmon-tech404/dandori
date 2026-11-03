@@ -9,10 +9,10 @@ export interface TestResultBadgeProps {
   initialRuns?: TestAgentRun[];
 }
 
-function getBadgeStyle(status: string): string {
-  if (status === "passed") return "bg-green-100 text-green-800 border-green-300";
-  if (status === "failed") return "bg-red-100 text-red-800 border-red-300";
-  return "bg-blue-100 text-blue-800 border-blue-300";
+function getBadgeColors(status: string): { bg: string; fg: string; border: string } {
+  if (status === "passed") return { bg: "var(--grb)", fg: "var(--gr)", border: "1px solid var(--gr)" };
+  if (status === "failed") return { bg: "var(--rdb)", fg: "var(--rd)", border: "1px solid var(--rd)" };
+  return { bg: "var(--blb)", fg: "var(--bl)", border: "1px solid var(--bl)" };
 }
 
 function getStatusLabel(status: string): string {
@@ -37,14 +37,28 @@ export const TestResultBadge: React.FC<TestResultBadgeProps> = ({ taskId, initia
   if (!latestRun) return null;
 
   const flagged = latestRun.flagged_files && latestRun.flagged_files !== "[]";
-  const badgeClass = `inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs border font-medium ${getBadgeStyle(latestRun.status)}`;
+  const { bg, fg, border } = getBadgeColors(latestRun.status);
 
   return (
-    <span className={badgeClass} title={latestRun.summary ?? undefined}>
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "4px",
+        padding: "2px 8px",
+        borderRadius: "var(--radius-pill)",
+        fontSize: "var(--fs-12)",
+        fontWeight: 600,
+        backgroundColor: bg,
+        color: fg,
+        border,
+      }}
+      title={latestRun.summary ?? undefined}
+    >
       <span>{t("test_agent_badge_label")}: {getStatusLabel(latestRun.status)}</span>
       {flagged && (
-        <span className="text-amber-600 font-bold" title={t("test_agent_flagged_warning")}>
-          <AlertTriangle className="w-3.5 h-3.5 inline" data-testid="warning-icon" />
+        <span style={{ color: "var(--or)", fontWeight: "bold", display: "inline-flex", alignItems: "center" }} title={t("test_agent_flagged_warning")}>
+          <AlertTriangle size={14} data-testid="warning-icon" />
         </span>
       )}
     </span>
