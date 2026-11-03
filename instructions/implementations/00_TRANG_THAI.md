@@ -149,6 +149,22 @@ Lý do: ngày 2026-11-02 mở giao diện thật lần đầu thì vỏ ứng d�
 | UI-07 | Kiểm thử trình duyệt thật trong `verify`, đối chiếu mockup | UI-01…UI-06 | 🟡 DONE_WITH_GAPS (giao diện các màn module chưa theo mockup, xem REVIEW_UI) | | [UI-07.md](reports/UI-07.md) |
 | UI-08 | **Cổng nối giao diện** | UI-00…UI-07 | ✅ DONE | | [TONG_KET_UI.md](TONG_KET_UI.md) |
 
+### Đợt thành phần dùng chung và làm đẹp theo mockup (`17_UI_THANH_PHAN_DUNG_CHUNG.md`): sau đợt nối giao diện, trước P4
+
+Lý do: chủ dự án dùng thử thật 2026-11-03; Claude đo bằng trình duyệt thật: Tailwind chưa nối (351 chỗ class vô tác dụng, ~20 hộp thoại không phủ màn hình), nút "++", dropdown không đóng khi bấm ra ngoài, chuyển trang giật (CLS 0,51), tái sử dụng kém (175 nút thô). Không nối Tailwind: dùng bộ thành phần chung + token.
+
+| # | Task | Phụ thuộc | Trạng thái | Commit (chủ dự án) | Báo cáo |
+| :-: | :--- | :--- | :--- | :--- | :--- |
+| UI-09 | Bộ thành phần dùng chung + trang xem thử | UI-08 | ⏳ Todo | | |
+| UI-10 | Modal + Dropdown dùng chung, thay toàn bộ (~24 hộp thoại, dropdown không đóng) | UI-09 | ⏳ Todo | | |
+| UI-11 | Nút/ô nhập dùng chung (175/70/22/8), bỏ "++", kiểm tra tự động | UI-09 | ⏳ Todo | | |
+| UI-12 | Gỡ class Tailwind (351 chỗ), gỡ dependency | UI-09 | ⏳ Todo | | |
+| UI-13 | Chuyển trang mượt (CLS < 0,1) | UI-09 | ⏳ Todo | | |
+| UI-14 | Màn Agent và tài khoản theo mockup | UI-10…UI-12 | ⏳ Todo | | |
+| UI-15 | Màn Dashboard và Lịch theo mockup | UI-10…UI-12 | ⏳ Todo | | |
+| UI-16 | Màn Prompt và tri thức, Tích hợp theo mockup | UI-10…UI-12 | ⏳ Todo | | |
+| UI-17 | **Cổng đợt thành phần dùng chung** | UI-09…UI-16 | ⏳ Todo | | |
+
 ### Giai đoạn 4: nặng và rủi ro (`14_P4_NANG_RUI_RO.md`)
 
 | # | Task | Phụ thuộc | Trạng thái | Commit (chủ dự án) | Báo cáo |

@@ -6,7 +6,7 @@
 
 ## Yêu cầu của chủ dự án (bắt buộc, đã chốt 2026-11-02)
 
-1. **Mọi màn hình luôn hiện trong menu**: Board, Agent và tài khoản, Dashboard, Lịch, Prompt và tri thức, Tích hợp, Cài đặt: Tính năng. **Hiện không có nghĩa là dùng được**: màn của module chưa bật hiện thông báo "Chưa bật: cần module X, vào Cài đặt để bật" kèm nút mở Cài đặt; chỉ khi người dùng bật trong Cài đặt thì màn đó mới dùng được. (Thay câu cuối thanh bên "Menu bên trái chỉ hiện những gì bạn đã bật" cho đúng.)
+1. **Mọi màn hình luôn hiện trong menu**: Board, Agent và tài khoản, Dashboard, Lịch, Prompt và tri thức, Tích hợp, Cài đặt. **Hiện không có nghĩa là dùng được**: màn của module chưa bật hiện thông báo "Chưa bật: cần module X, vào Cài đặt để bật" kèm nút mở Cài đặt; chỉ khi người dùng bật trong Cài đặt thì màn đó mới dùng được. (Thay câu cuối thanh bên "Menu bên trái chỉ hiện những gì bạn đã bật" cho đúng.)
 2. **Bản dùng thử cá nhân: tài khoản cố định trong tệp `.env`** (`DANDORI_ADMIN_USER`, `DANDORI_ADMIN_PASSWORD`; **backend đã làm xong**, có test). Giao diện chỉ có màn **Đăng nhập**; **bỏ** màn "Tạo tài khoản chủ" khỏi giao diện (route `setup-owner` của backend giữ nguyên).
 3. Giao diện chạy qua `pnpm dev` ở cổng 5173, `/api` được chuyển tiếp sang máy chủ cổng 3000 (`vite.config.ts` đã có proxy). Không bật CORS, không mở máy chủ ra ngoài `127.0.0.1`.
 

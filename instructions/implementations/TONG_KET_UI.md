@@ -315,7 +315,7 @@ Chi tiết trích xuất từ `instructions/implementations/reports/ui/DOI_CHIEU
 | **Lịch** | Trạng thái ban đầu trống task chờ cấu hình job. | Lưới lịch nạp động từ cơ sở dữ liệu thật thay vì dữ liệu cứng. |
 | **Prompt & Tri thức** | Sử dụng Tabbed Slot Layout thay vì 2 cột tĩnh cố định. | Khả năng mở rộng ARIA tablist/tab: các module mở rộng có thể đóng góp thêm tab độc lập mà không làm vỡ bố cục. |
 | **Tích hợp** | Token ghép nối thiết bị sinh mã ngẫu nhiên 1 lần, tự hủy khi đóng hộp thoại. | Quy tắc bảo mật RS-SEC (Rule 8 & Rule 17): Không lưu token một lần trong bộ nhớ trình duyệt sau khi đóng dialog. |
-| **Cài đặt: Tính năng** | 1. Đã sửa lỗi dính chữ "Đang bật41/41" thành "Đang bật 41/41".<br>2. Có hộp thoại phân tích rủi ro & phụ thuộc.<br>3. Nút Hoàn tác ẩn khi backend chưa hỗ trợ. | Tuân thủ mục 7 của `04_GIAO_DIEN.md` và tài liệu đặc tả kiến trúc PDF. Tránh nút giả gây hiểu lầm. |
+| **Cài đặt** | 1. Đã sửa lỗi dính chữ "Đang bật41/41" thành "Đang bật 41/41".<br>2. Có hộp thoại phân tích rủi ro & phụ thuộc.<br>3. Nút Hoàn tác ẩn khi backend chưa hỗ trợ. | Tuân thủ mục 7 của `04_GIAO_DIEN.md` và tài liệu đặc tả kiến trúc PDF. Tránh nút giả gây hiểu lầm. |
 
 ---
 
