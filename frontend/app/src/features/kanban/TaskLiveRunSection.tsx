@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Square, Terminal, Loader2 } from "lucide-react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
 import { getSafeErrorMessage } from "../../core/api";
 
 export interface EventItem {
@@ -131,28 +132,17 @@ function LiveRunHeader({ cancelling, onCancel }: { cancelling: boolean; onCancel
         <Loader2 size={14} className="animate-spin text-blue-500" />
         <span>{t("task_running_banner")}</span>
       </div>
-      <button
+      <Button
+        variant="danger"
+        size="sm"
         type="button"
         data-testid="btn-cancel-run"
         disabled={cancelling}
         onClick={onCancel}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "4px",
-          padding: "4px 10px",
-          background: "var(--rdb, #fee2e2)",
-          color: "var(--rd, #dc2626)",
-          border: "1px solid var(--rd, #dc2626)",
-          borderRadius: "4px",
-          fontSize: "12px",
-          fontWeight: 500,
-          cursor: cancelling ? "not-allowed" : "pointer",
-        }}
+        icon={<Square size={12} />}
       >
-        <Square size={12} />
-        <span>{cancelling ? t("btn_cancelling") : t("btn_cancel_run")}</span>
-      </button>
+        {cancelling ? t("btn_cancelling") : t("btn_cancel_run")}
+      </Button>
     </div>
   );
 }

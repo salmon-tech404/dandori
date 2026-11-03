@@ -2,26 +2,14 @@ import React, { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2, Play, Plus, Trash2 } from "lucide-react";
 import { t } from "../../../core/i18n";
 import { Button } from "../../../ui/components/Button";
+import { Input } from "../../../ui/components/Input";
+import { Select } from "../../../ui/components/Select";
 import { integrationsApi } from "../api/integrationsApi";
 import type { CreateConnectionRequest, PublicIntegrationConnection } from "../types";
 
 export interface IntegrationsSettingsProps {
   workspaceId: string;
 }
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  height: "var(--btn-height)",
-  padding: "0 12px",
-  fontSize: "var(--fs-13)",
-  fontFamily: "var(--font-sans)",
-  color: "var(--fg)",
-  backgroundColor: "var(--sf)",
-  border: "1px solid var(--ln)",
-  borderRadius: "var(--radius-8)",
-  outline: "none",
-  boxSizing: "border-box",
-};
 
 const labelStyle: React.CSSProperties = {
   display: "block",
@@ -49,7 +37,7 @@ const ConnectionButtons: React.FC<{
     <Button
       type="button"
       variant="ghost"
-      size="icon"
+      size="sm"
       onClick={() => onDelete(id)}
       style={{ color: "var(--rd)" }}
     >
@@ -98,6 +86,12 @@ const ConnectionItem: React.FC<{
   </div>
 );
 
+const providerOptions = [
+  { value: "github", label: t("integration_provider_github") },
+  { value: "gitlab", label: t("integration_provider_gitlab") },
+  { value: "linear", label: t("integration_provider_linear") },
+];
+
 const ProviderSelect: React.FC<{
   provider: string;
   onChange: (p: string) => void;
@@ -106,15 +100,11 @@ const ProviderSelect: React.FC<{
     <label style={labelStyle}>
       {t("integrations_provider_label")}
     </label>
-    <select
+    <Select
       value={provider}
-      onChange={(e) => onChange(e.target.value)}
-      style={inputStyle}
-    >
-      <option value="github">{t("integration_provider_github")}</option>
-      <option value="gitlab">{t("integration_provider_gitlab")}</option>
-      <option value="linear">{t("integration_provider_linear")}</option>
-    </select>
+      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
+      options={providerOptions}
+    />
   </div>
 );
 
@@ -131,24 +121,22 @@ const FormInputs: React.FC<{
       <label style={labelStyle}>
         {t("integrations_name_label")}
       </label>
-      <input
+      <Input
         type="text"
-        style={inputStyle}
         placeholder={t("integrations_name_placeholder")}
         value={form.name}
-        onChange={(e) => onChange({ name: e.target.value })}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange({ name: e.target.value })}
       />
     </div>
     <div>
       <label style={labelStyle}>
         {t("integrations_token_label")}
       </label>
-      <input
+      <Input
         type="password"
-        style={inputStyle}
         placeholder={t("integrations_token_placeholder")}
         value={form.token}
-        onChange={(e) => onChange({ token: e.target.value })}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange({ token: e.target.value })}
       />
     </div>
   </div>

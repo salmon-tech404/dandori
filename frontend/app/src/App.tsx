@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FeaturesProvider } from "./core/useFeatures";
@@ -9,6 +10,9 @@ import { Slot } from "./core/Slot";
 import { SettingsFeaturesScreen } from "./features/settings-features";
 import { MobileScreen } from "./features/mobile";
 import { useKanban } from "./features/kanban/useKanban";
+import { UiKitScreen } from "./ui/UiKitScreen";
+import { DashboardKpiSection } from "./features/dashboard/DashboardKpiSection";
+import { KnowledgeRoleSidebar } from "./features/prompt-library/KnowledgeRoleSidebar";
 import { t } from "./core/i18n";
 
 const queryClient = new QueryClient({
@@ -26,16 +30,18 @@ const screenWrapperStyle = {
 const AgentsScreen = () => (
   <div style={screenWrapperStyle}>
     <Slot name="agents.banner" />
-    <Slot name="agents.accounts" />
     <Slot name="agents.defaults" />
+    <Slot name="agents.accounts" />
     <Slot name="agents.panel" />
   </div>
 );
 
 const DashboardScreen = () => (
   <div style={screenWrapperStyle}>
-    <Slot name="dashboard.kpi" />
-    <Slot name="dashboard.panel" />
+    <DashboardKpiSection />
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 480px), 1fr))", gap: "var(--sp-16)" }}>
+      <Slot name="dashboard.panel" />
+    </div>
   </div>
 );
 
@@ -43,15 +49,25 @@ const CalendarScreen = () => (
   <div style={screenWrapperStyle}>
     <Slot name="calendar.toolbar" />
     <Slot name="calendar.grid" />
-    <Slot name="calendar.panel" />
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 480px), 1fr))", gap: "var(--sp-16)" }}>
+      <Slot name="calendar.panel" />
+    </div>
   </div>
 );
 
-const KnowledgeScreen = () => (
-  <div style={screenWrapperStyle}>
-    <Slot name="knowledge.tab" asTabs={true} />
-  </div>
-);
+const KnowledgeScreen = () => {
+  const [selectedRole, setSelectedRole] = useState("pm");
+  return (
+    <div style={screenWrapperStyle}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--sp-16)", width: "100%", alignItems: "flex-start" }}>
+        <KnowledgeRoleSidebar selectedRole={selectedRole} onSelectRole={setSelectedRole} />
+        <div style={{ flex: 1, minWidth: "min(100%, 580px)" }}>
+          <Slot name="knowledge.tab" asTabs={true} context={{ role: selectedRole }} />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const IntegrationsScreen = () => (
   <div style={screenWrapperStyle}>
@@ -80,6 +96,7 @@ function AppRoutes() {
       <Route path="/integrations" element={<IntegrationsScreen />} />
       <Route path="/settings" element={<SettingsScreen />} />
       <Route path="/m" element={<MobileScreen />} />
+      {import.meta.env.DEV && <Route path="/ui-kit" element={<UiKitScreen />} />}
       <Route path="/login" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -98,6 +115,10 @@ function AuthenticatedApp() {
 export function AppContent() {
   const { user, loading, login } = useSession();
   const location = useLocation();
+
+  if (import.meta.env.DEV && location.pathname === "/ui-kit") {
+    return <UiKitScreen />;
+  }
 
   if (loading) {
     return (

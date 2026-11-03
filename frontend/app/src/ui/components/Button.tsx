@@ -12,6 +12,7 @@ function getButtonColors(variant: string): { bg: string; fg: string; border: str
   if (variant === "primary") return { bg: "var(--ac)", fg: "var(--acf)", border: "1px solid var(--ac)" };
   if (variant === "danger") return { bg: "var(--rd)", fg: "var(--sf)", border: "1px solid var(--rd)" };
   if (variant === "ghost") return { bg: "transparent", fg: "var(--fg)", border: "1px solid transparent" };
+  if (variant === "outline") return { bg: "transparent", fg: "var(--fg)", border: "1px solid var(--ln)" };
   return { bg: "var(--sf2)", fg: "var(--fg)", border: "1px solid var(--ln)" };
 }
 
@@ -34,7 +35,7 @@ function buildButtonStyle(variant: string, size: string, disabled: boolean, load
     borderRadius: "var(--radius-8)",
     cursor: disabled || loading ? "not-allowed" : "pointer",
     opacity: disabled || loading ? 0.6 : 1,
-    minWidth: size === "icon" ? "44px" : "auto",
+    minWidth: size === "icon" ? "var(--touch-target)" : "auto",
     ...custom,
   };
 }
@@ -44,7 +45,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const buttonStyle = buildButtonStyle(variant, size, disabled, loading, style);
     return (
       <button ref={ref} disabled={disabled || loading} style={buttonStyle} className={`dandori-btn ${className}`} aria-busy={loading} {...props}>
-        {icon && <span style={{ display: "inline-flex" }}>{icon}</span>}
+        {icon && <span style={{ display: "inline-flex", alignItems: "center" }}>{icon}</span>}
         {loading ? <span style={{ fontSize: "var(--fs-12)", color: "var(--mu)" }}>{t("loading")}</span> : children}
       </button>
     );

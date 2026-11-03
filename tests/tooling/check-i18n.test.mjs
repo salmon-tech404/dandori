@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { validateI18n } from "../../scripts/check-i18n.mjs";
+import { validateI18n, validateComponents, validateNoTailwind } from "../../scripts/check-i18n.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -78,3 +78,62 @@ test("check-i18n: ca xanh khi mã sạch qua", async () => {
   const result = await validateI18n({ extraTsxFiles: [file] });
   assert.equal(result.ok, true, `mã sạch phải qua: ${result.errors.join("; ")}`);
 });
+
+test("check-i18n: ca đỏ khi từ điển chứa nhãn bắt đầu bằng ký tự trang trí (+, ×, ›, →)", async () => {
+  const badI18n = path.join(__dirname, "fixtures/i18n/decorative-prefix-i18n.ts");
+  const result = await validateI18n({ i18nPath: badI18n, extraTsxFiles: [] });
+  assert.equal(result.ok, false);
+  assert.match(
+    result.errors.join("\n"),
+    /bắt đầu bằng ký tự trang trí/
+  );
+});
+
+test("check-components: ca đỏ khi tệp chứa <button> thô trong features hoặc core", async () => {
+  const file = path.join(__dirname, "fixtures/i18n/raw-button.tsx");
+  const result = await validateComponents({ extraTsxFiles: [file] });
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join("\n"), /Dùng thẻ thô <button>/);
+});
+
+test("check-components: ca đỏ khi tệp chứa <input> thô trong features hoặc core", async () => {
+  const file = path.join(__dirname, "fixtures/i18n/raw-input.tsx");
+  const result = await validateComponents({ extraTsxFiles: [file] });
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join("\n"), /Dùng thẻ thô <input>/);
+});
+
+test("check-components: ca đỏ khi tệp chứa <select> thô trong features hoặc core", async () => {
+  const file = path.join(__dirname, "fixtures/i18n/raw-select.tsx");
+  const result = await validateComponents({ extraTsxFiles: [file] });
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join("\n"), /Dùng thẻ thô <select>/);
+});
+
+test("check-components: ca đỏ khi tệp chứa <textarea> thô trong features hoặc core", async () => {
+  const file = path.join(__dirname, "fixtures/i18n/raw-textarea.tsx");
+  const result = await validateComponents({ extraTsxFiles: [file] });
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join("\n"), /Dùng thẻ thô <textarea>/);
+});
+
+test("check-components: ca đỏ khi phần tử tương tác sử dụng thuộc tính title=", async () => {
+  const file = path.join(__dirname, "fixtures/i18n/interactive-title.tsx");
+  const result = await validateComponents({ extraTsxFiles: [file] });
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join("\n"), /Phát hiện thuộc tính 'title' trên phần tử tương tác/);
+});
+
+test("check-tailwind: ca đỏ khi tệp chứa class Tailwind phổ biến trong features", async () => {
+  const file = path.join(__dirname, "fixtures/i18n/tailwind-class.tsx");
+  const result = await validateNoTailwind({ extraTsxFiles: [file] });
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join("\n"), /Phát hiện class Tailwind/);
+});
+
+test("check-tailwind: ca xanh khi tệp không dùng class Tailwind", async () => {
+  const file = path.join(__dirname, "fixtures/i18n/clean-i18n.tsx");
+  const result = await validateNoTailwind({ extraTsxFiles: [file] });
+  assert.equal(result.ok, true, `tệp sạch không được có lỗi tailwind: ${result.errors.join("; ")}`);
+});
+

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
 import { fetchSkillDetail } from "./api";
 import { ImportSkillDialog } from "./ImportSkillDialog";
 import { SkillDetailDialog } from "./SkillDetailDialog";
@@ -26,7 +27,7 @@ export function SkillsPanel({ workspaceId }: SkillsPanelProps) {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-24)", padding: "var(--sp-24)" }}>
       <PanelHeader onOpenImport={() => setShowImportModal(true)} />
       <ScriptWarningBanner />
       <SkillsContentSection
@@ -52,26 +53,35 @@ export function SkillsPanel({ workspaceId }: SkillsPanelProps) {
 
 function PanelHeader({ onOpenImport }: { onOpenImport: () => void }) {
   return (
-    <div className="flex items-center justify-between">
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
       <div>
-        <h2 className="text-xl font-bold">{t("skills_title")}</h2>
-        <p className="text-sm text-gray-500">{t("skills_desc")}</p>
+        <h2 style={{ margin: 0, fontSize: "var(--fs-18)", fontWeight: 700 }}>{t("skills_title")}</h2>
+        <p style={{ margin: "var(--sp-4) 0 0", fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("skills_desc")}</p>
       </div>
-      <button
+      <Button
         type="button"
+        variant="primary"
         onClick={onOpenImport}
-        className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
       >
         {t("skills_import_btn")}
-      </button>
+      </Button>
     </div>
   );
 }
 
 function ScriptWarningBanner() {
   return (
-    <div className="rounded border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-      <p className="font-medium">{t("skills_scripts_warning")}</p>
+    <div
+      style={{
+        borderRadius: "var(--radius-8)",
+        border: "1px solid var(--or)",
+        backgroundColor: "var(--orb)",
+        padding: "var(--sp-16)",
+        fontSize: "var(--fs-13)",
+        color: "var(--or)",
+      }}
+    >
+      <p style={{ margin: 0, fontWeight: 500 }}>{t("skills_scripts_warning")}</p>
     </div>
   );
 }
@@ -86,11 +96,20 @@ interface SkillsContentSectionProps {
 }
 
 function SkillsContentSection(props: SkillsContentSectionProps) {
-  if (props.loading) return <p className="text-sm text-gray-500">{t("skills_loading")}</p>;
-  if (props.error) return <p className="text-sm text-red-600">{props.error}</p>;
+  if (props.loading) return <p style={{ fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("skills_loading")}</p>;
+  if (props.error) return <p style={{ fontSize: "var(--fs-13)", color: "var(--rd)" }}>{props.error}</p>;
   if (props.skills.length === 0) {
     return (
-      <div className="rounded border border-dashed p-8 text-center text-sm text-gray-500">
+      <div
+        style={{
+          borderRadius: "var(--radius-8)",
+          border: "1px dashed var(--ln)",
+          padding: "var(--sp-32)",
+          textAlign: "center",
+          fontSize: "var(--fs-13)",
+          color: "var(--mu)",
+        }}
+      >
         {t("skills_empty")}
       </div>
     );

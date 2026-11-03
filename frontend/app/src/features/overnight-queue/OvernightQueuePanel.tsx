@@ -1,5 +1,6 @@
 import React from 'react';
 import { t } from '../../core/i18n';
+import { Button } from '../../ui/components/Button';
 import { MorningReviewChainBanner } from './MorningReviewChainBanner';
 import type { OvernightQueueConfig, QueueItemWithTask } from './types';
 import { useOvernightQueue } from './useOvernightQueue';
@@ -15,38 +16,26 @@ const QueueItemRow: React.FC<{
   onMove: (idx: number, dir: 'up' | 'down') => void;
   onRemove: (id: string) => void;
 }> = ({ item, index, total, onMove, onRemove }) => (
-  <tr className="border-b hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-    <td className="py-2 px-3 font-mono text-xs">{item.order_index}</td>
-    <td className="py-2 px-3 font-medium text-sm">{item.task_title}</td>
-    <td className="py-2 px-3 text-xs">
-      <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700">
+  <tr style={{ borderBottom: "1px solid var(--ln)" }}>
+    <td style={{ padding: "8px 12px", fontFamily: "var(--font-mono)", fontSize: "var(--fs-12)", color: "var(--fg)" }}>{item.order_index}</td>
+    <td style={{ padding: "8px 12px", fontWeight: 500, fontSize: "var(--fs-14)", color: "var(--fg)" }}>{item.task_title}</td>
+    <td style={{ padding: "8px 12px", fontSize: "var(--fs-12)" }}>
+      <span style={{ padding: "2px 8px", borderRadius: "var(--radius-4)", backgroundColor: "var(--sf2)", color: "var(--mu)" }}>
         {item.status}
       </span>
     </td>
-    <td className="py-2 px-3 text-right text-xs space-x-1">
-      <button
-        type="button"
-        disabled={index === 0}
-        onClick={() => onMove(index, 'up')}
-        className="px-1.5 py-0.5 border rounded disabled:opacity-30"
-      >
-        {t('overnight_queue_move_up')}
-      </button>
-      <button
-        type="button"
-        disabled={index === total - 1}
-        onClick={() => onMove(index, 'down')}
-        className="px-1.5 py-0.5 border rounded disabled:opacity-30"
-      >
-        {t('overnight_queue_move_down')}
-      </button>
-      <button
-        type="button"
-        onClick={() => onRemove(item.id)}
-        className="px-1.5 py-0.5 text-red-500 hover:text-red-700"
-      >
-        {t('overnight_queue_remove')}
-      </button>
+    <td style={{ padding: "8px 12px", textAlign: "right", fontSize: "var(--fs-12)" }}>
+      <div style={{ display: "inline-flex", gap: 4 }}>
+        <Button variant="ghost" size="sm" type="button" disabled={index === 0} onClick={() => onMove(index, 'up')}>
+          {t('overnight_queue_move_up')}
+        </Button>
+        <Button variant="ghost" size="sm" type="button" disabled={index === total - 1} onClick={() => onMove(index, 'down')}>
+          {t('overnight_queue_move_down')}
+        </Button>
+        <Button variant="danger" size="sm" type="button" onClick={() => onRemove(item.id)}>
+          {t('overnight_queue_remove')}
+        </Button>
+      </div>
     </td>
   </tr>
 );
@@ -61,28 +50,28 @@ const QueueHeader: React.FC<{
   const isPaused = config?.status === 'paused';
 
   return (
-    <div className="flex items-center justify-between mb-4">
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--sp-16)" }}>
       <div>
-        <h2 className="text-lg font-bold">{t('overnight_queue_title')}</h2>
-        <p className="text-xs text-slate-500">
+        <h2 style={{ margin: 0, fontSize: "var(--fs-18)", fontWeight: 700, color: "var(--fg)" }}>{t('overnight_queue_title')}</h2>
+        <p style={{ margin: "4px 0 0", fontSize: "var(--fs-12)", color: "var(--mu)" }}>
           {config ? t('overnight_queue_start_time', { time: config.start_time }) : ''}
           {config ? ` | ${t('overnight_queue_concurrency', { count: String(config.max_concurrency) })}` : ''}
         </p>
       </div>
-      <div className="flex items-center gap-2">
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)" }}>
         {isPaused ? (
-          <button type="button" onClick={onResume} className="px-3 py-1 bg-green-600 text-white rounded text-xs">
+          <Button variant="primary" size="sm" type="button" onClick={onResume}>
             {t('overnight_queue_resume')}
-          </button>
+          </Button>
         ) : (
-          <button type="button" onClick={onPause} className="px-3 py-1 bg-amber-600 text-white rounded text-xs">
+          <Button variant="secondary" size="sm" type="button" onClick={onPause}>
             {t('overnight_queue_pause')}
-          </button>
+          </Button>
         )}
         {!isRunning && (
-          <button type="button" onClick={onStartNow} className="px-3 py-1 bg-blue-600 text-white rounded text-xs">
+          <Button variant="primary" size="sm" type="button" onClick={onStartNow}>
             {t('overnight_queue_start_now')}
-          </button>
+          </Button>
         )}
       </div>
     </div>
@@ -95,16 +84,16 @@ const QueueTable: React.FC<{
   onRemove: (id: string) => void;
 }> = ({ items, onMove, onRemove }) => {
   if (items.length === 0) {
-    return <p className="text-xs text-slate-500 py-4 text-center">{t('overnight_queue_empty')}</p>;
+    return <p style={{ fontSize: "var(--fs-12)", color: "var(--mu)", padding: "var(--sp-16) 0", textAlign: "center" }}>{t('overnight_queue_empty')}</p>;
   }
   return (
-    <table className="w-full text-left text-sm border rounded">
-      <thead className="bg-slate-50 dark:bg-slate-800 text-xs">
+    <table style={{ width: "100%", textAlign: "left", fontSize: "var(--fs-14)", borderCollapse: "collapse", border: "1px solid var(--ln)", borderRadius: "var(--radius-6)" }}>
+      <thead style={{ backgroundColor: "var(--sf2)", fontSize: "var(--fs-12)", color: "var(--mu)" }}>
         <tr>
-          <th className="py-2 px-3">{t('overnight_queue_col_order')}</th>
-          <th className="py-2 px-3">{t('overnight_queue_col_title')}</th>
-          <th className="py-2 px-3">{t('overnight_queue_col_status')}</th>
-          <th className="py-2 px-3 text-right">{t('overnight_queue_col_actions')}</th>
+          <th style={{ padding: "8px 12px" }}>{t('overnight_queue_col_order')}</th>
+          <th style={{ padding: "8px 12px" }}>{t('overnight_queue_col_title')}</th>
+          <th style={{ padding: "8px 12px" }}>{t('overnight_queue_col_status')}</th>
+          <th style={{ padding: "8px 12px", textAlign: "right" }}>{t('overnight_queue_col_actions')}</th>
         </tr>
       </thead>
       <tbody>
@@ -137,11 +126,11 @@ export const OvernightQueuePanel: React.FC<Props> = ({ workspaceId = 'default' }
   } = useOvernightQueue(workspaceId);
 
   if (loading && !config) {
-    return <div className="p-4 text-xs">{t('overnight_queue_loading')}</div>;
+    return <div style={{ padding: "var(--sp-16)", fontSize: "var(--fs-12)", color: "var(--mu)" }}>{t('overnight_queue_loading')}</div>;
   }
 
   return (
-    <div className="p-4 bg-white dark:bg-slate-900 rounded-lg shadow-sm">
+    <div style={{ padding: "var(--sp-16)", backgroundColor: "var(--sf)", borderRadius: "var(--radius-8)", border: "1px solid var(--ln)" }}>
       <MorningReviewChainBanner summary={summary} />
       <QueueHeader
         config={config}

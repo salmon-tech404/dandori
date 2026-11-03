@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Settings, AlertCircle } from "lucide-react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
 import type { QuotaStatusResponse, AccountQuotaConfigPayload, QuotaSource } from "./types";
 import { QuotaConfigModal } from "./QuotaConfigModal";
 
@@ -12,20 +13,20 @@ interface QuotaStatusBarProps {
 function SourceChip({ source }: { source: QuotaSource }) {
   if (source === "reported") {
     return (
-      <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+      <span style={{ borderRadius: "var(--radius-4)", backgroundColor: "var(--grb)", padding: "2px 6px", fontSize: "10px", fontWeight: 500, color: "var(--gr)" }}>
         {t("quota_source_reported")}
       </span>
     );
   }
   if (source === "estimated") {
     return (
-      <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-medium text-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
+      <span style={{ borderRadius: "var(--radius-4)", backgroundColor: "var(--blb)", padding: "2px 6px", fontSize: "10px", fontWeight: 500, color: "var(--bl)" }}>
         {t("quota_source_estimated")}
       </span>
     );
   }
   return (
-    <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+    <span style={{ borderRadius: "var(--radius-4)", backgroundColor: "var(--sf2)", padding: "2px 6px", fontSize: "10px", fontWeight: 500, color: "var(--mu)" }}>
       {t("quota_source_no_data")}
     </span>
   );
@@ -41,16 +42,16 @@ interface UsageRowProps {
 
 function UsageRow({ label, used, limit, percentage, threshold }: UsageRowProps) {
   const isOver = percentage !== null && percentage >= threshold;
-  const barClass = isOver ? "bg-amber-500" : "bg-blue-500";
+  const barColor = isOver ? "var(--or)" : "var(--bl)";
   const widthPercent = percentage !== null ? Math.min(percentage, 100) : 0;
 
   return (
-    <div className="flex items-center gap-2 text-xs">
-      <span className="w-12 font-medium text-slate-600 dark:text-slate-400">{label}</span>
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-        <div className={`h-full transition-all ${barClass}`} style={{ width: `${widthPercent}%` }} />
+    <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", fontSize: "var(--fs-12)" }}>
+      <span style={{ width: 48, fontWeight: 500, color: "var(--mu)" }}>{label}</span>
+      <div style={{ height: 8, flex: 1, overflow: "hidden", borderRadius: "var(--radius-pill)", backgroundColor: "var(--sf2)" }}>
+        <div style={{ height: "100%", backgroundColor: barColor, width: `${widthPercent}%`, transition: "all 0.2s" }} />
       </div>
-      <span className="w-24 text-right text-[11px] text-slate-500 dark:text-slate-400">
+      <span style={{ width: 96, textAlign: "right", fontSize: "11px", color: "var(--mu)" }}>
         {limit !== null ? `${used}/${limit} (${percentage}%)` : t("quota_source_no_data")}
       </span>
     </div>
@@ -59,8 +60,8 @@ function UsageRow({ label, used, limit, percentage, threshold }: UsageRowProps) 
 
 function ExhaustedAlert({ exhaustedUntil }: { exhaustedUntil: string }) {
   return (
-    <div className="flex items-center gap-1.5 rounded bg-rose-50 px-2 py-1 text-[11px] text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">
-      <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+    <div style={{ display: "flex", alignItems: "center", gap: 6, borderRadius: "var(--radius-4)", backgroundColor: "var(--rdb)", padding: "4px 8px", fontSize: "11px", color: "var(--rd)" }}>
+      <AlertCircle style={{ width: 14, height: 14, flexShrink: 0 }} />
       <span>{t("quota_exhausted_until")}: {exhaustedUntil}</span>
     </div>
   );
@@ -73,22 +74,23 @@ interface HeaderProps {
 
 function HeaderRow({ source, onOpenConfig }: HeaderProps) {
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)" }}>
+        <span style={{ fontSize: "var(--fs-12)", fontWeight: 600, color: "var(--fg)" }}>
           {t("quota_tracking_title")}
         </span>
         <SourceChip source={source} />
       </div>
       {onOpenConfig && (
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={onOpenConfig}
-          className="flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+          icon={<Settings style={{ width: 12, height: 12 }} />}
         >
-          <Settings className="h-3 w-3" />
-          <span>{t("quota_config_btn")}</span>
-        </button>
+          {t("quota_config_btn")}
+        </Button>
       )}
     </div>
   );
@@ -98,10 +100,10 @@ export function QuotaStatusBar({ status, onUpdateConfig }: QuotaStatusBarProps) 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="space-y-2 rounded border border-slate-200 bg-slate-50/50 p-2.5 dark:border-slate-800 dark:bg-slate-900/50">
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)", borderRadius: "var(--radius-6)", border: "1px solid var(--ln)", backgroundColor: "var(--sf)", padding: "10px" }}>
       <HeaderRow source={status.source} onOpenConfig={onUpdateConfig ? () => setIsModalOpen(true) : undefined} />
       {status.exhausted_until && <ExhaustedAlert exhaustedUntil={status.exhausted_until} />}
-      <div className="space-y-1.5 pt-0.5">
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingTop: 2 }}>
         <UsageRow
           label={t("quota_tracking_5h")}
           used={status.used_5h}

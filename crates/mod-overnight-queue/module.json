@@ -1,23 +1,15 @@
 {
-  "$schema": "https://raw.githubusercontent.com/dandori-dev/dandori/main/schemas/module.schema.json",
   "id": "overnight-queue",
+  "group": "scheduling",
   "name": "Hàng đợi qua đêm (Overnight Queue)",
   "version": "0.1.0",
   "description": "Quản lý hàng đợi chạy tuần tự qua đêm an toàn với giới hạn song song và dừng an toàn",
-  "scope": "workspace",
-  "dependencies": ["calendar"],
-  "contributions": [
-    {
-      "id": "overnight-queue-banner",
-      "slot": "calendar.panel",
-      "component": "OvernightQueuePanel"
-    },
-    {
-      "id": "overnight-queue-toolbar",
-      "slot": "board.toolbar",
-      "component": "OvernightQueueToolbar"
-    }
-  ],
+  "scopes": ["workspace"],
+  "requires": ["calendar"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
   "settings": {
     "defaultStartTime": {
       "type": "string",
@@ -29,5 +21,15 @@
       "default": 1,
       "description": "Số lượng tác vụ chạy song song tối đa"
     }
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "overnight-queue-panel",
+        "slot": "calendar.panel",
+        "label": "Hàng đợi qua đêm",
+        "order": 20
+      }
+    ]
   }
 }

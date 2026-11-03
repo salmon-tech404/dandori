@@ -1,6 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Sliders, Save } from "lucide-react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
+import { Input } from "../../ui/components/Input";
+import { Checkbox } from "../../ui/components/Checkbox";
 import type { AutoSwitchConfig, UpdateAutoSwitchConfigPayload } from "./types";
 
 interface AutoSwitchConfigCardProps {
@@ -10,13 +13,13 @@ interface AutoSwitchConfigCardProps {
 
 function ConfigHeader() {
   return (
-    <div className="flex items-center gap-2 border-b border-slate-200 pb-2 dark:border-slate-800">
-      <Sliders className="h-4 w-4 text-blue-500" />
+    <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", borderBottom: "1px solid var(--ln)", paddingBottom: "var(--sp-8)" }}>
+      <Sliders style={{ width: 16, height: 16, color: "var(--bl)" }} />
       <div>
-        <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+        <h4 style={{ margin: 0, fontSize: "var(--fs-13)", fontWeight: 600, color: "var(--fg)" }}>
           {t("auto_switch_title")}
         </h4>
-        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+        <p style={{ margin: 0, fontSize: "var(--fs-12)", color: "var(--mu)" }}>
           {t("auto_switch_desc")}
         </p>
       </div>
@@ -38,26 +41,24 @@ function CrossProviderField({
   setAllowedProviders,
 }: CrossProviderProps) {
   return (
-    <div className="space-y-2">
-      <label className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-300">
-        <input
-          type="checkbox"
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
+      <label style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", fontSize: "var(--fs-12)", fontWeight: 500, color: "var(--fg)" }}>
+        <Checkbox
           checked={allowCross}
           onChange={(e) => setAllowCross(e.target.checked)}
-          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800"
         />
         <span>{t("auto_switch_allow_cross_label")}</span>
       </label>
 
       {allowCross && (
-        <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
+        <label style={{ display: "block", fontSize: "var(--fs-12)", fontWeight: 500, color: "var(--fg)" }}>
           <span>{t("auto_switch_allowed_providers_label")}</span>
-          <input
+          <Input
             type="text"
             value={allowedProviders}
             onChange={(e) => setAllowedProviders(e.target.value)}
             placeholder={t("auto_switch_providers_placeholder")}
-            className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+            style={{ marginTop: 4 }}
           />
         </label>
       )}
@@ -78,15 +79,16 @@ interface FormBodyProps {
 
 function SaveButton({ isSaving }: { isSaving: boolean }) {
   return (
-    <div className="flex justify-end pt-1">
-      <button
+    <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 4 }}>
+      <Button
+        variant="primary"
+        size="sm"
         type="submit"
         disabled={isSaving}
-        className="flex items-center gap-1.5 rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        icon={<Save size={14} />}
       >
-        <Save className="h-3 w-3" />
-        <span>{t("auto_switch_save_btn")}</span>
-      </button>
+        {t("auto_switch_save_btn")}
+      </Button>
     </div>
   );
 }
@@ -102,16 +104,16 @@ function FormBody({
   onSubmit,
 }: FormBodyProps) {
   return (
-    <form onSubmit={onSubmit} className="space-y-3 pt-2">
-      <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
+    <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)", paddingTop: "var(--sp-8)" }}>
+      <label style={{ display: "block", fontSize: "var(--fs-12)", fontWeight: 500, color: "var(--fg)" }}>
         <span>{t("auto_switch_max_switches_label")}</span>
-        <input
+        <Input
           type="number"
           min="1"
           max="10"
           value={maxSwitches}
           onChange={(e) => setMaxSwitches(e.target.value)}
-          className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          style={{ marginTop: 4 }}
         />
       </label>
 
@@ -153,7 +155,7 @@ export function AutoSwitchConfigCard({ config, onSave }: AutoSwitchConfigCardPro
   };
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+    <div style={{ borderRadius: "var(--radius-10)", border: "1px solid var(--ln)", backgroundColor: "var(--sf)", padding: "var(--sp-16)" }}>
       <ConfigHeader />
       <FormBody
         maxSwitches={maxSwitches}

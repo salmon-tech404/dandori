@@ -1,5 +1,8 @@
 import React, { useState } from "react";
+import { Plus } from "lucide-react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
+import { Checkbox } from "../../ui/components/Checkbox";
 import { QuietWindowFormModal } from "./QuietWindowFormModal";
 import type { QuietWindow } from "./types";
 import { useQuietHours } from "./useQuietHours";
@@ -13,27 +16,16 @@ const WindowRow: React.FC<{
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
 }> = ({ item, onToggle, onDelete }) => (
-  <tr className="border-b hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-    <td className="py-2.5 px-3 font-medium">{item.name}</td>
-    <td className="py-2.5 px-3 font-mono text-xs">{item.start_time} - {item.end_time}</td>
-    <td className="py-2.5 px-3 text-xs">{item.days_of_week}</td>
-    <td className="py-2.5 px-3 text-xs">{item.timezone}</td>
-    <td className="py-2.5 px-3 text-center">
-      <input
-        type="checkbox"
-        checked={item.enabled}
-        onChange={() => onToggle(item.id)}
-        aria-label={`${t("quiet_hours_col_enabled")} ${item.name}`}
-      />
+  <tr style={{ borderBottom: "1px solid var(--ln)" }}>
+    <td style={{ padding: "10px 12px", fontWeight: 500, color: "var(--fg)" }}>{item.name}</td>
+    <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontSize: "var(--fs-12)", color: "var(--fg)" }}>{item.start_time} - {item.end_time}</td>
+    <td style={{ padding: "10px 12px", fontSize: "var(--fs-12)", color: "var(--mu)" }}>{item.days_of_week}</td>
+    <td style={{ padding: "10px 12px", fontSize: "var(--fs-12)", color: "var(--mu)" }}>{item.timezone}</td>
+    <td style={{ padding: "10px 12px", textAlign: "center" }}>
+      <Checkbox checked={item.enabled} onChange={() => onToggle(item.id)} aria-label={`${t("quiet_hours_col_enabled")} ${item.name}`} />
     </td>
-    <td className="py-2.5 px-3 text-right">
-      <button
-        type="button"
-        onClick={() => onDelete(item.id)}
-        className="text-red-500 hover:text-red-700 text-xs"
-      >
-        {t("quiet_hours_delete_window")}
-      </button>
+    <td style={{ padding: "10px 12px", textAlign: "right" }}>
+      <Button variant="danger" size="sm" type="button" onClick={() => onDelete(item.id)}>{t("quiet_hours_delete_window")}</Button>
     </td>
   </tr>
 );
@@ -43,15 +35,15 @@ const WindowsTable: React.FC<{
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
 }> = ({ windows, onToggle, onDelete }) => (
-  <table className="w-full text-sm text-left border rounded">
-    <thead className="bg-slate-50 dark:bg-slate-800 border-b text-xs font-semibold">
+  <table style={{ width: "100%", fontSize: "var(--fs-14)", textAlign: "left", border: "1px solid var(--ln)", borderRadius: "var(--radius-6)", borderCollapse: "collapse" }}>
+    <thead style={{ backgroundColor: "var(--sf2)", borderBottom: "1px solid var(--ln)", fontSize: "var(--fs-12)", fontWeight: 600, color: "var(--mu)" }}>
       <tr>
-        <th className="py-2 px-3">{t("quiet_hours_col_name")}</th>
-        <th className="py-2 px-3">{t("quiet_hours_col_time")}</th>
-        <th className="py-2 px-3">{t("quiet_hours_col_days")}</th>
-        <th className="py-2 px-3">{t("quiet_hours_col_timezone")}</th>
-        <th className="py-2 px-3 text-center">{t("quiet_hours_col_enabled")}</th>
-        <th className="py-2 px-3 text-right">{t("quiet_hours_col_actions")}</th>
+        <th style={{ padding: "8px 12px" }}>{t("quiet_hours_col_name")}</th>
+        <th style={{ padding: "8px 12px" }}>{t("quiet_hours_col_time")}</th>
+        <th style={{ padding: "8px 12px" }}>{t("quiet_hours_col_days")}</th>
+        <th style={{ padding: "8px 12px" }}>{t("quiet_hours_col_timezone")}</th>
+        <th style={{ padding: "8px 12px", textAlign: "center" }}>{t("quiet_hours_col_enabled")}</th>
+        <th style={{ padding: "8px 12px", textAlign: "right" }}>{t("quiet_hours_col_actions")}</th>
       </tr>
     </thead>
     <tbody>
@@ -70,21 +62,15 @@ export const QuietHoursSettingsPanel: React.FC<Props> = ({
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <div className="p-4 space-y-4" data-testid="quiet-hours-settings-panel">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{t("quiet_hours_title")}</h2>
-        <button
-          type="button"
-          onClick={() => setModalOpen(true)}
-          className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 font-medium"
-        >
-          {t("quiet_hours_add_window")}
-        </button>
+    <div style={{ padding: "var(--sp-16)", display: "flex", flexDirection: "column", gap: "var(--sp-16)" }} data-testid="quiet-hours-settings-panel">
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <h2 style={{ margin: 0, fontSize: "var(--fs-18)", fontWeight: 600, color: "var(--fg)" }}>{t("quiet_hours_title")}</h2>
+        <Button variant="primary" size="sm" icon={<Plus size={14} />} type="button" onClick={() => setModalOpen(true)}>{t("quiet_hours_add_window")}</Button>
       </div>
       {loading ? (
-        <div className="text-sm text-slate-500">{t("quiet_hours_loading")}</div>
+        <div style={{ fontSize: "var(--fs-14)", color: "var(--mu)" }}>{t("quiet_hours_loading")}</div>
       ) : windows.length === 0 ? (
-        <div className="text-sm text-slate-500 py-4 border border-dashed rounded text-center">
+        <div style={{ fontSize: "var(--fs-14)", color: "var(--mu)", padding: "var(--sp-16) 0", border: "1px dashed var(--ln)", borderRadius: "var(--radius-6)", textAlign: "center" }}>
           {t("quiet_hours_no_windows")}
         </div>
       ) : (

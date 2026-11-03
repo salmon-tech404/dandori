@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { t } from "../../../core/i18n";
 import { Button } from "../../../ui/components/Button";
+import { Input } from "../../../ui/components/Input";
+import { Checkbox } from "../../../ui/components/Checkbox";
 import { testAgentApi } from "../api/testAgentApi";
 import type { TestAgentConfig } from "../types";
 
@@ -14,20 +16,6 @@ interface FormState {
   maxRuns: number;
   timeout: number;
 }
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  height: "var(--btn-height)",
-  padding: "0 12px",
-  fontSize: "var(--fs-13)",
-  fontFamily: "var(--font-sans)",
-  color: "var(--fg)",
-  backgroundColor: "var(--sf)",
-  border: "1px solid var(--ln)",
-  borderRadius: "var(--radius-8)",
-  outline: "none",
-  boxSizing: "border-box",
-};
 
 const labelStyle: React.CSSProperties = {
   display: "block",
@@ -44,11 +32,9 @@ const BasicFields: React.FC<{
 }> = ({ enabled, cmd, onChange }) => (
   <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)", marginBottom: "var(--sp-12)" }}>
     <label style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", cursor: "pointer", fontSize: "var(--fs-14)", color: "var(--fg)" }}>
-      <input
-        type="checkbox"
+      <Checkbox
         checked={enabled}
         onChange={(e) => onChange({ enabled: e.target.checked })}
-        style={{ width: "16px", height: "16px", cursor: "pointer" }}
       />
       <span style={{ fontWeight: 500 }}>{t("test_agent_enabled_label")}</span>
     </label>
@@ -56,9 +42,8 @@ const BasicFields: React.FC<{
       <label style={labelStyle}>
         {t("test_agent_command_label")}
       </label>
-      <input
+      <Input
         type="text"
-        style={inputStyle}
         placeholder={t("test_agent_command_placeholder")}
         value={cmd}
         onChange={(e) => onChange({ suggestedCommand: e.target.value })}
@@ -77,11 +62,10 @@ const NumericFields: React.FC<{
       <label style={labelStyle}>
         {t("test_agent_max_runs_label")}
       </label>
-      <input
+      <Input
         type="number"
         min={1}
         max={5}
-        style={inputStyle}
         value={maxRuns}
         onChange={(e) => onChange({ maxRuns: Number(e.target.value) })}
       />
@@ -90,11 +74,10 @@ const NumericFields: React.FC<{
       <label style={labelStyle}>
         {t("test_agent_timeout_label")}
       </label>
-      <input
+      <Input
         type="number"
         min={30}
         max={3600}
-        style={inputStyle}
         value={timeout}
         onChange={(e) => onChange({ timeout: Number(e.target.value) })}
       />

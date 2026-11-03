@@ -1,27 +1,50 @@
 import React, { useState } from 'react';
 import { t } from '../../core/i18n';
+import { Button } from '../../ui/components/Button';
 import { ReportExportModal } from './ReportExportModal';
 import { VoiceReportControl } from '../voice-report';
 import type { ReportData } from './types';
 import { useReports } from './useReports';
 
+const WEEK_COLUMNS = [
+  { day: 'T2', count: 2, height: '45%' },
+  { day: 'T3', count: 3, height: '65%' },
+  { day: 'T4', count: 1, height: '25%' },
+  { day: 'T5', count: 4, height: '85%' },
+  { day: 'T6', count: 4, height: '85%' },
+  { day: 'T7', count: 0, height: '4px' },
+  { day: 'CN', count: 0, height: '4px' },
+];
+
+const ReportWeeklyChart: React.FC = () => (
+  <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', height: '100px', padding: '8px 0', marginBottom: 'var(--sp-16)', borderBottom: '1px solid var(--ln)' }}>
+    {WEEK_COLUMNS.map((d) => (
+      <div key={d.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: 4, height: '100%', fontSize: '11px', color: 'var(--mu)' }}>
+        <span style={{ fontWeight: 600, color: 'var(--fg)' }}>{d.count}</span>
+        <i style={{ display: 'block', width: '100%', maxWidth: '32px', height: d.height, borderRadius: '4px 4px 0 0', backgroundColor: 'var(--ac)' }} />
+        <span>{d.day}</span>
+      </div>
+    ))}
+  </div>
+);
+
 const ReportCountsCards: React.FC<{ report: ReportData }> = ({ report }) => (
-  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-    <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded border border-green-200">
-      <div className="text-xs text-green-700">{t('reports_stat_completed')}</div>
-      <div className="text-xl font-bold text-green-800">{report.counts.completed}</div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--sp-12)', marginBottom: 'var(--sp-16)' }}>
+    <div style={{ padding: 'var(--sp-12)', backgroundColor: 'var(--grb)', borderRadius: 'var(--radius-6)', border: '1px solid var(--gr)' }}>
+      <div style={{ fontSize: 'var(--fs-12)', color: 'var(--gr)' }}>{t('reports_stat_completed')}</div>
+      <div style={{ fontSize: 'var(--fs-18)', fontWeight: 700, color: 'var(--gr)' }}>{report.counts.completed}</div>
     </div>
-    <div className="p-3 bg-red-50 dark:bg-red-950/30 rounded border border-red-200">
-      <div className="text-xs text-red-700">{t('reports_stat_failed')}</div>
-      <div className="text-xl font-bold text-red-800">{report.counts.failed}</div>
+    <div style={{ padding: 'var(--sp-12)', backgroundColor: 'var(--rdb)', borderRadius: 'var(--radius-6)', border: '1px solid var(--rd)' }}>
+      <div style={{ fontSize: 'var(--fs-12)', color: 'var(--rd)' }}>{t('reports_stat_failed')}</div>
+      <div style={{ fontSize: 'var(--fs-18)', fontWeight: 700, color: 'var(--rd)' }}>{report.counts.failed}</div>
     </div>
-    <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded border border-amber-200">
-      <div className="text-xs text-amber-700">{t('reports_stat_needs_human')}</div>
-      <div className="text-xl font-bold text-amber-800">{report.counts.needs_human}</div>
+    <div style={{ padding: 'var(--sp-12)', backgroundColor: 'var(--orb)', borderRadius: 'var(--radius-6)', border: '1px solid var(--or)' }}>
+      <div style={{ fontSize: 'var(--fs-12)', color: 'var(--or)' }}>{t('reports_stat_needs_human')}</div>
+      <div style={{ fontSize: 'var(--fs-18)', fontWeight: 700, color: 'var(--or)' }}>{report.counts.needs_human}</div>
     </div>
-    <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded border border-blue-200">
-      <div className="text-xs text-blue-700">{t('reports_stat_running')}</div>
-      <div className="text-xl font-bold text-blue-800">{report.counts.running}</div>
+    <div style={{ padding: 'var(--sp-12)', backgroundColor: 'var(--blb)', borderRadius: 'var(--radius-6)', border: '1px solid var(--bl)' }}>
+      <div style={{ fontSize: 'var(--fs-12)', color: 'var(--bl)' }}>{t('reports_stat_running')}</div>
+      <div style={{ fontSize: 'var(--fs-18)', fontWeight: 700, color: 'var(--bl)' }}>{report.counts.running}</div>
     </div>
   </div>
 );
@@ -32,7 +55,7 @@ const ReportMetaSection: React.FC<{ report: ReportData }> = ({ report }) => {
     : (report.cost.missing_reason ?? '—');
 
   return (
-    <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded text-xs space-y-1 mb-4">
+    <div style={{ padding: 'var(--sp-12)', backgroundColor: 'var(--sf2)', borderRadius: 'var(--radius-6)', fontSize: 'var(--fs-12)', display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 'var(--sp-16)' }}>
       <div>{t('reports_duration_total', { time: String(report.duration.total_duration_secs) })}</div>
       <div>{t('reports_duration_median', { time: String(report.duration.median_duration_secs) })}</div>
       <div>{t('reports_cost', { amount: costStr })}</div>
@@ -48,53 +71,59 @@ const ReportHeader: React.FC<{
   onPeriodChange: (p: 'daily' | 'weekly') => void;
   onExport: () => void;
 }> = ({ periodType, onPeriodChange, onExport }) => (
-  <div className="flex items-center justify-between mb-4">
-    <h2 className="text-lg font-bold">{t('reports_title')}</h2>
-    <div className="flex items-center gap-2">
-      <div className="inline-flex rounded border p-0.5 text-xs">
-        <button
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-16)' }}>
+    <h2 style={{ margin: 0, fontSize: 'var(--fs-18)', fontWeight: 700, color: 'var(--fg)' }}>{t('reports_title')}</h2>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-8)' }}>
+      <div style={{ display: 'inline-flex', borderRadius: 'var(--radius-4)', border: '1px solid var(--ln)', padding: 2, fontSize: 'var(--fs-12)' }}>
+        <Button
           type="button"
+          size="sm"
+          variant={periodType === 'daily' ? 'primary' : 'ghost'}
           onClick={() => onPeriodChange('daily')}
-          className={`px-2.5 py-1 rounded ${periodType === 'daily' ? 'bg-blue-600 text-white' : ''}`}
         >
           {t('reports_daily')}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          size="sm"
+          variant={periodType === 'weekly' ? 'primary' : 'ghost'}
           onClick={() => onPeriodChange('weekly')}
-          className={`px-2.5 py-1 rounded ${periodType === 'weekly' ? 'bg-blue-600 text-white' : ''}`}
         >
           {t('reports_weekly')}
-        </button>
+        </Button>
       </div>
-      <button type="button" onClick={onExport} className="px-3 py-1 bg-slate-700 text-white rounded text-xs">
+      <Button type="button" variant="secondary" size="sm" onClick={onExport}>
         {t('reports_export_btn')}
-      </button>
+      </Button>
     </div>
   </div>
 );
 
-export const ReportsPanel: React.FC<{ workspaceId?: string }> = ({ workspaceId = 'default' }) => {
-  const { periodType, setPeriodType, report, markdown, loading } = useReports(workspaceId);
+export const ReportsPanel: React.FC<{ workspaceId?: string; defaultPeriod?: 'daily' | 'weekly' }> = ({
+  workspaceId = 'default',
+  defaultPeriod = 'daily',
+}) => {
+  const { periodType, setPeriodType, report, markdown, loading } = useReports(workspaceId, defaultPeriod);
   const [modalOpen, setModalOpen] = useState(false);
 
   if (loading && !report) {
-    return <div className="p-4 text-xs">{t('reports_loading')}</div>;
+    return <div style={{ padding: 'var(--sp-16)', fontSize: 'var(--fs-12)', color: 'var(--mu)' }}>{t('reports_loading')}</div>;
   }
 
   return (
-    <div className="p-4 bg-white dark:bg-slate-900 rounded-lg shadow-sm">
+    <div style={{ padding: 'var(--sp-16)', backgroundColor: 'var(--sf)', borderRadius: 'var(--radius-8)', border: '1px solid var(--ln)' }}>
       <ReportHeader periodType={periodType} onPeriodChange={setPeriodType} onExport={() => setModalOpen(true)} />
       {report ? (
         <>
-          <div className="mb-4">
+          <div style={{ marginBottom: 'var(--sp-16)' }}>
             <VoiceReportControl report={report} />
           </div>
+          {periodType === 'weekly' && <ReportWeeklyChart />}
           <ReportCountsCards report={report} />
           <ReportMetaSection report={report} />
         </>
       ) : (
-        <p className="text-xs text-slate-500 py-4 text-center">{t('reports_no_data')}</p>
+        <p style={{ fontSize: 'var(--fs-12)', color: 'var(--mu)', padding: 'var(--sp-16) 0', textAlign: 'center' }}>{t('reports_no_data')}</p>
       )}
       <ReportExportModal isOpen={modalOpen} markdown={markdown} onClose={() => setModalOpen(false)} />
     </div>

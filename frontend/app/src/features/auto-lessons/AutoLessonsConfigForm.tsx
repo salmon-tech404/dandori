@@ -5,6 +5,8 @@
 import React, { useState } from "react";
 import { t } from "../../core/i18n";
 import { Button } from "../../ui/components/Button";
+import { Input } from "../../ui/components/Input";
+import { Checkbox } from "../../ui/components/Checkbox";
 import type { AutoLessonsConfig, UpdateAutoLessonsConfigRequest } from "./types";
 
 interface AutoLessonsConfigFormProps {
@@ -40,16 +42,12 @@ const ToggleItem: React.FC<{
   checked: boolean;
   onChange: (v: boolean) => void;
 }> = ({ id, label, checked, onChange }) => (
-  <label htmlFor={id} style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", cursor: "pointer", fontSize: "var(--fs-13)", color: "var(--fg)" }}>
-    <input
-      type="checkbox"
-      id={id}
-      checked={checked}
-      onChange={(e) => onChange(e.target.checked)}
-      style={{ width: "16px", height: "16px", cursor: "pointer" }}
-    />
-    <span>{label}</span>
-  </label>
+  <Checkbox
+    id={id}
+    checked={checked}
+    onChange={(e) => onChange(e.target.checked)}
+    label={label}
+  />
 );
 
 const BudgetInput: React.FC<{
@@ -60,7 +58,7 @@ const BudgetInput: React.FC<{
     <label htmlFor="al-budget" style={labelStyle}>
       {t("auto_lessons_max_budget")}
     </label>
-    <input
+    <Input
       type="number"
       id="al-budget"
       value={budget}

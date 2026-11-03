@@ -1,6 +1,8 @@
 import React from "react";
 import type { PreviewStatus } from "../types";
 import { t } from "../../../core/i18n";
+import { Button } from "../../../ui/components/Button";
+import { Checkbox } from "../../../ui/components/Checkbox";
 
 interface Props {
   status: PreviewStatus | null;
@@ -21,19 +23,19 @@ export function PreviewControls(props: Props): React.JSX.Element {
           {isRunning ? `${t("diff_preview_running")} ${props.status?.url}` : t("diff_preview_stopped")}
         </span>
         {isRunning ? (
-          <button type="button" onClick={props.onStop} style={{ padding: "8px 16px", minHeight: "44px", borderRadius: "8px", background: "var(--rd)", color: "#fff", border: "none", cursor: "pointer" }}>
+          <Button variant="danger" type="button" onClick={props.onStop} style={{ padding: "8px 16px", minHeight: "44px", borderRadius: "8px", background: "var(--rd)", color: "#fff", border: "none" }}>
             {t("diff_btn_stop_preview")}
-          </button>
+          </Button>
         ) : (
-          <button type="button" onClick={props.onStart} disabled={!props.confirmed} style={{ padding: "8px 16px", minHeight: "44px", borderRadius: "8px", background: props.confirmed ? "var(--ac)" : "var(--gy)", color: "var(--acf)", border: "none", cursor: props.confirmed ? "pointer" : "not-allowed" }}>
+          <Button variant="primary" type="button" onClick={props.onStart} disabled={!props.confirmed} style={{ padding: "8px 16px", minHeight: "44px", borderRadius: "8px", background: props.confirmed ? "var(--ac)" : "var(--gy)", color: "var(--acf)", border: "none" }}>
             {t("diff_btn_start_preview")}
-          </button>
+          </Button>
         )}
       </div>
       {!isRunning && (
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <input id="diff-confirm-cb" type="checkbox" checked={props.confirmed} onChange={(e) => props.onConfirmChange(e.target.checked)} style={{ width: "20px", height: "20px" }} />
-          <label htmlFor="diff-confirm-cb" style={{ fontSize: "13px", color: "var(--fg)", cursor: "pointer" }}>{t("diff_confirm_checkbox")}</label>
+          <Checkbox id="diff-confirm-cb" checked={props.confirmed} onChange={(e) => props.onConfirmChange(e.target.checked)} label={t("diff_confirm_checkbox")} />
+
         </div>
       )}
     </div>

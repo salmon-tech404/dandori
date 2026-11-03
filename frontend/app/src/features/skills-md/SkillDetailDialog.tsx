@@ -1,6 +1,10 @@
-import { X } from "lucide-react";
 import { useState } from "react";
 import { t } from "../../core/i18n";
+import { Modal } from "../../ui/components/Modal";
+import { Button } from "../../ui/components/Button";
+import { Input } from "../../ui/components/Input";
+import { Select } from "../../ui/components/Select";
+import { Checkbox } from "../../ui/components/Checkbox";
 import { createBinding, deleteBinding } from "./api";
 import type { SkillDetail } from "./types";
 
@@ -45,9 +49,9 @@ export function SkillDetailDialog({ workspaceId, skill, onClose, onReload }: Ski
   const actions = useBindingActions(workspaceId, skill.id, onReload);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded bg-white p-6 shadow-lg space-y-4">
-        <DialogHeader name={skill.name} desc={skill.description} onClose={onClose} />
+    <Modal open onClose={onClose} title={skill.name} size="lg">
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-16)" }}>
+        {skill.description && <p style={{ margin: 0, fontSize: "var(--fs-12)", color: "var(--mu)" }}>{skill.description}</p>}
         <SkillMetaInfo skill={skill} />
         <BindingSection
           projectId={actions.projectId}
@@ -62,34 +66,20 @@ export function SkillDetailDialog({ workspaceId, skill, onClose, onReload }: Ski
         />
         <ContentPreview content={skill.content} />
       </div>
-    </div>
-  );
-}
-
-function DialogHeader({ name, desc, onClose }: { name: string; desc: string; onClose: () => void }) {
-  return (
-    <div className="flex items-start justify-between border-b pb-3">
-      <div>
-        <h3 className="text-lg font-bold">{name}</h3>
-        <p className="text-xs text-gray-500">{desc}</p>
-      </div>
-      <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600">
-        <X className="h-4 w-4" />
-      </button>
-    </div>
+    </Modal>
   );
 }
 
 function SkillMetaInfo({ skill }: { skill: SkillDetail }) {
   return (
-    <div className="text-xs space-y-1">
+    <div style={{ fontSize: "var(--fs-12)", display: "flex", flexDirection: "column", gap: 4 }}>
       <div>
-        <span className="font-medium">{t("skills_hash_label")}: </span>
-        <code className="bg-gray-100 p-1">{skill.content_hash}</code>
+        <span style={{ fontWeight: 500, color: "var(--fg)" }}>{t("skills_hash_label")}: </span>
+        <code style={{ backgroundColor: "var(--sf2)", padding: "2px 4px", borderRadius: "var(--radius-4)", fontFamily: "var(--font-mono)", color: "var(--fg)" }}>{skill.content_hash}</code>
       </div>
       {skill.has_scripts && (
-        <div className="rounded bg-orange-50 p-2 text-orange-800">
-          <span className="font-semibold">{t("skills_has_scripts_badge")}: </span>
+        <div style={{ borderRadius: "var(--radius-4)", backgroundColor: "var(--orb)", padding: "var(--sp-8)", color: "var(--or)", border: "1px solid var(--or)" }}>
+          <span style={{ fontWeight: 600 }}>{t("skills_has_scripts_badge")}: </span>
           {skill.script_files.join(", ")}
         </div>
       )}
@@ -112,7 +102,7 @@ interface BindingSectionProps {
 function BindingSection(props: BindingSectionProps) {
   return (
     <div>
-      <h4 className="text-sm font-semibold mb-2">{t("skill_binding_title")}</h4>
+      <h4 style={{ margin: "0 0 var(--sp-8)", fontSize: "var(--fs-14)", fontWeight: 600, color: "var(--fg)" }}>{t("skill_binding_title")}</h4>
       <BindingInputBar
         projectId={props.projectId}
         role={props.role}
@@ -137,33 +127,41 @@ interface BindingInputBarProps {
   onAdd: () => void;
 }
 
+const roleOptions = [
+  { value: "worker", label: t("role_worker") },
+  { value: "lead", label: t("role_lead") },
+  { value: "test", label: t("role_test") },
+  { value: "doc", label: t("role_doc") },
+];
+
 function BindingInputBar(props: BindingInputBarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2 text-xs">
-      <input
+    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--sp-8)", fontSize: "var(--fs-12)" }}>
+      <Input
         type="text"
         placeholder={t("skill_project_id_placeholder")}
         value={props.projectId}
         onChange={(e) => props.onProjectChange(e.target.value)}
-        className="rounded border p-1"
+        style={{ width: "auto" }}
       />
-      <select value={props.role} onChange={(e) => props.onRoleChange(e.target.value)} className="rounded border p-1">
-        <option value="worker">{t("role_worker")}</option>
-        <option value="lead">{t("role_lead")}</option>
-        <option value="test">{t("role_test")}</option>
-        <option value="doc">{t("role_doc")}</option>
-      </select>
-      <label className="flex items-center space-x-1">
-        <input type="checkbox" checked={props.embedFull} onChange={(e) => props.onEmbedFullChange(e.target.checked)} />
+      <Select
+        value={props.role}
+        onChange={(e) => props.onRoleChange(e.target.value)}
+        options={roleOptions}
+        style={{ width: "auto" }}
+      />
+      <label style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--fg)" }}>
+        <Checkbox checked={props.embedFull} onChange={(e) => props.onEmbedFullChange(e.target.checked)} />
         <span>{t("skills_embed_full_label")}</span>
       </label>
-      <button
+      <Button
         type="button"
+        size="sm"
+        variant="primary"
         onClick={props.onAdd}
-        className="rounded bg-blue-600 px-3 py-1 font-medium text-white hover:bg-blue-700"
       >
         {t("skills_add_binding")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -176,16 +174,16 @@ function BindingList({
   onDeleteBinding: (id: string) => void;
 }) {
   return (
-    <div className="mt-2 divide-y rounded border text-xs">
+    <div style={{ marginTop: "var(--sp-8)", borderRadius: "var(--radius-6)", border: "1px solid var(--ln)", fontSize: "var(--fs-12)" }}>
       {bindings.map((b) => (
-        <div key={b.id} className="flex items-center justify-between p-2">
-          <span>
+        <div key={b.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--sp-8)", borderBottom: "1px solid var(--ln)" }}>
+          <span style={{ color: "var(--fg)" }}>
             {t("skill_project_prefix")} {b.project_id || t("filter_all")} {t("skill_role_prefix")} {b.role || t("filter_all")} |{" "}
             {b.embed_full ? t("skills_embed_full_label") : t("skills_embed_default_label")}
           </span>
-          <button type="button" onClick={() => onDeleteBinding(b.id)} className="text-red-600 hover:underline">
+          <Button type="button" variant="ghost" size="sm" onClick={() => onDeleteBinding(b.id)} style={{ color: "var(--rd)" }}>
             {t("skills_remove_binding")}
-          </button>
+          </Button>
         </div>
       ))}
     </div>
@@ -195,8 +193,8 @@ function BindingList({
 function ContentPreview({ content }: { content: string }) {
   return (
     <div>
-      <h4 className="text-sm font-semibold mb-1">{t("skills_content_markdown")}</h4>
-      <pre className="max-h-48 overflow-y-auto rounded bg-gray-50 p-3 text-xs">{content}</pre>
+      <h4 style={{ margin: "0 0 4px", fontSize: "var(--fs-14)", fontWeight: 600, color: "var(--fg)" }}>{t("skills_content_markdown")}</h4>
+      <pre style={{ margin: 0, maxHeight: 192, overflowY: "auto", borderRadius: "var(--radius-6)", backgroundColor: "var(--sf2)", padding: "var(--sp-12)", fontSize: "var(--fs-12)", fontFamily: "var(--font-mono)", color: "var(--fg)" }}>{content}</pre>
     </div>
   );
 }

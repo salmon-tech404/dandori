@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { t } from "../../core/i18n";
+import { Modal } from "../../ui/components/Modal";
+import { Button } from "../../ui/components/Button";
+import { Input } from "../../ui/components/Input";
+import { Checkbox } from "../../ui/components/Checkbox";
 import type { CreateQuietWindowRequest, QuietWindow } from "./types";
 
 interface Props {
@@ -26,36 +30,30 @@ const BasicInputs: React.FC<{
 }> = ({ name, startTime, endTime, onChange }) => (
   <>
     <div>
-      <label className="block mb-1 font-medium">{t("quiet_hours_window_name")}</label>
-      <input
-        type="text"
+      <label style={{ display: "block", marginBottom: 4, fontWeight: 500, fontSize: "var(--fs-12)", color: "var(--fg)" }}>{t("quiet_hours_window_name")}</label>
+      <Input type="text"
         required
         value={name}
         onChange={(e) => onChange({ name: e.target.value })}
-        className="w-full border rounded px-2.5 py-1.5 bg-transparent"
         placeholder={t("quiet_hours_name_placeholder")}
       />
     </div>
-    <div className="grid grid-cols-2 gap-2">
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--sp-8)" }}>
       <div>
-        <label className="block mb-1 font-medium">{t("quiet_hours_start_time")}</label>
-        <input
-          type="text"
+        <label style={{ display: "block", marginBottom: 4, fontWeight: 500, fontSize: "var(--fs-12)", color: "var(--fg)" }}>{t("quiet_hours_start_time")}</label>
+        <Input type="text"
           required
           value={startTime}
           onChange={(e) => onChange({ startTime: e.target.value })}
-          className="w-full border rounded px-2.5 py-1.5 bg-transparent"
           placeholder="09:00"
         />
       </div>
       <div>
-        <label className="block mb-1 font-medium">{t("quiet_hours_end_time")}</label>
-        <input
-          type="text"
+        <label style={{ display: "block", marginBottom: 4, fontWeight: 500, fontSize: "var(--fs-12)", color: "var(--fg)" }}>{t("quiet_hours_end_time")}</label>
+        <Input type="text"
           required
           value={endTime}
           onChange={(e) => onChange({ endTime: e.target.value })}
-          className="w-full border rounded px-2.5 py-1.5 bg-transparent"
           placeholder="18:00"
         />
       </div>
@@ -70,37 +68,22 @@ const ScheduleInputs: React.FC<{
 }> = ({ days, blockManual, onChange }) => (
   <>
     <div>
-      <label className="block mb-1 font-medium">{t("quiet_hours_days")}</label>
-      <input
-        type="text"
+      <label style={{ display: "block", marginBottom: 4, fontWeight: 500, fontSize: "var(--fs-12)", color: "var(--fg)" }}>{t("quiet_hours_days")}</label>
+      <Input type="text"
         required
         value={days}
         onChange={(e) => onChange({ days: e.target.value })}
-        className="w-full border rounded px-2.5 py-1.5 bg-transparent"
         placeholder="1,2,3,4,5"
       />
     </div>
-    <div className="flex items-center gap-2 pt-1">
-      <input
-        type="checkbox"
-        id="blockManual"
-        checked={blockManual}
-        onChange={(e) => onChange({ blockManual: e.target.checked })}
-        className="rounded"
-      />
-      <label htmlFor="blockManual" className="cursor-pointer">{t("quiet_hours_block_manual")}</label>
-    </div>
+    <Checkbox id="blockManual" checked={blockManual} onChange={(e) => onChange({ blockManual: e.target.checked })} label={t("quiet_hours_block_manual")} />
   </>
 );
 
 const ModalActions: React.FC<{ onClose: () => void }> = ({ onClose }) => (
-  <div className="flex justify-end gap-2 pt-3 border-t">
-    <button type="button" onClick={onClose} className="px-3 py-1.5 border rounded">
-      {t("quiet_hours_cancel")}
-    </button>
-    <button type="submit" className="px-3 py-1.5 bg-blue-600 text-white rounded font-medium">
-      {t("quiet_hours_save")}
-    </button>
+  <div style={{ display: "flex", justifyContent: "flex-end", gap: "var(--sp-8)", paddingTop: "var(--sp-12)", borderTop: "1px solid var(--ln)" }}>
+    <Button variant="secondary" type="button" onClick={onClose}>{t("quiet_hours_cancel")}</Button>
+    <Button variant="primary" type="submit">{t("quiet_hours_save")}</Button>
   </div>
 );
 
@@ -138,15 +121,12 @@ export const QuietWindowFormModal: React.FC<Props> = ({
 
   const title = initial ? t("quiet_hours_edit_window") : t("quiet_hours_add_window");
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 border rounded-lg p-5 max-w-md w-full shadow-lg">
-        <h3 className="text-base font-semibold mb-3">{title}</h3>
-        <form onSubmit={onSubmit} className="space-y-3 text-sm">
-          <BasicInputs name={form.name} startTime={form.startTime} endTime={form.endTime} onChange={(p) => setForm((s) => ({ ...s, ...p }))} />
-          <ScheduleInputs days={form.days} blockManual={form.blockManual} onChange={(p) => setForm((s) => ({ ...s, ...p }))} />
-          <ModalActions onClose={onClose} />
-        </form>
-      </div>
-    </div>
+    <Modal open onClose={onClose} title={title} size="md">
+      <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)", fontSize: "var(--fs-14)" }}>
+        <BasicInputs name={form.name} startTime={form.startTime} endTime={form.endTime} onChange={(p) => setForm((s) => ({ ...s, ...p }))} />
+        <ScheduleInputs days={form.days} blockManual={form.blockManual} onChange={(p) => setForm((s) => ({ ...s, ...p }))} />
+        <ModalActions onClose={onClose} />
+      </form>
+    </Modal>
   );
 };

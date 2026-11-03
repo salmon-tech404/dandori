@@ -21,9 +21,9 @@ export const LiveStatusTaskTab: React.FC<Props> = ({
   const logs = runId ? logsByRunId[runId] || [] : [];
 
   return (
-    <div data-testid="live-status-task-tab" className="space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-neutral-500">
+    <div data-testid="live-status-task-tab" style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontSize: "var(--fs-12)", fontWeight: 500, color: "var(--mu)" }}>
           {t('live_status_tab_label')}
         </span>
         <ConnectionIndicator state={connectionState} />

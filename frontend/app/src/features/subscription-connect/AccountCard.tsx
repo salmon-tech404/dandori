@@ -1,6 +1,9 @@
 import type { ReactElement } from "react";
 import type { AgentAccount } from "./types";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
+import { Card } from "../../ui/components/Card";
+import { Chip } from "../../ui/components/Chip";
 
 interface AccountCardProps {
   acc: AgentAccount;
@@ -9,42 +12,142 @@ interface AccountCardProps {
   onDelete: (id: string) => void;
 }
 
-function StatusBadge({ status }: { status: string }) {
-  if (status === "ready") return <span className="chip chip-green">{t("account_status_ready")}</span>;
-  if (status === "not_installed") return <span className="chip chip-gray">{t("account_status_not_installed")}</span>;
-  if (status === "not_logged_in" || status === "session_expired") return <span className="chip chip-orange">{t("account_status_not_logged_in")}</span>;
-  return <span className="chip chip-gray">{t("account_status_unknown")}</span>;
+function StatusChip({ status }: { status: string }) {
+  if (status === "ready") {
+    return <Chip variant="green">{t("account_status_ready")}</Chip>;
+  }
+  if (status === "not_logged_in" || status === "session_expired") {
+    return <Chip variant="orange">{t("account_status_not_logged_in")}</Chip>;
+  }
+  if (status === "not_installed") {
+    return <Chip variant="gray">{t("account_status_not_installed")}</Chip>;
+  }
+  return <Chip variant="gray">{t("account_status_unknown")}</Chip>;
 }
 
-function ProviderAvatar({ provider }: { provider: string }) {
+function ProviderLetterBadge({ provider }: { provider: string }) {
   const p = provider.toLowerCase();
-  const cls = p === "claude" ? "provider-circle-claude" : p === "codex" ? "provider-circle-codex" : "provider-circle-gemini";
-  return <div className={`provider-circle ${cls}`}>{p === "claude" || p === "codex" ? "C" : "G"}</div>;
+  let letter = "C";
+  let bg = "var(--orb)";
+  let fg = "var(--or)";
+  if (p === "gemini") {
+    letter = "G";
+    bg = "var(--blb)";
+    fg = "var(--bl)";
+  } else if (p === "codex") {
+    letter = "K";
+    bg = "var(--tlb)";
+    fg = "var(--tl)";
+  } else if (p === "fake") {
+    letter = "F";
+    bg = "var(--gyb)";
+    fg = "var(--gy)";
+  }
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flex: "0 0 24px",
+        width: "24px",
+        height: "24px",
+        borderRadius: "50%",
+        fontSize: "12px",
+        fontWeight: 700,
+        backgroundColor: bg,
+        color: fg,
+      }}
+    >
+      {letter}
+    </span>
+  );
 }
 
-function CardActions({ id, onShowInstructions, onRecheck, onDelete }: { id: string; onShowInstructions: (id: string) => void; onRecheck: (id: string) => void; onDelete: (id: string) => void }) {
+function QuotaBarRow({
+  label,
+  percent,
+  variant = "blue",
+}: {
+  label: string;
+  percent: number;
+  variant?: "blue" | "orange" | "red" | "green";
+}) {
+  const barColor =
+    variant === "orange"
+      ? "var(--or)"
+      : variant === "red"
+      ? "var(--rd)"
+      : variant === "green"
+      ? "var(--gr)"
+      : "var(--bl)";
+
   return (
-    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "auto", paddingTop: "8px", borderTop: "1px solid var(--ln)" }}>
-      <button type="button" className="btn btn-secondary" style={{ minHeight: "44px", fontSize: "12px" }} onClick={() => onShowInstructions(id)}>{t("btn_login_instructions")}</button>
-      <button type="button" className="btn btn-secondary" style={{ minHeight: "44px", fontSize: "12px" }} onClick={() => onRecheck(id)}>{t("btn_recheck_status")}</button>
-      <button type="button" className="btn btn-secondary" style={{ minHeight: "44px", fontSize: "12px", color: "var(--rd)" }} onClick={() => onDelete(id)}>{t("btn_delete_account")}</button>
+    <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "var(--fs-12)", color: "var(--mu)" }}>
+      <span style={{ width: "36px" }}>{label}</span>
+      <div style={{ flex: 1, height: "6px", borderRadius: "999px", backgroundColor: "var(--sf2)", overflow: "hidden" }}>
+        <div style={{ width: `${percent}%`, height: "100%", borderRadius: "999px", backgroundColor: barColor }} />
+      </div>
+      <span style={{ width: "36px", textAlign: "right" }}>{percent}%</span>
+    </div>
+  );
+}
+
+function CardActions({
+  id,
+  priority,
+  onShowInstructions,
+  onRecheck,
+  onDelete,
+}: {
+  id: string;
+  priority: number;
+  onShowInstructions: (id: string) => void;
+  onRecheck: (id: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginTop: "auto", paddingTop: "8px", borderTop: "1px solid var(--ln)" }}>
+      <Chip variant="default">{`${t("account_priority")} ${priority}`}</Chip>
+      <div style={{ flex: 1 }} />
+      <Button type="button" variant="secondary" size="sm" onClick={() => onShowInstructions(id)}>
+        {t("btn_login_instructions")}
+      </Button>
+      <Button type="button" variant="secondary" size="sm" onClick={() => onRecheck(id)}>
+        {t("btn_recheck_status")}
+      </Button>
+      <Button type="button" variant="secondary" size="sm" onClick={() => onDelete(id)} style={{ color: "var(--rd)" }}>
+        {t("btn_delete_account")}
+      </Button>
     </div>
   );
 }
 
 export function AccountCard({ acc, onShowInstructions, onRecheck, onDelete }: AccountCardProps): ReactElement {
   return (
-    <div style={{ backgroundColor: "var(--sf)", border: "1px solid var(--ln)", borderRadius: "10px", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+    <Card padding="md">
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <ProviderAvatar provider={acc.provider} />
+        <ProviderLetterBadge provider={acc.provider} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 600, fontSize: "15px", color: "var(--fg)" }}>{acc.label}</div>
-          <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "12px", color: "var(--mu)" }}>{acc.id.slice(0, 8)} • {acc.provider.toUpperCase()}</div>
+          <div style={{ fontWeight: 600, fontSize: "14px", color: "var(--fg)" }}>{acc.label}</div>
+          <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "12px", color: "var(--mu)" }}>
+            {acc.id.slice(0, 8)} • {acc.provider.toUpperCase()}
+          </div>
         </div>
-        <StatusBadge status={acc.status} />
+        <StatusChip status={acc.status} />
       </div>
-      <div style={{ fontSize: "12px", color: "var(--mu)" }}><span>{t("account_priority")}: {acc.priority}</span></div>
-      <CardActions id={acc.id} onShowInstructions={onShowInstructions} onRecheck={onRecheck} onDelete={onDelete} />
-    </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <QuotaBarRow label={t("quota_period_5h")} percent={acc.status === "ready" ? 25 : 0} variant="blue" />
+        <QuotaBarRow label={t("quota_period_week")} percent={acc.status === "ready" ? 40 : 0} variant="orange" />
+      </div>
+      <CardActions
+        id={acc.id}
+        priority={acc.priority}
+        onShowInstructions={onShowInstructions}
+        onRecheck={onRecheck}
+        onDelete={onDelete}
+      />
+    </Card>
   );
 }

@@ -43,10 +43,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const inputStyle = buildInputStyle(error, disabled, style);
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-4)", width: "100%" }} className={className}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-4)", width: "100%" }} className={`dandori-input-wrapper ${className}`}>
         {label && <label htmlFor={inputId} style={{ fontSize: "var(--fs-13)", fontWeight: 500, color: error ? "var(--rd)" : "var(--mu)" }}>{label}</label>}
         <div style={{ display: "flex", alignItems: "center", minHeight: "var(--touch-target)" }}>
-          <input ref={ref} id={inputId} disabled={disabled} aria-invalid={Boolean(error)} aria-describedby={error ? errorId : hint ? hintId : undefined} style={inputStyle} {...props} />
+          <input ref={ref} id={inputId} disabled={disabled} aria-invalid={Boolean(error)} aria-describedby={error ? errorId : hint ? hintId : undefined} style={inputStyle} className={className} {...props} />
         </div>
         <InputFeedback error={error} hint={hint} errorId={errorId} hintId={hintId} />
       </div>

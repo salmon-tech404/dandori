@@ -1,6 +1,7 @@
 import { useState, useEffect, type ChangeEvent } from 'react';
 import { t } from '../../core/i18n';
 import { fetchProjectFallbackConfig, updateProjectFallbackConfig } from './api';
+import { Checkbox } from '../../ui/components/Checkbox';
 
 export function ProjectFallbackConfigCard({ projectId }: { projectId: string }) {
   const [enabled, setEnabled] = useState(false);
@@ -28,10 +29,10 @@ export function ProjectFallbackConfigCard({ projectId }: { projectId: string }) 
       <h4>{t('api_key_fallback_project_config_title')}</h4>
       {error && <div className="alert-error" role="alert">{error}</div>}
       <div className="checkbox-control">
-        <label>
-          <input type="checkbox" checked={enabled} onChange={handleToggle} />
-          <strong>{t('api_key_fallback_project_config_checkbox')}</strong>
-        </label>
+
+        <Checkbox checked={enabled} onChange={handleToggle} label={<strong>{t('api_key_fallback_project_config_checkbox')}</strong>} />
+
+
       </div>
     </div>
   );

@@ -1,5 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { t } from "../../core/i18n";
+import { Modal } from "../../ui/components/Modal";
+import { Button } from "../../ui/components/Button";
+import { Input } from "../../ui/components/Input";
 import type { AccountQuotaConfigPayload } from "./types";
 
 interface QuotaConfigModalProps {
@@ -20,14 +23,14 @@ interface FormFieldProps {
 
 function FormField({ labelKey, value, onChange, placeholder }: FormFieldProps) {
   return (
-    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
+    <label style={{ display: "block", fontSize: "var(--fs-12)", fontWeight: 500, color: "var(--fg)" }}>
       <span>{t(labelKey)}</span>
-      <input
+      <Input
         type="number"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+        style={{ marginTop: 4 }}
       />
     </label>
   );
@@ -40,21 +43,23 @@ interface ModalActionsProps {
 
 function ModalActions({ isSaving, onClose }: ModalActionsProps) {
   return (
-    <div className="flex justify-end gap-2 pt-2">
-      <button
+    <div style={{ display: "flex", justifyContent: "flex-end", gap: "var(--sp-8)", paddingTop: "var(--sp-8)" }}>
+      <Button
         type="button"
+        variant="secondary"
+        size="sm"
         onClick={onClose}
-        className="rounded border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
       >
         {t("quota_cancel_btn")}
-      </button>
-      <button
+      </Button>
+      <Button
         type="submit"
+        variant="primary"
+        size="sm"
         disabled={isSaving}
-        className="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
       >
         {t("quota_save_btn")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -89,7 +94,7 @@ function ConfigForm({ onClose, onSave, initial5h, initialWeekly, initialThreshol
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-3 space-y-3">
+    <form onSubmit={handleSubmit} style={{ marginTop: "var(--sp-12)", display: "flex", flexDirection: "column", gap: "var(--sp-12)" }}>
       <FormField labelKey="quota_limit_5h_label" value={limit5h} onChange={setLimit5h} placeholder="10" />
       <FormField labelKey="quota_limit_weekly_label" value={limitWeekly} onChange={setLimitWeekly} placeholder="50" />
       <FormField labelKey="quota_alert_threshold_label" value={threshold} onChange={setThreshold} placeholder="80" />
@@ -106,22 +111,15 @@ export function QuotaConfigModal({
   initialWeekly,
   initialThreshold = 80,
 }: QuotaConfigModalProps) {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-sm rounded-lg bg-white p-4 shadow-xl dark:bg-slate-900">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-          {t("quota_modal_title")}
-        </h3>
-        <ConfigForm
-          onClose={onClose}
-          onSave={onSave}
-          initial5h={initial5h}
-          initialWeekly={initialWeekly}
-          initialThreshold={initialThreshold}
-        />
-      </div>
-    </div>
+    <Modal open={isOpen} onClose={onClose} title={t("quota_modal_title")} size="sm">
+      <ConfigForm
+        onClose={onClose}
+        onSave={onSave}
+        initial5h={initial5h}
+        initialWeekly={initialWeekly}
+        initialThreshold={initialThreshold}
+      />
+    </Modal>
   );
 }

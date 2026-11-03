@@ -73,7 +73,11 @@ fn make_features_router() -> Router<AppState> {
 
 fn make_runs_router() -> Router<AppState> {
     Router::new()
-        .route("/tasks/{id}/runs", post(runs::start_run_handler))
+        .route("/runs", get(runs::list_runs_handler))
+        .route(
+            "/tasks/{id}/runs",
+            post(runs::start_run_handler).get(runs::list_task_runs_handler),
+        )
         .route("/runs/{id}", get(runs::get_run_handler))
         .route("/runs/{id}/cancel", post(runs::cancel_run_handler))
         .route("/runs/{id}/events", get(runs::list_run_events_handler))

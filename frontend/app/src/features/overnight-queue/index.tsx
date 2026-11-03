@@ -7,6 +7,10 @@ export * from './useOvernightQueue';
 import { MorningReviewChainBanner } from './MorningReviewChainBanner';
 import { OvernightQueuePanel } from './OvernightQueuePanel';
 
+export const contributions = {
+  'overnight-queue-panel': OvernightQueuePanel,
+};
+
 export default {
   MorningReviewChainBanner,
   OvernightQueuePanel,

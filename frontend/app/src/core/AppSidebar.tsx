@@ -6,6 +6,7 @@ import { SessionContext } from "./session";
 import { ProjectSelector } from "./ProjectSelector";
 import { UserMenu } from "./UserMenu";
 import { MENU_ITEMS, type MenuItem } from "./menu";
+import { preloadScreen } from "./preload";
 
 function SidebarBrand() {
   return (
@@ -54,6 +55,8 @@ function SidebarNavItem({
     <li>
       <Link
         to={item.path}
+        onMouseEnter={() => preloadScreen(item.id)}
+        onFocus={() => preloadScreen(item.id)}
         style={{
           display: "flex",
           alignItems: "center",

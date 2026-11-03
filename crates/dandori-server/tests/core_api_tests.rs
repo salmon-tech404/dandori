@@ -239,6 +239,8 @@ async fn test_ac1_bola_isolation_user_b_cannot_access_workspace_a_data() {
             Some(json!({ "status": "running" })),
         ),
         ("DELETE", format!("/api/v1/tasks/{task_a_id}"), None),
+        ("GET", format!("/api/v1/runs?task_id={task_a_id}"), None),
+        ("GET", format!("/api/v1/tasks/{task_a_id}/runs"), None),
     ];
 
     for (m, uri, body) in forbidden_routes {
@@ -249,6 +251,43 @@ async fn test_ac1_bola_isolation_user_b_cannot_access_workspace_a_data() {
             "User B không được phép truy cập {m} {uri}. Nhận: {status} {resp_json}"
         );
     }
+
+    // Kiểm tra quyền 3 vai trò: Member / Admin truy cập được danh sách lần chạy -> 200 OK
+    let (status_runs_a, body_runs_a) = send_req(
+        &app,
+        "GET",
+        &format!("/api/v1/runs?task_id={task_a_id}"),
+        Some(&cookie_a),
+        None,
+    )
+    .await;
+    assert_eq!(status_runs_a, StatusCode::OK);
+    assert!(body_runs_a["runs"].is_array());
+
+    let (status_runs_task, body_runs_task) = send_req(
+        &app,
+        "GET",
+        &format!("/api/v1/tasks/{task_a_id}/runs"),
+        Some(&cookie_a),
+        None,
+    )
+    .await;
+    assert_eq!(status_runs_task, StatusCode::OK);
+    assert!(body_runs_task["runs"].is_array());
+
+    // Mutation proof: validation tham số task_id
+    let (status_bad_req, _) = send_req(&app, "GET", "/api/v1/runs", Some(&cookie_a), None).await;
+    assert_eq!(status_bad_req, StatusCode::BAD_REQUEST);
+
+    let (status_bad_uuid, _) = send_req(
+        &app,
+        "GET",
+        "/api/v1/runs?task_id=invalid-uuid",
+        Some(&cookie_a),
+        None,
+    )
+    .await;
+    assert_eq!(status_bad_uuid, StatusCode::BAD_REQUEST);
 }
 
 #[tokio::test]

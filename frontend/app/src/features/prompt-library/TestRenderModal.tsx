@@ -1,4 +1,6 @@
-import { X } from 'lucide-react';
+import { Modal } from '../../ui/components/Modal';
+import { Button } from '../../ui/components/Button';
+import { Input } from '../../ui/components/Input';
 import React, { useState } from 'react';
 import { t } from '../../core/i18n';
 
@@ -20,46 +22,42 @@ interface TestInputsProps {
 }
 
 const Row1: React.FC<Pick<TestInputsProps, 'taskTitle' | 'setTaskTitle' | 'projectName' | 'setProjectName'>> = (p) => (
-  <div className="grid grid-cols-2 gap-3">
+  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--sp-12)" }}>
     <div>
-      <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('prompt_test_task_title')}</label>
-      <input
+      <label style={{ display: "block", fontSize: "var(--fs-12)", fontWeight: 500, color: "var(--fg)", marginBottom: 4 }}>{t('prompt_test_task_title')}</label>
+      <Input
         type="text"
         value={p.taskTitle}
-        onChange={(e) => p.setTaskTitle(e.target.value)}
-        className="w-full rounded border border-neutral-300 px-3 py-1.5 text-xs dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => p.setTaskTitle(e.target.value)}
       />
     </div>
     <div>
-      <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('prompt_test_project')}</label>
-      <input
+      <label style={{ display: "block", fontSize: "var(--fs-12)", fontWeight: 500, color: "var(--fg)", marginBottom: 4 }}>{t('prompt_test_project')}</label>
+      <Input
         type="text"
         value={p.projectName}
-        onChange={(e) => p.setProjectName(e.target.value)}
-        className="w-full rounded border border-neutral-300 px-3 py-1.5 text-xs dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => p.setProjectName(e.target.value)}
       />
     </div>
   </div>
 );
 
 const Row2: React.FC<Pick<TestInputsProps, 'taskDesc' | 'setTaskDesc' | 'role' | 'setRole'>> = (p) => (
-  <div className="grid grid-cols-2 gap-3">
+  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--sp-12)" }}>
     <div>
-      <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('prompt_test_task_desc')}</label>
-      <input
+      <label style={{ display: "block", fontSize: "var(--fs-12)", fontWeight: 500, color: "var(--fg)", marginBottom: 4 }}>{t('prompt_test_task_desc')}</label>
+      <Input
         type="text"
         value={p.taskDesc}
-        onChange={(e) => p.setTaskDesc(e.target.value)}
-        className="w-full rounded border border-neutral-300 px-3 py-1.5 text-xs dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => p.setTaskDesc(e.target.value)}
       />
     </div>
     <div>
-      <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('prompt_test_role')}</label>
-      <input
+      <label style={{ display: "block", fontSize: "var(--fs-12)", fontWeight: 500, color: "var(--fg)", marginBottom: 4 }}>{t('prompt_test_role')}</label>
+      <Input
         type="text"
         value={p.role}
-        onChange={(e) => p.setRole(e.target.value)}
-        className="w-full rounded border border-neutral-300 px-3 py-1.5 text-xs dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => p.setRole(e.target.value)}
       />
     </div>
   </div>
@@ -109,33 +107,25 @@ export const TestRenderModal: React.FC<Props> = ({ content, defaultRole, onClose
   const r = useTestRender(content, defaultRole);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-lg border border-neutral-200 bg-white p-6 shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="flex items-center justify-between pb-4 border-b border-neutral-200 dark:border-neutral-800">
-          <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">{t('prompt_test_title')}</h3>
-          <button type="button" onClick={onClose} className="text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300">
-            <X size={20} />
-          </button>
+    <Modal open onClose={onClose} title={t('prompt_test_title')} size="lg">
+      <form onSubmit={r.handleRender} style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)" }}>
+        <Row1 taskTitle={r.taskTitle} setTaskTitle={r.setTaskTitle} projectName={r.projectName} setProjectName={r.setProjectName} />
+        <Row2 taskDesc={r.taskDesc} setTaskDesc={r.setTaskDesc} role={r.role} setRole={r.setRole} />
+        <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: "var(--sp-8)" }}>
+          <Button variant="primary" type="submit" disabled={r.loading}>
+            {r.loading ? t('loading') : t('prompt_test_btn_render')}
+          </Button>
         </div>
-        <form onSubmit={r.handleRender} className="mt-4 space-y-3">
-          <Row1 taskTitle={r.taskTitle} setTaskTitle={r.setTaskTitle} projectName={r.projectName} setProjectName={r.setProjectName} />
-          <Row2 taskDesc={r.taskDesc} setTaskDesc={r.setTaskDesc} role={r.role} setRole={r.setRole} />
-          <div className="flex justify-end pt-2">
-            <button type="submit" disabled={r.loading} className="px-4 py-1.5 text-xs font-medium rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
-              {r.loading ? t('loading') : t('prompt_test_btn_render')}
-            </button>
-          </div>
-        </form>
-        {r.err && <div className="mt-2 text-xs text-rose-500">{r.err}</div>}
-        {r.rendered !== null && (
-          <div className="mt-4 border-t border-neutral-200 dark:border-neutral-800 pt-3">
-            <h4 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 mb-2">{t('prompt_test_result_title')}</h4>
-            <pre className="p-3 bg-neutral-100 dark:bg-neutral-950 rounded text-xs font-mono whitespace-pre-wrap max-h-48 overflow-y-auto text-neutral-800 dark:text-neutral-200">
-              {r.rendered}
-            </pre>
-          </div>
-        )}
-      </div>
-    </div>
+      </form>
+      {r.err && <div style={{ marginTop: "var(--sp-8)", fontSize: "var(--fs-12)", color: "var(--rd)" }}>{r.err}</div>}
+      {r.rendered !== null && (
+        <div style={{ marginTop: "var(--sp-16)", borderTop: "1px solid var(--ln)", paddingTop: "var(--sp-12)" }}>
+          <h4 style={{ margin: "0 0 var(--sp-8)", fontSize: "var(--fs-12)", fontWeight: 600, color: "var(--fg)" }}>{t('prompt_test_result_title')}</h4>
+          <pre style={{ margin: 0, padding: "var(--sp-12)", backgroundColor: "var(--sf2)", borderRadius: "var(--radius-6)", fontSize: "var(--fs-12)", fontFamily: "var(--font-mono)", whiteSpace: "pre-wrap", maxHeight: 192, overflowY: "auto", color: "var(--fg)" }}>
+            {r.rendered}
+          </pre>
+        </div>
+      )}
+    </Modal>
   );
 };

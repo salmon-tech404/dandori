@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { SettingsFeaturesScreen } from "./SettingsFeaturesScreen";
+import { AuditLogSection } from "./AuditLogSection";
 import { FeatureModuleItem } from "./types";
 
 const TEST_MODULES: FeatureModuleItem[] = [
@@ -159,16 +160,24 @@ describe("AC3 & AC4: Gear button state and Locked Switch Behavior", () => {
   });
 });
 
-describe("Audit log and Undo functionality", () => {
-  it("records change into audit log and allows undoing the latest change", () => {
-    render(<SettingsFeaturesScreen initialModules={TEST_MODULES} />);
-    const kanbanSwitch = screen.getByRole("switch", { name: "Bảng Kanban" });
-    fireEvent.click(kanbanSwitch);
-    expect(kanbanSwitch.getAttribute("aria-checked")).toBe("true");
+describe("Audit log component and Undo functionality", () => {
+  it("renders audit items and invokes onUndo when clicking undo button", () => {
+    let undone = false;
+    const mockAudits = [
+      {
+        id: "1",
+        module_id: "kanban",
+        action: "enable" as const,
+        scope: "workspace" as const,
+        actor: "admin",
+        created_at: new Date().toISOString(),
+      },
+    ];
+    render(<AuditLogSection audits={mockAudits} onUndo={() => { undone = true; }} undoDisabled={false} />);
     expect(screen.getByText(/kanban \(enable\)/)).toBeDefined();
 
     const undoBtn = screen.getByRole("button", { name: "Hoàn tác thay đổi gần nhất" });
     fireEvent.click(undoBtn);
-    expect(kanbanSwitch.getAttribute("aria-checked")).toBe("false");
+    expect(undone).toBe(true);
   });
 });

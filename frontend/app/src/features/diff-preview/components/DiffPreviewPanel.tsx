@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { t } from "../../../core/i18n";
+import { Button } from "../../../ui/components/Button";
 import { useDiffPreview } from "../hooks/useDiffPreview";
 import { DiffFileList } from "./DiffFileList";
 import { DiffFileView } from "./DiffFileView";
@@ -28,8 +29,8 @@ export function DiffPreviewPanel({ context, task, taskId }: Props): React.JSX.El
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "8px" }}>
       <div style={{ display: "flex", gap: "8px", borderBottom: "1px solid var(--ln)", paddingBottom: "8px" }}>
-        <button type="button" onClick={() => setActiveTab("diff")} style={{ minHeight: "44px", padding: "8px 16px", border: "none", background: activeTab === "diff" ? "var(--sf2)" : "transparent", fontWeight: 600, cursor: "pointer", borderRadius: "6px" }}>{t("diff_preview_tab_diff")}</button>
-        <button type="button" onClick={() => setActiveTab("preview")} style={{ minHeight: "44px", padding: "8px 16px", border: "none", background: activeTab === "preview" ? "var(--sf2)" : "transparent", fontWeight: 600, cursor: "pointer", borderRadius: "6px" }}>{t("diff_preview_tab_preview")}</button>
+        <Button variant="ghost" type="button" onClick={() => setActiveTab("diff")} style={{ minHeight: "44px", padding: "8px 16px", border: "none", background: activeTab === "diff" ? "var(--sf2)" : "transparent", fontWeight: 600, cursor: "pointer", borderRadius: "6px" }}>{t("diff_preview_tab_diff")}</Button>
+        <Button variant="ghost" type="button" onClick={() => setActiveTab("preview")} style={{ minHeight: "44px", padding: "8px 16px", border: "none", background: activeTab === "preview" ? "var(--sf2)" : "transparent", fontWeight: 600, cursor: "pointer", borderRadius: "6px" }}>{t("diff_preview_tab_preview")}</Button>
       </div>
       {activeTab === "diff" ? (
         <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: "16px" }}>

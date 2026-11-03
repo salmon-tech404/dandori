@@ -25,72 +25,83 @@ const TableRow: React.FC<{
 }> = ({ agent, isSelected, onSelect }) => (
   <tr
     onClick={onSelect}
-    className={`cursor-pointer border-b border-neutral-100 transition-colors hover:bg-neutral-50 dark:border-neutral-800/50 dark:hover:bg-neutral-800/40 ${
-      isSelected ? 'bg-indigo-50/60 dark:bg-indigo-950/20' : ''
-    }`}
+    style={{
+      cursor: "pointer",
+      borderBottom: "1px solid var(--ln)",
+      backgroundColor: isSelected ? "var(--blb)" : "transparent",
+    }}
   >
-    <td className="px-3 py-2.5">
-      <div className="flex items-center gap-1.5 font-medium text-neutral-800 dark:text-neutral-200">
-        <Bot size={14} className="text-indigo-500" />
+    <td style={{ padding: "10px 12px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500, color: "var(--fg)" }}>
+        <Bot size={14} style={{ color: "var(--bl)" }} />
         <span>{agent.agent}</span>
-        <span className="text-xs text-neutral-400">({agent.account})</span>
+        <span style={{ fontSize: "var(--fs-12)", color: "var(--mu)" }}>({agent.account})</span>
       </div>
     </td>
-    <td className="px-3 py-2.5 text-neutral-600 dark:text-neutral-300">{agent.taskTitle}</td>
-    <td className="px-3 py-2.5 text-neutral-500">{agent.assignedBy}</td>
-    <td className="px-3 py-2.5 font-mono text-xs text-neutral-600 dark:text-neutral-300">
-      <div className="flex items-center gap-1">
-        <Clock size={12} className="text-neutral-400" />
+    <td style={{ padding: "10px 12px", color: "var(--fg)" }}>{agent.taskTitle}</td>
+    <td style={{ padding: "10px 12px", color: "var(--mu)" }}>{agent.assignedBy}</td>
+    <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontSize: "var(--fs-12)", color: "var(--fg)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <Clock size={12} style={{ color: "var(--mu)" }} />
         {formatElapsed(agent.startedAt)}
       </div>
     </td>
-    <td className="px-3 py-2.5 text-xs text-neutral-400 italic">
+    <td style={{ padding: "10px 12px", fontSize: "var(--fs-12)", color: "var(--mu)", fontStyle: "italic" }}>
       {t('live_status_eta_placeholder')}
     </td>
-    <td className="px-3 py-2.5">
-      <span className="rounded bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+    <td style={{ padding: "10px 12px" }}>
+      <span style={{ borderRadius: "var(--radius-4)", backgroundColor: "var(--grb)", padding: "2px 8px", fontSize: "var(--fs-12)", fontWeight: 500, color: "var(--gr)" }}>
         {agent.status}
       </span>
     </td>
   </tr>
 );
 
-export const ActiveAgentsTable: React.FC<Props> = ({ agents, selectedRunId, onSelectRun }) => {
-  if (agents.length === 0) {
+const AgentsGrid: React.FC<Props> = ({ agents, selectedRunId, onSelectRun }) => (
+  <div style={{ overflowX: "auto", borderRadius: "var(--radius-8)", border: "1px solid var(--ln)", backgroundColor: "var(--sf)", fontSize: "var(--fs-14)" }}>
+    <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+      <thead style={{ borderBottom: "1px solid var(--ln)", backgroundColor: "var(--sf2)", fontSize: "var(--fs-12)", fontWeight: 600, color: "var(--mu)" }}>
+        <tr>
+          <th style={{ padding: "8px 12px" }}>{t('live_status_col_agent')}</th>
+          <th style={{ padding: "8px 12px" }}>{t('live_status_col_task')}</th>
+          <th style={{ padding: "8px 12px" }}>{t('live_status_col_assigned_by')}</th>
+          <th style={{ padding: "8px 12px" }}>{t('live_status_col_elapsed')}</th>
+          <th style={{ padding: "8px 12px" }}>{t('live_status_col_eta')}</th>
+          <th style={{ padding: "8px 12px" }}>{t('live_status_col_status')}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {agents.map((a) => (
+          <TableRow
+            key={a.runId}
+            agent={a}
+            isSelected={selectedRunId === a.runId}
+            onSelect={() => onSelectRun(a.runId)}
+          />
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
+export const ActiveAgentsTable: React.FC<Props> = (props) => {
+  if (props.agents.length === 0) {
     return (
       <div
         data-testid="active-agents-empty"
-        className="rounded-lg border border-dashed border-neutral-200 p-6 text-center text-sm text-neutral-400 dark:border-neutral-800"
+        style={{
+          borderRadius: "var(--radius-8)",
+          border: "1px dashed var(--ln)",
+          padding: "var(--sp-24)",
+          textAlign: "center",
+          fontSize: "var(--fs-14)",
+          color: "var(--mu)",
+        }}
       >
         {t('live_status_no_active_agents')}
       </div>
     );
   }
 
-  return (
-    <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white text-sm dark:border-neutral-800 dark:bg-neutral-900">
-      <table className="w-full text-left">
-        <thead className="border-b border-neutral-200 bg-neutral-50 text-xs font-semibold text-neutral-500 dark:border-neutral-800 dark:bg-neutral-800/50">
-          <tr>
-            <th className="px-3 py-2">{t('live_status_col_agent')}</th>
-            <th className="px-3 py-2">{t('live_status_col_task')}</th>
-            <th className="px-3 py-2">{t('live_status_col_assigned_by')}</th>
-            <th className="px-3 py-2">{t('live_status_col_elapsed')}</th>
-            <th className="px-3 py-2">{t('live_status_col_eta')}</th>
-            <th className="px-3 py-2">{t('live_status_col_status')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {agents.map((a) => (
-            <TableRow
-              key={a.runId}
-              agent={a}
-              isSelected={selectedRunId === a.runId}
-              onSelect={() => onSelectRun(a.runId)}
-            />
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  return <AgentsGrid {...props} />;
 };

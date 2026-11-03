@@ -1,5 +1,7 @@
 import React from "react";
 import { t } from "../../core/i18n";
+import { Input } from "../../ui/components/Input";
+import { Select } from "../../ui/components/Select";
 import type { TaskTemplateDto } from "./types";
 
 interface Props {
@@ -20,31 +22,31 @@ export const ScheduleFormFields: React.FC<Props> = ({
   setScheduleExpr, timezone, setTimezone, template, setTemplate
 }) => {
   return (
-    <div className="space-y-3">
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)" }}>
       <div>
-        <label className="block text-xs text-text-subtle mb-1">{t("calendar_title")}</label>
-        <input className="w-full text-sm border rounded px-2 py-1 bg-surface" value={title} onChange={(e) => setTitle(e.target.value)} required />
+        <label style={{ display: "block", fontSize: "var(--fs-12)", color: "var(--mu)", marginBottom: 4 }}>{t("calendar_title")}</label>
+        <Input value={title} onChange={(e) => setTitle(e.target.value)} required />
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--sp-8)" }}>
         <div>
-          <label className="block text-xs text-text-subtle mb-1">{t("calendar_schedule_type")}</label>
-          <select className="w-full text-sm border rounded px-2 py-1 bg-surface" value={scheduleType} onChange={(e) => setScheduleType(e.target.value as "cron" | "interval")}>
+          <label style={{ display: "block", fontSize: "var(--fs-12)", color: "var(--mu)", marginBottom: 4 }}>{t("calendar_schedule_type")}</label>
+          <Select value={scheduleType} onChange={(e) => setScheduleType(e.target.value as "cron" | "interval")}>
             <option value="cron">{t("calendar_cron")}</option>
             <option value="interval">{t("calendar_interval")}</option>
-          </select>
+          </Select>
         </div>
         <div>
-          <label className="block text-xs text-text-subtle mb-1">{t("calendar_expression")}</label>
-          <input className="w-full text-sm border rounded px-2 py-1 bg-surface" value={scheduleExpr} onChange={(e) => setScheduleExpr(e.target.value)} placeholder={scheduleType === "cron" ? "0 * * * *" : "3600"} required />
+          <label style={{ display: "block", fontSize: "var(--fs-12)", color: "var(--mu)", marginBottom: 4 }}>{t("calendar_expression")}</label>
+          <Input value={scheduleExpr} onChange={(e) => setScheduleExpr(e.target.value)} placeholder={scheduleType === "cron" ? "0 * * * *" : "3600"} required />
         </div>
       </div>
       <div>
-        <label className="block text-xs text-text-subtle mb-1">{t("calendar_timezone")}</label>
-        <input className="w-full text-sm border rounded px-2 py-1 bg-surface" value={timezone} onChange={(e) => setTimezone(e.target.value)} placeholder={t("calendar_tz_placeholder")} />
+        <label style={{ display: "block", fontSize: "var(--fs-12)", color: "var(--mu)", marginBottom: 4 }}>{t("calendar_timezone")}</label>
+        <Input value={timezone} onChange={(e) => setTimezone(e.target.value)} placeholder={t("calendar_tz_placeholder")} />
       </div>
       <div>
-        <label className="block text-xs text-text-subtle mb-1">{t("calendar_task_title")}</label>
-        <input className="w-full text-sm border rounded px-2 py-1 bg-surface" value={template.title} onChange={(e) => setTemplate((prev) => ({ ...prev, title: e.target.value }))} required />
+        <label style={{ display: "block", fontSize: "var(--fs-12)", color: "var(--mu)", marginBottom: 4 }}>{t("calendar_task_title")}</label>
+        <Input value={template.title} onChange={(e) => setTemplate((prev) => ({ ...prev, title: e.target.value }))} required />
       </div>
     </div>
   );

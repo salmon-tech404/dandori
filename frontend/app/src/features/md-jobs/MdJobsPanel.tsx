@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
 import { approveJob, fetchJobs, fireJobNow, rejectJob, syncJobs } from "./api";
 import { JobCard } from "./JobCard";
 import { JobDetailModal } from "./JobDetailModal";
@@ -23,7 +24,7 @@ function useMdJobs(projectId?: string) {
   };
 
   useEffect(() => {
-    loadJobs();
+    void loadJobs();
   }, [projectId]);
 
   const handleSync = async () => {
@@ -47,21 +48,23 @@ function useMdJobs(projectId?: string) {
 
 function renderPanelHeader(onSync: () => void, syncing: boolean) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border">
-      <div className="flex items-center gap-2">
-        <h3 className="font-bold text-text-primary">{t("md_jobs_title")}</h3>
-        <span className="font-mono text-xs px-2 py-0.5 rounded bg-surface-muted text-text-secondary border border-border">
+    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "var(--sp-12)", paddingBottom: "var(--sp-12)", borderBottom: "1px solid var(--ln)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)" }}>
+        <h3 style={{ margin: 0, fontWeight: 700, color: "var(--fg)" }}>{t("md_jobs_title")}</h3>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--fs-12)", padding: "2px 8px", borderRadius: "var(--radius-4)", backgroundColor: "var(--sf2)", color: "var(--mu)", border: "1px solid var(--ln)" }}>
           {t("md_jobs_path_badge")}
         </span>
       </div>
-      <button
+      <Button
+        variant="secondary"
+        size="sm"
         type="button"
         onClick={onSync}
         disabled={syncing}
-        className="px-3 py-1.5 rounded bg-surface-muted hover:bg-surface-muted/80 text-text-primary text-xs font-medium border border-border disabled:opacity-50"
+        loading={syncing}
       >
         {syncing ? t("md_jobs_syncing") : t("md_jobs_sync")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -74,10 +77,10 @@ function renderJobsList(
   onFireNow: (id: string) => void
 ) {
   if (jobs.length === 0) {
-    return <div className="py-8 text-center text-sm text-text-muted">{t("md_jobs_no_jobs")}</div>;
+    return <div style={{ padding: "var(--sp-32) 0", textAlign: "center", fontSize: "var(--fs-14)", color: "var(--mu)" }}>{t("md_jobs_no_jobs")}</div>;
   }
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "var(--sp-16)" }}>
       {jobs.map((job) => (
         <JobCard
           key={job.id}
@@ -97,7 +100,7 @@ export function MdJobsPanel({ projectId }: MdJobsPanelProps) {
   const [selectedJob, setSelectedJob] = useState<MdJobDto | null>(null);
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-4 shadow-sm space-y-4">
+    <div style={{ borderRadius: "var(--radius-8)", border: "1px solid var(--ln)", backgroundColor: "var(--sf)", padding: "var(--sp-16)", display: "flex", flexDirection: "column", gap: "var(--sp-16)" }}>
       {renderPanelHeader(handleSync, syncing)}
       {renderJobsList(
         jobs,

@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { t } from "../../../core/i18n";
+import { Modal } from "../../../ui/components/Modal";
+import { Button } from "../../../ui/components/Button";
+import { Textarea } from "../../../ui/components/Textarea";
 import type { ApprovalRequest } from "../types";
 
 interface ApprovalDecisionModalProps {
@@ -50,33 +53,28 @@ interface ModalActionsProps {
 
 function ModalActions({ submitting, onClose, onReject, onApprove }: ModalActionsProps) {
   return (
-    <div className="mt-6 flex justify-end gap-3">
-      <button
-        type="button"
-        onClick={onClose}
-        disabled={submitting}
-        className="rounded-lg px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800 transition-colors"
-      >
+    <div style={{ display: "flex", justifyContent: "flex-end", gap: "var(--sp-8)" }}>
+      <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
         {t("btn_close")}
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant="danger"
         onClick={onReject}
         disabled={submitting}
-        className="rounded-lg bg-red-600/20 text-red-400 border border-red-500/30 px-4 py-2 text-sm font-medium hover:bg-red-600/30 transition-colors disabled:opacity-50"
         data-testid="reject-button"
       >
         {t("approval_gate_btn_reject")}
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant="primary"
         onClick={onApprove}
         disabled={submitting}
-        className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors disabled:opacity-50"
         data-testid="approve-button"
       >
         {t("approval_gate_btn_approve")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -91,43 +89,43 @@ interface ModalBodyProps {
 
 function ModalBody({ request, reason, onReasonChange, error, onViewDiff }: ModalBodyProps) {
   return (
-    <>
-      <h3 className="text-lg font-semibold text-zinc-100">{t("approval_gate_title")}</h3>
-      <p className="mt-1 text-sm text-zinc-400">
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)" }}>
+      <p style={{ margin: 0, fontSize: "var(--fs-14)", color: "var(--mu)" }}>
         {request.from_status} → {request.target_status}
       </p>
 
       {request.reason && (
-        <div className="mt-3 p-3 rounded bg-zinc-800/50 border border-zinc-800 text-sm text-zinc-300">
+        <div style={{ padding: "var(--sp-12)", borderRadius: "var(--radius-8)", backgroundColor: "var(--sf2)", border: "1px solid var(--ln)", fontSize: "var(--fs-13)", color: "var(--fg)" }}>
           {request.reason}
         </div>
       )}
 
       {onViewDiff && (
-        <div className="mt-4">
-          <button
+        <div>
+          <Button
+            variant="ghost"
+            size="sm"
             type="button"
             onClick={() => onViewDiff(request.task_id)}
-            className="text-xs text-blue-400 hover:text-blue-300 underline"
+            style={{ background: "none", border: "none", padding: 0, fontSize: "var(--fs-12)", color: "var(--bl)", textDecoration: "underline", height: "auto", minHeight: "unset" }}
           >
             {t("approval_gate_diff_link")}
-          </button>
+          </Button>
         </div>
       )}
 
-      <div className="mt-4">
-        <textarea
+      <div>
+        <Textarea
           value={reason}
           onChange={(e) => onReasonChange(e.target.value)}
           placeholder={t("approval_gate_reason_placeholder")}
           rows={3}
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-800 p-2.5 text-sm text-zinc-200 placeholder-zinc-500 focus:border-blue-500 focus:outline-none"
           data-testid="approval-reason-input"
         />
       </div>
 
-      {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
-    </>
+      {error && <p style={{ margin: 0, fontSize: "var(--fs-12)", color: "var(--rd)" }}>{error}</p>}
+    </div>
   );
 }
 
@@ -146,25 +144,28 @@ export function ApprovalDecisionModal({
   );
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+    <Modal
+      open={true}
+      onClose={onClose}
+      title={t("approval_gate_title")}
+      size="md"
       data-testid="approval-decision-modal"
-    >
-      <div className="w-full max-w-lg rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
-        <ModalBody
-          request={request}
-          reason={reason}
-          onReasonChange={setReason}
-          error={error}
-          onViewDiff={onViewDiff}
-        />
+      footer={
         <ModalActions
           submitting={submitting}
           onClose={onClose}
           onReject={() => void handleAction("reject")}
           onApprove={() => void handleAction("approve")}
         />
-      </div>
-    </div>
+      }
+    >
+      <ModalBody
+        request={request}
+        reason={reason}
+        onReasonChange={setReason}
+        error={error}
+        onViewDiff={onViewDiff}
+      />
+    </Modal>
   );
 }

@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { t } from "../../../core/i18n";
 import { Button } from "../../../ui/components/Button";
+import { Input } from "../../../ui/components/Input";
+import { Textarea } from "../../../ui/components/Textarea";
+import { Checkbox } from "../../../ui/components/Checkbox";
 import { docAgentApi } from "../api/docAgentApi";
 import type { DocAgentConfig } from "../types";
 
@@ -56,20 +59,16 @@ const BasicFields: React.FC<{
   onChange: (f: Partial<FormState>) => void;
 }> = ({ enabled, prompt, onChange }) => (
   <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)", marginBottom: "var(--sp-12)" }}>
-    <label style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", cursor: "pointer", fontSize: "var(--fs-14)", color: "var(--fg)" }}>
-      <input
-        type="checkbox"
-        checked={enabled}
-        onChange={(e) => onChange({ enabled: e.target.checked })}
-        style={{ width: "16px", height: "16px", cursor: "pointer" }}
-      />
-      <span style={{ fontWeight: 500 }}>{t("doc_agent_enabled_label")}</span>
-    </label>
+    <Checkbox
+      checked={enabled}
+      onChange={(e) => onChange({ enabled: e.target.checked })}
+      label={<span style={{ fontWeight: 500 }}>{t("doc_agent_enabled_label")}</span>}
+    />
     <div>
       <label style={labelStyle}>
         {t("doc_agent_prompt_label")}
       </label>
-      <textarea
+      <Textarea
         rows={3}
         style={textareaStyle}
         placeholder={t("doc_agent_prompt_placeholder")}
@@ -88,7 +87,7 @@ const TimeoutField: React.FC<{
     <label style={labelStyle}>
       {t("doc_agent_timeout_label")}
     </label>
-    <input
+    <Input
       type="number"
       min={30}
       max={3600}

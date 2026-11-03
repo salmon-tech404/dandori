@@ -1,9 +1,11 @@
-import { FC, FormEvent, useEffect, useMemo, useState, ReactNode } from "react";
+import { FC, FormEvent, useEffect, useMemo, useState } from "react";
 import { FolderOpen } from "lucide-react";
 import { t } from "./i18n";
 import { useProject } from "./project";
 import { Button } from "../ui/components/Button";
 import { Input } from "../ui/components/Input";
+import { Modal } from "../ui/components/Modal";
+import { Tooltip } from "../ui/components/Tooltip";
 import { apiClient, getSafeErrorMessage } from "./api";
 import { DirectoryPicker } from "./DirectoryPicker";
 import { BranchSelect } from "./BranchSelect";
@@ -11,35 +13,6 @@ import { BranchSelect } from "./BranchSelect";
 export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-}
-
-function ModalBackdrop({ children }: { children: ReactNode }) {
-  return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 50,
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "480px",
-          backgroundColor: "var(--sf)",
-          borderRadius: "var(--radius-10)",
-          border: "1px solid var(--ln)",
-          padding: "var(--sp-24)",
-        }}
-      >
-        {children}
-      </div>
-    </div>
-  );
 }
 
 function ModalErrorBanner({ error }: { error: string | null }) {
@@ -91,13 +64,8 @@ export const CreateWorkspaceModal: FC<ModalProps> = ({ isOpen, onClose }) => {
   const { name, setName, loading, error, handleSubmit } =
     useWorkspaceModalLogic(onClose);
 
-  if (!isOpen) return null;
-
   return (
-    <ModalBackdrop>
-      <h2 style={{ margin: "0 0 var(--sp-16) 0", fontSize: "var(--fs-18)" }}>
-        {t("workspace_create_title")}
-      </h2>
+    <Modal open={isOpen} onClose={onClose} title={t("workspace_create_title")} size="md">
       <ModalErrorBanner error={error} />
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)" }}>
         <Input
@@ -117,7 +85,7 @@ export const CreateWorkspaceModal: FC<ModalProps> = ({ isOpen, onClose }) => {
           </Button>
         </div>
       </form>
-    </ModalBackdrop>
+    </Modal>
   );
 };
 
@@ -207,7 +175,9 @@ function RepoPathField({ logic }: { logic: ProjectModalLogic }) {
         onChange={(e) => logic.setRepoPath(e.target.value)}
         disabled={logic.loading}
       />
-      <Button type="button" variant="secondary" size="icon" aria-label={t("pick_folder")} title={t("pick_folder")} disabled={logic.loading} onClick={() => setPicking(true)} icon={<FolderOpen size={16} />} />
+      <Tooltip content={t("pick_folder")}>
+        <Button type="button" variant="secondary" size="icon" aria-label={t("pick_folder")} disabled={logic.loading} onClick={() => setPicking(true)} icon={<FolderOpen size={16} />} />
+      </Tooltip>
       {picking && (
         <DirectoryPicker
           initialPath={logic.repoPath.trim()}
@@ -256,15 +226,11 @@ function ProjectModalForm({ logic, onClose }: { logic: ProjectModalLogic; onClos
 
 export const CreateProjectModal: FC<ModalProps> = ({ isOpen, onClose }) => {
   const logic = useProjectModalLogic(onClose);
-  if (!isOpen) return null;
 
   return (
-    <ModalBackdrop>
-      <h2 style={{ margin: "0 0 var(--sp-16) 0", fontSize: "var(--fs-18)" }}>
-        {t("project_create_title")}
-      </h2>
+    <Modal open={isOpen} onClose={onClose} title={t("project_create_title")} size="md">
       <ModalErrorBanner error={logic.error} />
       <ProjectModalForm logic={logic} onClose={onClose} />
-    </ModalBackdrop>
+    </Modal>
   );
 };

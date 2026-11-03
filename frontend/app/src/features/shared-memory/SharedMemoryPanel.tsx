@@ -20,9 +20,9 @@ export function SharedMemoryPanel({ workspaceId, projectId }: PanelProps) {
   const actions = useMemoryActions(workspaceId, loadMemories, selection.clearSelection);
 
   return (
-    <div className="space-y-6 p-6">
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-24)", padding: "var(--sp-24)" }}>
       <PanelHeader />
-      {error && <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm rounded">{error}</div>}
+      {error && <div style={{ padding: "var(--sp-12)", backgroundColor: "var(--rdb)", border: "1px solid var(--rd)", color: "var(--rd)", fontSize: "var(--fs-14)", borderRadius: "var(--radius-6)" }}>{error}</div>}
       <MemoryFilterBar
         filters={filters}
         onFilterChange={setFilters}
@@ -54,8 +54,8 @@ export function SharedMemoryPanel({ workspaceId, projectId }: PanelProps) {
 function PanelHeader() {
   return (
     <div>
-      <h1 className="text-xl font-bold text-white">{t("shared_memory_title")}</h1>
-      <p className="text-sm text-slate-400 mt-1">{t("shared_memory_desc")}</p>
+      <h1 style={{ margin: 0, fontSize: "var(--fs-18)", fontWeight: 700, color: "var(--fg)" }}>{t("shared_memory_title")}</h1>
+      <p style={{ margin: "4px 0 0", fontSize: "var(--fs-14)", color: "var(--mu)" }}>{t("shared_memory_desc")}</p>
     </div>
   );
 }
@@ -80,8 +80,9 @@ function TableSection({
   onDelete: (id: string) => void;
 }) {
   if (loading) {
-    return <div className="text-center py-12 text-slate-500 text-sm">...</div>;
+    return <div style={{ textAlign: "center", padding: "var(--sp-32) 0", color: "var(--mu)" }}>{t("loading")}</div>;
   }
+
   return (
     <MemoryTable
       memories={memories}

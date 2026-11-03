@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { findChromePath, getFreePort, runUi07Scenario } from "../../scripts/ui-shots.mjs";
+import { findChromePath, getFreePort, runUi07Scenario, runUi13Scenario, runUi14Scenario, runUi15Scenario, runUi16Scenario } from "../../scripts/ui-shots.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "../..");
@@ -24,6 +24,22 @@ test("ui-shots: getFreePort cấp cổng mạng hợp lệ", async () => {
 
 test("ui-shots: runUi07Scenario được xuất khẩu như một hàm", () => {
   assert.equal(typeof runUi07Scenario, "function");
+});
+
+test("ui-shots: runUi13Scenario được xuất khẩu như một hàm", () => {
+  assert.equal(typeof runUi13Scenario, "function");
+});
+
+test("ui-shots: runUi14Scenario được xuất khẩu như một hàm", () => {
+  assert.equal(typeof runUi14Scenario, "function");
+});
+
+test("ui-shots: runUi15Scenario được xuất khẩu như một hàm", () => {
+  assert.equal(typeof runUi15Scenario, "function");
+});
+
+test("ui-shots: runUi16Scenario được xuất khẩu như một hàm", () => {
+  assert.equal(typeof runUi16Scenario, "function");
 });
 
 test("ui-shots: --verify thoát với mã 42 và thông báo khi không có Chrome", () => {

@@ -90,7 +90,7 @@ describe("LeadWorker: Defaults Section", () => {
 
     render(<LeadWorkerDefaultsSection context={{ projectId: "p-1" }} />);
     await waitFor(() => {
-      expect(screen.getByText("PM (Trưởng nhóm / Phân tích)")).toBeDefined();
+      expect(screen.getByText("PM (giao việc và kiểm tra)")).toBeDefined();
     });
 
     const saveBtn = screen.getByRole("button", { name: "Lưu cấu hình mặc định" });

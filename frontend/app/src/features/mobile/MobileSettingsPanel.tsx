@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { t } from "../../core/i18n";
 import { Button } from "../../ui/components/Button";
+import { Modal } from "../../ui/components/Modal";
+import { Input } from "../../ui/components/Input";
+import { Checkbox } from "../../ui/components/Checkbox";
 import {
   createDevice,
   deleteDevice,
@@ -127,43 +130,36 @@ function CreateDeviceModal({
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: "var(--sp-16)" }}>
-      <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: "400px", borderRadius: "var(--radius-10)", backgroundColor: "var(--sf)", border: "1px solid var(--ln)", padding: "var(--sp-24)", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-        <h3 style={{ margin: "0 0 var(--sp-16) 0", fontSize: "var(--fs-16)", fontWeight: 600, color: "var(--fg)" }}>{t("mobile_add_device_title")}</h3>
-        <input
-          type="text"
+    <Modal open onClose={onClose} title={t("mobile_add_device_title")} size="sm">
+      <form onSubmit={handleSubmit}>
+        <Input type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t("mobile_device_name_placeholder")}
           style={{ width: "100%", height: "var(--btn-height)", padding: "0 12px", fontSize: "var(--fs-13)", fontFamily: "var(--font-sans)", color: "var(--fg)", backgroundColor: "var(--sf2)", border: "1px solid var(--ln)", borderRadius: "var(--radius-8)", outline: "none", boxSizing: "border-box", marginBottom: "var(--sp-12)" }}
           required
         />
-        <label style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", fontSize: "var(--fs-13)", color: "var(--fg)", cursor: "pointer", marginBottom: "var(--sp-16)" }}>
-          <input type="checkbox" checked={ro} onChange={(e) => setRo(e.target.checked)} style={{ width: "16px", height: "16px", cursor: "pointer" }} />
-          {t("mobile_read_only_opt")}
-        </label>
+        <div style={{ marginBottom: "var(--sp-16)" }}><Checkbox checked={ro} onChange={(e) => setRo(e.target.checked)} label={t("mobile_read_only_opt")} /></div>
         <ModalActions onClose={onClose} />
       </form>
-    </div>
+    </Modal>
   );
 }
 
 function TokenDisplayModal({ res, onClose }: { res: CreateDeviceResponse; onClose: () => void }) {
+  const footer = (
+    <Button variant="primary" size="sm" onClick={onClose}>
+      {t("mobile_done_btn")}
+    </Button>
+  );
+
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: "var(--sp-16)" }}>
-      <div style={{ width: "100%", maxWidth: "420px", borderRadius: "var(--radius-10)", backgroundColor: "var(--sf)", border: "1px solid var(--ln)", padding: "var(--sp-24)", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-        <h3 style={{ margin: "0 0 var(--sp-8) 0", fontSize: "var(--fs-16)", fontWeight: 600, color: "var(--gr)" }}>{t("mobile_pair_success_title")}</h3>
-        <p style={{ margin: "0 0 var(--sp-16) 0", fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("mobile_pair_success_desc")}</p>
-        <div style={{ padding: "var(--sp-12)", borderRadius: "var(--radius-8)", backgroundColor: "var(--sf2)", fontFamily: "var(--font-mono)", fontSize: "var(--fs-12)", color: "var(--fg)", wordBreak: "break-all", marginBottom: "var(--sp-16)" }}>
-          {res.token}
-        </div>
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button variant="primary" size="sm" onClick={onClose}>
-            {t("mobile_done_btn")}
-          </Button>
-        </div>
+    <Modal open onClose={onClose} title={t("mobile_pair_success_title")} footer={footer} size="sm">
+      <p style={{ margin: "0 0 var(--sp-16) 0", fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("mobile_pair_success_desc")}</p>
+      <div style={{ padding: "var(--sp-12)", borderRadius: "var(--radius-8)", backgroundColor: "var(--sf2)", fontFamily: "var(--font-mono)", fontSize: "var(--fs-12)", color: "var(--fg)", wordBreak: "break-all" }}>
+        {res.token}
       </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -172,8 +168,11 @@ function useMobileDevices(ws: string) {
   const [cfg, setCfg] = useState<PublicMobileConfig | null>(null);
 
   const reload = useCallback(async () => {
-    const [d, c] = await Promise.all([fetchDevices(ws), fetchMobileConfig(ws)]);
-    setDevices(d);
+    const [d, c] = await Promise.all([
+      fetchDevices(ws).catch(() => [] as PublicMobileDevice[]),
+      fetchMobileConfig(ws).catch(() => null),
+    ]);
+    setDevices(Array.isArray(d) ? d : []);
     setCfg(c);
   }, [ws]);
 
@@ -212,7 +211,7 @@ function DevicesTable({
           </tr>
         </thead>
         <tbody>
-          {devices.map((d) => (
+          {Array.isArray(devices) && devices.map((d) => (
             <DeviceRow
               key={d.id}
               d={d}
@@ -261,10 +260,7 @@ export function MobileSettingsPanel({ workspaceId }: { workspaceId?: string }) {
       <MobilePanelHeader onOpenModal={() => setModalOpen(true)} />
 
       <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", padding: "var(--sp-12)", borderRadius: "var(--radius-8)", backgroundColor: "var(--sf2)", marginBottom: "var(--sp-16)" }}>
-        <input type="checkbox" id="ro-toggle" checked={cfg?.read_only || false} onChange={toggleRo} style={{ width: "16px", height: "16px", cursor: "pointer" }} />
-        <label htmlFor="ro-toggle" style={{ fontSize: "var(--fs-13)", color: "var(--fg)", cursor: "pointer" }}>
-          {t("mobile_workspace_read_only")}
-        </label>
+        <Checkbox id="ro-toggle" checked={cfg?.read_only || false} onChange={toggleRo} label={t("mobile_workspace_read_only")} />
       </div>
 
       <DevicesTable devices={devices} ws={ws} onReload={reload} />

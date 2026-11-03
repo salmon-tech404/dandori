@@ -2,6 +2,8 @@ import { FC, KeyboardEvent, useState } from "react";
 import { Plus } from "lucide-react";
 import { t } from "./i18n";
 import { Button } from "../ui/components/Button";
+import { Input } from "../ui/components/Input";
+import { Select } from "../ui/components/Select";
 
 export interface BranchSelectProps {
   value: string;
@@ -54,7 +56,7 @@ function AddBranchForm({ onAdd, onCancel }: { onAdd: (b: string) => void; onCanc
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-4)" }}>
       <div style={{ display: "flex", gap: "var(--sp-8)" }}>
-        <input
+        <Input
           autoFocus
           value={name}
           onChange={(e) => { setName(e.target.value); setError(false); }}
@@ -81,9 +83,9 @@ export const BranchSelect: FC<BranchSelectProps> = ({ value, options, onChange, 
   }
   return (
     <div style={{ display: "flex", gap: "var(--sp-8)", alignItems: "center" }}>
-      <select value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)} aria-label={t("default_branch_label")} style={selectStyle}>
+      <Select value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)} aria-label={t("default_branch_label")} style={selectStyle}>
         {list.map((b) => <option key={b} value={b}>{b}</option>)}
-      </select>
+      </Select>
       <Button type="button" variant="secondary" size="icon" aria-label={t("branch_add")} disabled={disabled} onClick={() => setAdding(true)} icon={<Plus size={16} />} />
     </div>
   );

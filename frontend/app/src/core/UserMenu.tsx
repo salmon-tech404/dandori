@@ -1,8 +1,11 @@
-import { FC, ReactNode, useEffect, useRef, useState } from "react";
+import { FC, ReactNode, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { LogOut, Moon, Settings, SlidersHorizontal, Sun } from "lucide-react";
 import { t } from "./i18n";
 import { Avatar } from "../ui/components/Avatar";
+import { Button } from "../ui/components/Button";
+import { IconButton } from "../ui/components/IconButton";
+import { useDismiss } from "../ui/components/useDismiss";
 import type { User } from "./session";
 
 export interface UserMenuProps {
@@ -38,27 +41,6 @@ function MenuRow({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   );
 }
 
-/** Đóng menu khi bấm ra ngoài hoặc nhấn Escape. */
-function useDismiss(open: boolean, close: () => void) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return undefined;
-    const onDown = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) close();
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open, close]);
-  return ref;
-}
-
 function UserMenuPopover({ user, theme, onToggleTheme, onLogout, close }: UserMenuProps & { close: () => void }) {
   return (
     <div
@@ -83,15 +65,15 @@ function UserMenuPopover({ user, theme, onToggleTheme, onLogout, close }: UserMe
       <Link to="/settings" role="menuitem" onClick={close} style={itemStyle}>
         <MenuRow icon={<SlidersHorizontal size={16} />}>{t("user_menu_settings")}</MenuRow>
       </Link>
-      <button type="button" role="menuitem" onClick={() => { onToggleTheme(); close(); }} style={itemStyle}>
+      <Button variant="ghost" type="button" role="menuitem" onClick={() => { onToggleTheme(); close(); }} style={{ ...itemStyle, height: "auto" }}>
         <MenuRow icon={theme === "light" ? <Moon size={16} /> : <Sun size={16} />}>
           {theme === "light" ? t("user_menu_theme_dark") : t("user_menu_theme_light")}
         </MenuRow>
-      </button>
+      </Button>
       <div style={{ borderTop: "1px solid var(--ln)", margin: "var(--sp-4) 0" }} />
-      <button type="button" role="menuitem" aria-label={t("btn_logout")} onClick={() => { close(); onLogout(); }} style={{ ...itemStyle, color: "var(--rd)" }}>
+      <Button variant="ghost" type="button" role="menuitem" aria-label={t("btn_logout")} onClick={() => { close(); onLogout(); }} style={{ ...itemStyle, color: "var(--rd)", height: "auto" }}>
         <MenuRow icon={<LogOut size={16} />}>{t("btn_logout")}</MenuRow>
-      </button>
+      </Button>
     </div>
   );
 }
@@ -100,7 +82,8 @@ function UserMenuPopover({ user, theme, onToggleTheme, onLogout, close }: UserMe
 export const UserMenu: FC<UserMenuProps> = (props) => {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
-  const ref = useDismiss(open, close);
+  const ref = useRef<HTMLDivElement>(null);
+  useDismiss({ isOpen: open, onDismiss: close, ref });
   const roleLabel = props.user.system_role === "admin" ? t("user_role_admin") : t("user_role_member");
 
   return (
@@ -114,16 +97,17 @@ export const UserMenu: FC<UserMenuProps> = (props) => {
           </div>
           <div style={{ fontSize: "var(--fs-12)", color: "var(--mu)" }}>{roleLabel}</div>
         </div>
-        <button
+        <IconButton
+          variant="ghost"
+          size="sm"
           type="button"
           aria-label={t("user_menu_open")}
           aria-haspopup="menu"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", minWidth: "36px", background: open ? "var(--sf2)" : "none", border: "none", borderRadius: "var(--radius-8)", color: "var(--fg)", cursor: "pointer" }}
-        >
-          <Settings size={18} />
-        </button>
+          icon={<Settings size={18} />}
+          style={{ width: "36px", height: "36px", minWidth: "36px", background: open ? "var(--sf2)" : "none" }}
+        />
       </div>
     </div>
   );

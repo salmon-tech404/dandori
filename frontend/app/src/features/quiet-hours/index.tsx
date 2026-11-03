@@ -7,6 +7,10 @@ export * from "./QuietWindowFormModal";
 import { QuietHoursToolbarBadge } from "./QuietHoursToolbarBadge";
 import { QuietHoursSettingsPanel } from "./QuietHoursSettingsPanel";
 
+export const contributions = {
+  "quiet-hours-toolbar": QuietHoursToolbarBadge,
+};
+
 export default {
   QuietHoursToolbarBadge,
   QuietHoursSettingsPanel,

@@ -4,6 +4,7 @@ import { t } from "../../core/i18n";
 import { Slot } from "../../core/Slot";
 import type { Task, TaskStatus } from "../../../../../shared/types";
 import { StatusBadge } from "../../ui/components/StatusBadge";
+import { IconButton } from "../../ui/components/IconButton";
 import { TaskDispatchCard } from "./TaskDispatchCard";
 import { TaskLiveRunSection } from "./TaskLiveRunSection";
 
@@ -61,22 +62,7 @@ function PanelHeader({ task, onClose }: { task: Task; onClose: () => void }) {
         <h2 style={{ margin: "4px 0 8px 0", fontSize: "16px", fontWeight: 600 }}>{task.title}</h2>
         <StatusBadge status={task.status as TaskStatus} />
       </div>
-      <button
-        type="button"
-        onClick={onClose}
-        style={{
-          background: "none",
-          border: "none",
-          fontSize: "13px",
-          color: "var(--mu)",
-          cursor: "pointer",
-          padding: "4px 8px",
-        }}
-        aria-label={t("kanban_panel_close")}
-      >
-        <X size={14} />
-        <span>{t("kanban_panel_close")}</span>
-      </button>
+      <IconButton variant="ghost" size="sm" type="button" aria-label={t("kanban_panel_close")} onClick={onClose} icon={<X size={14} />} />
     </div>
   );
 }

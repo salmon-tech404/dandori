@@ -7,6 +7,7 @@ import { Slot } from "./Slot";
 import { Button } from "../ui/components/Button";
 import { Table, Column } from "../ui/components/Table";
 import { StatusBadge } from "../ui/components/StatusBadge";
+import { Skeleton } from "../ui/components/Skeleton";
 import { ProjectContext } from "./project";
 import { AppSidebar } from "./AppSidebar";
 import { MENU_ITEMS, type MenuItem } from "./menu";
@@ -285,8 +286,13 @@ interface LayoutMainProps {
 }
 
 function LayoutMain(props: LayoutMainProps) {
-  const { isModuleEnabled } = useFeatures();
-  if (!props.active) return <ModuleDisabledNotice screenId={props.screenId} />;
+  const { isModuleEnabled, loading } = useFeatures();
+  if (!props.active) {
+    if (loading) {
+      return <Skeleton height="400px" width="100%" radius="lg" />;
+    }
+    return <ModuleDisabledNotice screenId={props.screenId} />;
+  }
   if (props.screenId === "board") {
     if (!props.hasProject && props.tasks.length === 0) {
       return <EmptyProjectGuide onOpenCreate={props.onOpenCreateProject} />;

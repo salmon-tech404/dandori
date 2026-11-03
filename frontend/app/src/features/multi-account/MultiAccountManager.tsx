@@ -3,31 +3,37 @@ import type { ProviderGroup, AccountDetail } from "./types";
 import { fetchGroupedAccounts, updateAccount } from "./api";
 import { AccountGroupCard } from "./AccountGroupCard";
 import { t } from "../../core/i18n";
+import { Modal } from "../../ui/components/Modal";
+import { Button } from "../../ui/components/Button";
 
 function ReloginModal({ account, onClose }: { account: AccountDetail; onClose: () => void }): ReactElement {
   const loginCmd = account.provider === "claude"
     ? `$env:USERPROFILE="${account.home_dir}"; claude auth login`
     : `$env:USERPROFILE="${account.home_dir}"; ${account.provider} login`;
 
-  return (
-    <div className="modal-backdrop">
-      <div className="modal-content" style={{ maxWidth: "500px" }}>
-        <h3 style={{ margin: "0 0 12px 0", color: "var(--fg)" }}>
-          {t("dialog_login_title", { label: account.label })}
-        </h3>
-        <p style={{ fontSize: "13px", color: "var(--mu)", marginBottom: "12px" }}>
-          {t("dialog_login_desc")}
-        </p>
-        <div style={{ backgroundColor: "var(--bg)", border: "1px solid var(--ln)", borderRadius: "6px", padding: "12px", fontFamily: "monospace", fontSize: "12px", overflowX: "auto" }}>
-          <code>{loginCmd}</code>
-        </div>
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "16px" }}>
-          <button type="button" className="btn btn-primary" style={{ minHeight: "44px" }} onClick={onClose}>
-            {t("btn_close")}
-          </button>
-        </div>
-      </div>
+  const footer = (
+    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+      <Button variant="primary" type="button" onClick={onClose}>
+        {t("btn_close")}
+      </Button>
     </div>
+  );
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title={t("dialog_login_title", { label: account.label })}
+      footer={footer}
+      size="sm"
+    >
+      <p style={{ fontSize: "13px", color: "var(--mu)", marginBottom: "12px" }}>
+        {t("dialog_login_desc")}
+      </p>
+      <div style={{ backgroundColor: "var(--bg)", border: "1px solid var(--ln)", borderRadius: "6px", padding: "12px", fontFamily: "monospace", fontSize: "12px", overflowX: "auto" }}>
+        <code>{loginCmd}</code>
+      </div>
+    </Modal>
   );
 }
 

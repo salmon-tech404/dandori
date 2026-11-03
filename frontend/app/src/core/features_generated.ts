@@ -219,6 +219,14 @@ export const SLOT_CONTRIBUTIONS: Record<string, SlotContribution[]> = {
       order: 10,
       load: () => import("../features/md-jobs"),
     },
+    {
+      moduleId: "overnight-queue",
+      id: "overnight-queue-panel",
+      slot: "calendar.panel",
+      label: "Hàng đợi qua đêm",
+      order: 20,
+      load: () => import("../features/overnight-queue"),
+    },
   ],
   "calendar.toolbar": [
     {
@@ -228,6 +236,14 @@ export const SLOT_CONTRIBUTIONS: Record<string, SlotContribution[]> = {
       label: "Thanh công cụ lịch",
       order: 10,
       load: () => import("../features/calendar"),
+    },
+    {
+      moduleId: "quiet-hours",
+      id: "quiet-hours-toolbar",
+      slot: "calendar.toolbar",
+      label: "Giờ cấm",
+      order: 20,
+      load: () => import("../features/quiet-hours"),
     },
   ],
   "dashboard.kpi": [
@@ -248,6 +264,14 @@ export const SLOT_CONTRIBUTIONS: Record<string, SlotContribution[]> = {
       label: "Agent đang làm việc",
       order: 10,
       load: () => import("../features/live-status"),
+    },
+    {
+      moduleId: "reports",
+      id: "reports-panel",
+      slot: "dashboard.panel",
+      label: "Báo cáo tuần",
+      order: 20,
+      load: () => import("../features/reports"),
     },
     {
       moduleId: "cost-tracking",

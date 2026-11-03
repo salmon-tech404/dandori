@@ -102,10 +102,60 @@ export async function validateTokens(options = {}) {
     }
   }
 
+  // 3. Mọi `var(--x)` trong mã giao diện phải trỏ tới token CÓ định nghĩa (biến không tồn tại bị trình duyệt bỏ qua
+  //    âm thầm: khoảng cách, màu, cỡ chữ biến mất và chữ chồng lên nhau).
+  await checkUndefinedVars(errors, tokensPath, appSrcDir, options.extraSourceFiles);
+
   return {
     ok: errors.length === 0,
     errors,
   };
+}
+
+async function collectSourceFiles(dir, out) {
+  let entries = [];
+  try {
+    entries = await fs.readdir(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      await collectSourceFiles(full, out);
+    } else if (/\.(tsx|ts|css)$/.test(entry.name) && !/\.test\./.test(entry.name)) {
+      out.push(full);
+    }
+  }
+}
+
+async function checkUndefinedVars(errors, tokensPath, appSrcDir, extraSourceFiles) {
+  const files = [];
+  if (extraSourceFiles) files.push(...extraSourceFiles);
+  else await collectSourceFiles(appSrcDir, files);
+
+  let defined = new Set();
+  try {
+    const tokens = await fs.readFile(tokensPath, "utf-8");
+    defined = new Set([...tokens.matchAll(/(--[A-Za-z0-9-]+)\s*:/g)].map((m) => m[1]));
+  } catch {
+    return; // lỗi đọc tokens đã được báo ở bước 1
+  }
+
+  const bad = new Map();
+  for (const file of files) {
+    const content = await fs.readFile(file, "utf-8");
+    for (const m of content.matchAll(/var\((--[A-Za-z0-9-]+)/g)) {
+      if (!defined.has(m[1])) {
+        const list = bad.get(m[1]) ?? new Set();
+        list.add(path.relative(repoRoot, file));
+        bad.set(m[1], list);
+      }
+    }
+  }
+  for (const [name, list] of bad) {
+    errors.push(`Biến CSS không có trong tokens.css: ${name} (dùng ở ${[...list].slice(0, 3).join(", ")}). Dùng token thật hoặc thêm vào tokens.css.`);
+  }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

@@ -20,21 +20,21 @@ export function CostTrackingTaskTab({ taskId }: { taskId: string }) {
     }
   };
 
-  useEffect(() => { loadData(); }, [taskId]);
+  useEffect(() => { void loadData(); }, [taskId]);
 
   const handleSaveBudget = async (val: number) => {
     await setTaskBudget(taskId, val);
     await loadData();
   };
 
-  if (!summary) return <div className="p-4 text-xs text-slate-500">{t("api_key_fallback_loading")}</div>;
+  if (!summary) return <div style={{ padding: "var(--sp-16)", fontSize: "var(--fs-12)", color: "var(--mu)" }}>{t("api_key_fallback_loading")}</div>;
 
   return (
-    <div className="space-y-4 p-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-16)", padding: "var(--sp-16)" }}>
       <CostOverviewCard summary={summary} />
       <BudgetBar summary={summary} onOpenBudgetModal={() => setShowModal(true)} />
       <RunsBreakdownList runs={summary.runs} />
-      <p className="text-[10px] text-slate-400 italic">{t("cost_tracking_source_disclaimer")}</p>
+      <p style={{ margin: 0, fontSize: "10px", color: "var(--mu)", fontStyle: "italic" }}>{t("cost_tracking_source_disclaimer")}</p>
       {showModal && (
         <TaskBudgetModal
           currentBudget={summary.budget}

@@ -1,6 +1,11 @@
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import React, { useState } from 'react';
 import { t } from '../../core/i18n';
+import { Modal } from '../../ui/components/Modal';
+import { Button } from '../../ui/components/Button';
+import { Input } from '../../ui/components/Input';
+import { Select } from '../../ui/components/Select';
+import { Textarea } from '../../ui/components/Textarea';
 import { PromptDetail } from './types';
 
 interface Props {
@@ -25,82 +30,52 @@ interface MetadataProps {
 }
 
 const MetadataInputs: React.FC<MetadataProps> = ({ name, setName, role, setRole, skillTag, setSkillTag }) => (
-  <>
-    <div>
-      <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('prompt_editor_name_label')}</label>
-      <input
+  <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)" }}>
+    <Input
+      label={t('prompt_editor_name_label')}
+      type="text"
+      required
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+    />
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--sp-12)" }}>
+      <Select
+        label={t('prompt_editor_role_label')}
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+        options={[
+          { value: "", label: t('prompt_role_all') },
+          { value: "pm", label: t('prompt_role_pm') },
+          { value: "worker", label: t('prompt_role_worker') },
+          { value: "test", label: t('prompt_role_test') },
+          { value: "doc", label: t('prompt_role_doc') },
+        ]}
+      />
+      <Input
+        label={t('prompt_editor_skill_label')}
         type="text"
-        required
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-full rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
+        value={skillTag}
+        onChange={(e) => setSkillTag(e.target.value)}
+        placeholder={t("prompt_tags_placeholder")}
       />
     </div>
-    <div className="grid grid-cols-2 gap-4">
-      <div>
-        <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('prompt_editor_role_label')}</label>
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className="w-full rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
-        >
-          <option value="">{t('prompt_role_all')}</option>
-          <option value="pm">{t('prompt_role_pm')}</option>
-          <option value="worker">{t('prompt_role_worker')}</option>
-          <option value="test">{t('prompt_role_test')}</option>
-          <option value="doc">{t('prompt_role_doc')}</option>
-        </select>
-      </div>
-      <div>
-        <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('prompt_editor_skill_label')}</label>
-        <input
-          type="text"
-          value={skillTag}
-          onChange={(e) => setSkillTag(e.target.value)}
-          placeholder={t("prompt_tags_placeholder")}
-          className="w-full rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
-        />
-      </div>
-    </div>
-  </>
+  </div>
 );
 
 const ContentInput: React.FC<{ content: string; setContent: (v: string) => void; isOverLength: boolean }> = ({ content, setContent, isOverLength }) => (
   <div>
-    <div className="flex justify-between items-center mb-1">
-      <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300">{t('prompt_editor_content_label')}</label>
-      <span className={`text-xs ${isOverLength ? 'text-rose-500 font-semibold' : 'text-neutral-500'}`}>{content.length}/10.000</span>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--sp-4)" }}>
+      <span style={{ fontSize: "var(--fs-13)", fontWeight: 500, color: "var(--mu)" }}>{t('prompt_editor_content_label')}</span>
+      <span style={{ fontSize: "var(--fs-12)", color: isOverLength ? "var(--rd)" : "var(--mu)", fontWeight: isOverLength ? 600 : 400 }}>{content.length}/10.000</span>
     </div>
-    <textarea
+    <Textarea
       data-testid="prompt-content-input"
       required
+      mono={true}
       rows={8}
       value={content}
       onChange={(e) => setContent(e.target.value)}
-      className="w-full font-mono rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
     />
-  </div>
-);
-
-const DialogHeader: React.FC<{ initial?: PromptDetail | null; onClose: () => void }> = ({ initial, onClose }) => (
-  <div className="flex items-center justify-between pb-4 border-b border-neutral-200 dark:border-neutral-800">
-    <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-      {initial ? t('prompt_editor_title_edit') : t('prompt_editor_title_new')}
-    </h3>
-    <button type="button" onClick={onClose} className="text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300">
-      <X size={20} />
-    </button>
-  </div>
-);
-
-const FormFooter: React.FC<{ saving: boolean; disabled: boolean; onClose: () => void }> = ({ saving, disabled, onClose }) => (
-  <div className="flex justify-end gap-3 pt-4 border-t border-neutral-200 dark:border-neutral-800">
-    <button type="button" onClick={onClose} className="px-4 py-2 text-sm rounded border border-neutral-300 hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800">
-      {t('btn_cancel')}
-    </button>
-    <button type="submit" disabled={disabled} className="px-4 py-2 text-sm rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
-      {saving ? t('loading') : t('prompt_editor_btn_save')}
-    </button>
   </div>
 );
 
@@ -148,22 +123,31 @@ export const PromptEditorModal: React.FC<Props> = ({ initial, workspaceId, onClo
   const ed = usePromptEditor(initial, workspaceId, onSaved);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-lg border border-neutral-200 bg-white p-6 shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
-        <DialogHeader initial={initial} onClose={onClose} />
-        <form onSubmit={ed.handleSave} className="mt-4 space-y-4">
-          <MetadataInputs name={ed.name} setName={ed.setName} role={ed.role} setRole={ed.setRole} skillTag={ed.skillTag} setSkillTag={ed.setSkillTag} />
-          <ContentInput content={ed.content} setContent={ed.setContent} isOverLength={ed.isOverLength} />
-          {ed.isSecret && (
-            <div className="flex items-center gap-2 p-2.5 rounded bg-rose-50 border border-rose-200 text-rose-700 text-xs dark:bg-rose-950/30 dark:border-rose-900 dark:text-rose-400">
-              <AlertTriangle size={16} />
-              <span>{t('prompt_editor_warning_secret')}</span>
-            </div>
-          )}
-          {ed.err && <div className="text-xs text-rose-500">{ed.err}</div>}
-          <FormFooter saving={ed.saving} disabled={ed.saving || ed.isSecret || ed.isOverLength} onClose={onClose} />
-        </form>
-      </div>
-    </div>
+    <Modal
+      open={true}
+      onClose={onClose}
+      title={initial ? t('prompt_editor_title_edit') : t('prompt_editor_title_new')}
+      size="lg"
+      footer={
+        <div style={{ display: "flex", gap: "var(--sp-8)" }}>
+          <Button variant="ghost" onClick={onClose}>{t('btn_cancel')}</Button>
+          <Button variant="primary" loading={ed.saving} disabled={ed.saving || ed.isSecret || ed.isOverLength} onClick={ed.handleSave}>
+            {t('prompt_editor_btn_save')}
+          </Button>
+        </div>
+      }
+    >
+      <form onSubmit={ed.handleSave} style={{ display: "flex", flexDirection: "column", gap: "var(--sp-16)" }}>
+        <MetadataInputs name={ed.name} setName={ed.setName} role={ed.role} setRole={ed.setRole} skillTag={ed.skillTag} setSkillTag={ed.setSkillTag} />
+        <ContentInput content={ed.content} setContent={ed.setContent} isOverLength={ed.isOverLength} />
+        {ed.isSecret && (
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", padding: "var(--sp-8) var(--sp-12)", borderRadius: "var(--radius-6)", backgroundColor: "var(--rdb)", border: "1px solid var(--rd)", color: "var(--rd)", fontSize: "var(--fs-12)" }}>
+            <AlertTriangle size={16} />
+            <span>{t('prompt_editor_warning_secret')}</span>
+          </div>
+        )}
+        {ed.err && <div style={{ fontSize: "var(--fs-12)", color: "var(--rd)" }}>{ed.err}</div>}
+      </form>
+    </Modal>
   );
 };

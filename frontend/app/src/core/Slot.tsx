@@ -3,6 +3,25 @@ import { SLOT_CONTRIBUTIONS, SlotContribution } from "./features_generated";
 import { useFeatures } from "./useFeatures";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ProjectContext } from "./project";
+import { Button } from "../ui/components/Button";
+import { Skeleton } from "../ui/components/Skeleton";
+
+const DEFAULT_SLOT_HEIGHTS: Record<string, string> = {
+  "board.columns": "500px",
+  "board.header.chip": "28px",
+  "agents.banner": "64px",
+  "agents.accounts": "240px",
+  "agents.defaults": "180px",
+  "agents.panel": "300px",
+  "dashboard.kpi": "120px",
+  "dashboard.panel": "320px",
+  "calendar.toolbar": "44px",
+  "calendar.grid": "450px",
+  "calendar.panel": "240px",
+  "knowledge.tab": "400px",
+  "integrations.card": "350px",
+  "settings.section": "120px",
+};
 
 /** Mọi màn module nhận `context` và cả `workspaceId`/`projectId` thành thuộc tính riêng (nhiều màn khai báo theo kiểu này). */
 export type SlotComponent = React.ComponentType<{
@@ -16,6 +35,7 @@ export interface SlotProps {
   context?: Record<string, unknown>;
   fallback?: ReactNode;
   asTabs?: boolean;
+  skeletonHeight?: string | number;
 }
 
 interface LoadedContribution {
@@ -65,7 +85,8 @@ function TabButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      variant="ghost"
       role="tab"
       aria-selected={isActive}
       type="button"
@@ -78,11 +99,12 @@ function TabButton({
         color: isActive ? "var(--bl, #2563eb)" : "var(--mu, #64748b)",
         fontWeight: isActive ? 600 : 500,
         fontSize: "13px",
-        cursor: "pointer",
+        height: "auto",
+        minHeight: "unset",
       }}
     >
       {item.label}
-    </button>
+    </Button>
   );
 }
 
@@ -147,7 +169,38 @@ function useMergedContext(ownContext?: Record<string, unknown>): Record<string, 
   return useMemo(() => ({ workspaceId, projectId, ...ownContext }), [workspaceId, projectId, ownContext]);
 }
 
-export const Slot: FC<SlotProps> = ({ name, context: ownContext, fallback = null, asTabs = false }) => {
+function SlotContent({
+  loaded,
+  asTabs,
+  context,
+  ids,
+}: {
+  loaded: LoadedContribution[];
+  asTabs: boolean;
+  context: Record<string, unknown>;
+  ids: { workspaceId?: string; projectId?: string };
+}) {
+  if (asTabs && loaded.length > 1) {
+    return <TabbedSlotLayout loaded={loaded} context={context} />;
+  }
+  return (
+    <>
+      {loaded.map(({ id, label, Component }) => (
+        <ErrorBoundary key={id} name={label}>
+          <Component context={context} {...ids} />
+        </ErrorBoundary>
+      ))}
+    </>
+  );
+}
+
+export const Slot: FC<SlotProps> = ({
+  name,
+  context: ownContext,
+  fallback = null,
+  asTabs = false,
+  skeletonHeight,
+}) => {
   const { isModuleEnabled } = useFeatures();
   const context = useMergedContext(ownContext);
   const [loaded, setLoaded] = useState<LoadedContribution[]>([]);
@@ -171,17 +224,9 @@ export const Slot: FC<SlotProps> = ({ name, context: ownContext, fallback = null
 
   const ids = idsFromContext(context);
   if (activeContribs.length === 0) return <>{fallback}</>;
-  if (asTabs && loaded.length > 1) {
-    return <TabbedSlotLayout loaded={loaded} context={context} />;
+  if (loaded.length === 0) {
+    const h = skeletonHeight || DEFAULT_SLOT_HEIGHTS[name] || "160px";
+    return <Skeleton height={h} width="100%" radius="lg" />;
   }
-
-  return (
-    <>
-      {loaded.map(({ id, label, Component }) => (
-        <ErrorBoundary key={id} name={label}>
-          <Component context={context} {...ids} />
-        </ErrorBoundary>
-      ))}
-    </>
-  );
+  return <SlotContent loaded={loaded} asTabs={asTabs} context={context} ids={ids} />;
 };

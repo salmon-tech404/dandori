@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { t } from '../../core/i18n';
 import { contributions } from './index';
 import { PromptEditorModal } from './PromptEditorModal';
 import { PromptLibraryTab } from './PromptLibraryTab';
@@ -18,7 +19,7 @@ describe('Prompt Library Slot & Tabs', () => {
   it('renders PromptLibraryTab with title and create button', () => {
     render(<PromptLibraryTab workspaceId="ws-1" />);
     expect(screen.getByText('Thư viện prompt')).toBeDefined();
-    expect(screen.getByText('+ Tạo prompt')).toBeDefined();
+    expect(screen.getByText(t('prompt_btn_create'))).toBeDefined();
   });
 });
 

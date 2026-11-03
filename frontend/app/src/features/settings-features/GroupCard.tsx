@@ -1,6 +1,7 @@
 import { FC, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
 import { ModuleRow } from "./ModuleRow";
 import { FeatureModuleItem } from "./types";
 
@@ -17,10 +18,20 @@ export const GroupCard: FC<GroupCardProps> = ({ title, items, onToggle, onConfig
 
   return (
     <div style={{ backgroundColor: "var(--sf)", borderRadius: "var(--radius-10)", border: "1px solid var(--ln)", marginBottom: "var(--sp-16)", overflow: "hidden" }}>
-      <button
+      <Button
         type="button"
+        variant="ghost"
         onClick={() => setExpanded(!expanded)}
-        style={{ width: "100%", padding: "var(--sp-12) var(--sp-16)", backgroundColor: "var(--sf2)", border: "none", borderBottom: expanded ? "1px solid var(--ln)" : "none", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", outline: "none" }}
+        style={{
+          width: "100%",
+          padding: "var(--sp-12) var(--sp-16)",
+          backgroundColor: "var(--sf2)",
+          borderBottom: expanded ? "1px solid var(--ln)" : "none",
+          borderRadius: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)" }}>
           {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
@@ -29,7 +40,7 @@ export const GroupCard: FC<GroupCardProps> = ({ title, items, onToggle, onConfig
         <span style={{ fontSize: "var(--fs-12)", fontWeight: 600, color: "var(--mu)", backgroundColor: "var(--sf)", padding: "2px 8px", borderRadius: "var(--radius-pill)", border: "1px solid var(--ln)" }}>
           {t("group_count_badge", { on: enabledCount, total: items.length })}
         </span>
-      </button>
+      </Button>
       {expanded && (
         <div>
           {items.map((item) => (

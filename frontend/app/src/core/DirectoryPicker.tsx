@@ -3,6 +3,7 @@ import { ArrowUp, Folder, GitBranch } from "lucide-react";
 import { t } from "./i18n";
 import { apiClient, getSafeErrorMessage } from "./api";
 import { Button } from "../ui/components/Button";
+import { Modal } from "../ui/components/Modal";
 
 interface DirEntry {
   name: string;
@@ -56,10 +57,11 @@ function useDirListing(initialPath: string) {
 function EntryRow({ entry, onOpen }: { entry: DirEntry; onOpen: (p: string) => void }) {
   return (
     <li>
-      <button
+      <Button
+        variant="ghost"
         type="button"
         onClick={() => onOpen(entry.path)}
-        style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", width: "100%", minHeight: "var(--menu-height)", padding: "0 var(--sp-12)", background: "none", border: "none", borderRadius: "var(--radius-8)", color: "var(--fg)", fontSize: "var(--fs-14)", textAlign: "left", cursor: "pointer" }}
+        style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", width: "100%", minHeight: "var(--menu-height)", height: "auto", padding: "0 var(--sp-12)", background: "none", border: "none", borderRadius: "var(--radius-8)", color: "var(--fg)", fontSize: "var(--fs-14)", textAlign: "left" }}
       >
         <Folder size={16} />
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{entry.name}</span>
@@ -69,7 +71,7 @@ function EntryRow({ entry, onOpen }: { entry: DirEntry; onOpen: (p: string) => v
             {t("picker_git_badge")}
           </span>
         )}
-      </button>
+      </Button>
     </li>
   );
 }
@@ -89,25 +91,27 @@ export const DirectoryPicker: FC<DirectoryPickerProps> = ({ initialPath = "", on
   const { path, listing, error, loading, load } = useDirListing(initialPath);
   const canUse = Boolean(listing?.is_git) && !loading;
 
+  const footer = (
+    <div style={{ display: "flex", justifyContent: "flex-end", gap: "var(--sp-8)" }}>
+      <Button type="button" variant="ghost" onClick={onClose}>{t("btn_cancel")}</Button>
+      <Button type="button" variant="primary" disabled={!canUse} onClick={() => listing && onSelect(listing.path)}>{t("picker_use_this")}</Button>
+    </div>
+  );
+
   return (
-    <div role="dialog" aria-label={t("picker_title")} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60 }}>
-      <div style={{ width: "100%", maxWidth: "560px", maxHeight: "80vh", display: "flex", flexDirection: "column", gap: "var(--sp-12)", backgroundColor: "var(--sf)", border: "1px solid var(--ln)", borderRadius: "var(--radius-10)", padding: "var(--sp-24)" }}>
-        <h2 style={{ margin: 0, fontSize: "var(--fs-18)" }}>{t("picker_title")}</h2>
+    <Modal open onClose={onClose} title={t("picker_title")} footer={footer} size="md">
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)" }}>
           <Button type="button" variant="ghost" size="icon" aria-label={t("picker_up")} disabled={!listing?.path} onClick={() => void load(listing?.parent ?? "")} icon={<ArrowUp size={16} />} />
           <code data-testid="picker-path" style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "var(--fs-13)" }}>{path || t("picker_roots")}</code>
         </div>
         {error && <div role="alert" style={{ color: "var(--rd)", fontSize: "var(--fs-13)" }}>{error}</div>}
-        <div style={{ flex: 1, minHeight: "160px", overflowY: "auto" }}>
+        <div style={{ minHeight: "160px", maxHeight: "40vh", overflowY: "auto" }}>
           <PickerList listing={listing} loading={loading} onOpen={(p) => void load(p)} />
         </div>
         {listing?.truncated && <small style={{ color: "var(--mu)" }}>{t("picker_truncated")}</small>}
         {listing?.path && <small style={{ color: listing.is_git ? "var(--gr)" : "var(--mu)" }}>{listing.is_git ? t("picker_is_git") : t("picker_not_git")}</small>}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "var(--sp-8)" }}>
-          <Button type="button" variant="ghost" onClick={onClose}>{t("btn_cancel")}</Button>
-          <Button type="button" variant="primary" disabled={!canUse} onClick={() => listing && onSelect(listing.path)}>{t("picker_use_this")}</Button>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 };

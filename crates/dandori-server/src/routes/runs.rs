@@ -33,6 +33,14 @@ pub struct ListEventsQuery {
     pub offset: Option<i64>,
 }
 
+/// Tham số truy vấn danh sách lần chạy.
+#[derive(Debug, Clone, Deserialize, Default)]
+pub struct ListRunsQuery {
+    /// Định danh task cần lọc lần chạy.
+    pub task_id: Option<String>,
+    /// Giới hạn số lượng lần chạy trả về.
+    pub limit: Option<i64>,
+}
 /// Khởi động một lần chạy mới cho task.
 pub async fn start_run_handler(
     State(state): State<AppState>,
@@ -173,6 +181,53 @@ pub async fn list_run_events_handler(
             })),
         )),
         Err(RunServiceError::RunNotFound(id)) => Err(ApiError::NotFound(format!("run: {id}"))),
+        Err(RunServiceError::Forbidden(msg)) => Err(ApiError::Forbidden(msg)),
+        Err(other) => Err(ApiError::Internal(other.to_string())),
+    }
+}
+
+/// Lấy danh sách lần chạy (hỗ trợ lọc theo task_id và limit).
+pub async fn list_runs_handler(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Query(query): Query<ListRunsQuery>,
+) -> Result<impl IntoResponse, ApiError> {
+    let task_id_str = query
+        .task_id
+        .ok_or_else(|| ApiError::BadRequest("Tham số task_id là bắt buộc".into()))?;
+
+    let task_id = TaskId::from_str(&task_id_str)
+        .map_err(|e| ApiError::BadRequest(format!("TaskId không hợp lệ: {e}")))?;
+
+    match state
+        .run_service
+        .list_task_runs(task_id, user.id, query.limit)
+        .await
+    {
+        Ok(runs) => Ok((StatusCode::OK, Json(serde_json::json!({ "runs": runs })))),
+        Err(RunServiceError::TaskNotFound(id)) => Err(ApiError::NotFound(format!("task: {id}"))),
+        Err(RunServiceError::Forbidden(msg)) => Err(ApiError::Forbidden(msg)),
+        Err(other) => Err(ApiError::Internal(other.to_string())),
+    }
+}
+
+/// Lấy danh sách lần chạy của một task qua đường dẫn `/tasks/{id}/runs`.
+pub async fn list_task_runs_handler(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(task_id_str): Path<String>,
+    Query(query): Query<ListRunsQuery>,
+) -> Result<impl IntoResponse, ApiError> {
+    let task_id = TaskId::from_str(&task_id_str)
+        .map_err(|e| ApiError::BadRequest(format!("TaskId không hợp lệ: {e}")))?;
+
+    match state
+        .run_service
+        .list_task_runs(task_id, user.id, query.limit)
+        .await
+    {
+        Ok(runs) => Ok((StatusCode::OK, Json(serde_json::json!({ "runs": runs })))),
+        Err(RunServiceError::TaskNotFound(id)) => Err(ApiError::NotFound(format!("task: {id}"))),
         Err(RunServiceError::Forbidden(msg)) => Err(ApiError::Forbidden(msg)),
         Err(other) => Err(ApiError::Internal(other.to_string())),
     }

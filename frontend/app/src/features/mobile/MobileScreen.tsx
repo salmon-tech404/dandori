@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
+import { Input } from "../../ui/components/Input";
 import { fetchMobileApprovals, fetchMobileStatus, submitMobileDecision } from "./api";
 import type { MobileApprovalItem, MobileStatusResponse } from "./types";
 
@@ -14,23 +16,49 @@ function TokenInputForm({ onSave }: { onSave: (t: string) => void }) {
   };
 
   return (
-    <form onSubmit={handleSub} className="flex flex-col gap-4 p-4">
-      <h2 className="text-lg font-semibold text-neutral-100">{t("mobile_pair_title")}</h2>
-      <p className="text-sm text-neutral-400">{t("mobile_pair_desc")}</p>
-      <input
+    <form onSubmit={handleSub} style={{ display: "flex", flexDirection: "column", gap: "var(--sp-16)", padding: "var(--sp-16)" }}>
+      <h2 style={{ margin: 0, fontSize: "var(--fs-18)", fontWeight: 600, color: "var(--fg)" }}>{t("mobile_pair_title")}</h2>
+      <p style={{ margin: 0, fontSize: "var(--fs-14)", color: "var(--mu)" }}>{t("mobile_pair_desc")}</p>
+      <Input
         type="password"
         value={val}
-        onChange={(e) => setVal(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setVal(e.target.value)}
         placeholder={t("mobile_token_placeholder")}
-        className="min-h-[44px] rounded border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-neutral-100"
+        className="min-h-[44px]"
       />
-      <button
-        type="submit"
-        className="min-h-[44px] rounded bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-500"
-      >
+      <Button variant="primary" type="submit" className="min-h-[44px]">
         {t("mobile_connect_btn")}
-      </button>
+      </Button>
     </form>
+  );
+}
+
+function MobileTitle({ status }: { status: MobileStatusResponse | null }) {
+  return (
+    <div>
+      <h1 style={{ margin: 0, fontSize: "var(--fs-16)", fontWeight: 700, color: "var(--fg)" }}>{t("mobile_app_title")}</h1>
+      <p style={{ margin: "2px 0 0", fontSize: "var(--fs-12)", color: "var(--mu)" }}>
+        {status?.device_name || t("mobile_connected_device")}
+        {status?.is_read_only && (
+          <span style={{ marginLeft: 8, borderRadius: "var(--radius-4)", backgroundColor: "var(--orb)", padding: "2px 6px", fontSize: "10px", color: "var(--or)" }}>
+            {t("mobile_read_only_badge")}
+          </span>
+        )}
+      </p>
+    </div>
+  );
+}
+
+function MobileHeaderActions({ onRefresh, onLogout }: { onRefresh: () => void; onLogout: () => void }) {
+  return (
+    <div style={{ display: "flex", gap: "var(--sp-8)" }}>
+      <Button variant="secondary" size="sm" type="button" onClick={onRefresh} className="min-h-[44px]">
+        {t("mobile_refresh_btn")}
+      </Button>
+      <Button variant="danger" size="sm" type="button" onClick={onLogout} className="min-h-[44px]">
+        {t("mobile_disconnect_btn")}
+      </Button>
+    </div>
   );
 }
 
@@ -44,33 +72,41 @@ function MobileHeader({
   onLogout: () => void;
 }) {
   return (
-    <header className="flex items-center justify-between border-b border-neutral-800 bg-neutral-900/80 px-4 py-3">
-      <div>
-        <h1 className="text-base font-bold text-neutral-100">{t("mobile_app_title")}</h1>
-        <p className="text-xs text-neutral-400">
-          {status?.device_name || t("mobile_connected_device")}
-          {status?.is_read_only && (
-            <span className="ml-2 rounded bg-amber-950 px-1.5 py-0.5 text-[10px] text-amber-400">
-              {t("mobile_read_only_badge")}
-            </span>
-          )}
-        </p>
-      </div>
-      <div className="flex gap-2">
-        <button
-          onClick={onRefresh}
-          className="min-h-[44px] min-w-[44px] rounded bg-neutral-800 px-3 text-xs text-neutral-200 hover:bg-neutral-700"
-        >
-          {t("mobile_refresh_btn")}
-        </button>
-        <button
-          onClick={onLogout}
-          className="min-h-[44px] min-w-[44px] rounded bg-rose-950 px-3 text-xs text-rose-300 hover:bg-rose-900"
-        >
-          {t("mobile_disconnect_btn")}
-        </button>
-      </div>
+    <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--ln)", backgroundColor: "var(--sf)", padding: "var(--sp-12) var(--sp-16)" }}>
+      <MobileTitle status={status} />
+      <MobileHeaderActions onRefresh={onRefresh} onLogout={onLogout} />
     </header>
+  );
+}
+
+function ApprovalCardActions({
+  itemId,
+  onAction,
+}: {
+  itemId: string;
+  onAction: (id: string, act: "approve" | "reject") => void;
+}) {
+  return (
+    <div style={{ display: "flex", gap: "var(--sp-12)" }}>
+      <Button
+        variant="primary"
+        type="button"
+        onClick={() => onAction(itemId, "approve")}
+        className="min-h-[44px]"
+        style={{ flex: 1 }}
+      >
+        {t("mobile_approve_btn")}
+      </Button>
+      <Button
+        variant="danger"
+        type="button"
+        onClick={() => onAction(itemId, "reject")}
+        className="min-h-[44px]"
+        style={{ flex: 1 }}
+      >
+        {t("mobile_reject_btn")}
+      </Button>
+    </div>
   );
 }
 
@@ -84,30 +120,15 @@ function ApprovalCard({
   onAction: (id: string, act: "approve" | "reject") => void;
 }) {
   return (
-    <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
-      <div className="mb-2 flex items-start justify-between gap-2">
-        <h3 className="font-semibold text-neutral-100">{item.task_title}</h3>
-        <span className="rounded bg-amber-950 px-2 py-0.5 text-xs font-semibold text-amber-400">
+    <div style={{ borderRadius: "var(--radius-8)", border: "1px solid var(--ln)", backgroundColor: "var(--sf)", padding: "var(--sp-16)" }}>
+      <div style={{ marginBottom: "var(--sp-8)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "var(--sp-8)" }}>
+        <h3 style={{ margin: 0, fontWeight: 600, color: "var(--fg)" }}>{item.task_title}</h3>
+        <span style={{ borderRadius: "var(--radius-4)", backgroundColor: "var(--orb)", padding: "2px 8px", fontSize: "var(--fs-12)", fontWeight: 600, color: "var(--or)" }}>
           {item.status}
         </span>
       </div>
-      <p className="mb-4 text-xs text-neutral-400">{item.reason}</p>
-      {!readOnly && (
-        <div className="flex gap-3">
-          <button
-            onClick={() => onAction(item.id, "approve")}
-            className="flex-1 min-h-[44px] rounded bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-500"
-          >
-            {t("mobile_approve_btn")}
-          </button>
-          <button
-            onClick={() => onAction(item.id, "reject")}
-            className="flex-1 min-h-[44px] rounded bg-rose-600 px-4 py-2 font-medium text-white hover:bg-rose-500"
-          >
-            {t("mobile_reject_btn")}
-          </button>
-        </div>
-      )}
+      <p style={{ margin: "0 0 var(--sp-16)", fontSize: "var(--fs-12)", color: "var(--mu)" }}>{item.reason}</p>
+      {!readOnly && <ApprovalCardActions itemId={item.id} onAction={onAction} />}
     </div>
   );
 }
@@ -123,13 +144,13 @@ function ApprovalList({
 }) {
   if (items.length === 0) {
     return (
-      <div className="p-8 text-center text-sm text-neutral-400">
+      <div style={{ padding: "var(--sp-32)", textAlign: "center", fontSize: "var(--fs-14)", color: "var(--mu)" }}>
         {t("mobile_empty_approvals")}
       </div>
     );
   }
   return (
-    <div className="flex flex-col gap-3 p-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)", padding: "var(--sp-16)" }}>
       {items.map((it) => (
         <ApprovalCard key={it.id} item={it} readOnly={readOnly} onAction={onAction} />
       ))}
@@ -176,20 +197,20 @@ export function MobileScreen() {
 
   if (!token) {
     return (
-      <div className="mx-auto max-w-md p-4">
+      <div style={{ maxWidth: 448, margin: "0 auto", padding: "var(--sp-16)" }}>
         <TokenInputForm onSave={(t) => { localStorage.setItem(TOKEN_KEY, t); setToken(t); }} />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto min-h-screen max-w-md bg-neutral-950 text-neutral-100">
+    <div style={{ maxWidth: 448, minHeight: "100vh", margin: "0 auto", backgroundColor: "var(--bg)", color: "var(--fg)" }}>
       <MobileHeader
         status={status}
         onRefresh={reload}
         onLogout={() => { localStorage.removeItem(TOKEN_KEY); setToken(""); }}
       />
-      {msg && <div className="m-4 rounded bg-rose-950 p-3 text-xs text-rose-300">{msg}</div>}
+      {msg && <div style={{ margin: "var(--sp-16)", borderRadius: "var(--radius-4)", backgroundColor: "var(--rdb)", padding: "var(--sp-12)", fontSize: "var(--fs-12)", color: "var(--rd)" }}>{msg}</div>}
       <ApprovalList items={items} readOnly={Boolean(status?.is_read_only)} onAction={handleDecision} />
     </div>
   );

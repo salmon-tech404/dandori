@@ -30,3 +30,11 @@ test("check-tokens: ca đỏ khi tokens.css thiếu token bắt buộc", async (
     /Thiếu token bắt buộc/
   );
 });
+
+test("check-tokens: ca đỏ khi mã dùng biến CSS không có trong tokens.css", async () => {
+  const badTsx = path.join(__dirname, "fixtures/tokens/undefined-var.tsx");
+  const result = await validateTokens({ extraSourceFiles: [badTsx] });
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join("\n"), /Biến CSS không có trong tokens\.css: --spacing-xs/);
+  assert.doesNotMatch(result.errors.join("\n"), /--mu/, "biến có định nghĩa không bị báo");
+});

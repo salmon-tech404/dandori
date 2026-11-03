@@ -1,6 +1,7 @@
 import React from "react";
 import type { DiffFile } from "../types";
 import { t } from "../../../core/i18n";
+import { Button } from "../../../ui/components/Button";
 
 interface ItemProps {
   file: DiffFile;
@@ -10,7 +11,8 @@ interface ItemProps {
 
 function DiffFileItem({ file, isSelected, onSelect }: ItemProps): React.JSX.Element {
   return (
-    <button
+    <Button
+      variant="ghost"
       type="button"
       onClick={() => onSelect(file.path)}
       style={{
@@ -37,7 +39,7 @@ function DiffFileItem({ file, isSelected, onSelect }: ItemProps): React.JSX.Elem
           </>
         )}
       </span>
-    </button>
+    </Button>
   );
 }
 

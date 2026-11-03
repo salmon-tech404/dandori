@@ -1,46 +1,87 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useState, ChangeEvent } from "react";
 import { t } from "../../core/i18n";
 import { RoleDefaultItem } from "./types";
 import { useProjectDefaults } from "./useLeadWorker";
 import { EmptyState } from "../../ui/components/EmptyState";
+import { Button } from "../../ui/components/Button";
+import { Card } from "../../ui/components/Card";
+import { Select, SelectOption } from "../../ui/components/Select";
+import { Chip } from "../../ui/components/Chip";
 
-interface BadgeProps {
-  prov: string;
-  idx: number;
-  total: number;
-  onMove: (index: number, direction: -1 | 1) => void;
+const PROVIDER_OPTIONS: SelectOption[] = [
+  { value: "claude", label: "Claude" },
+  { value: "gemini", label: "Gemini" },
+  { value: "codex", label: "Codex" },
+  { value: "fake", label: "Fake Agent" },
+];
+
+interface RoleConfig {
+  role: string;
+  labelKey: string;
+  defaultProv: string;
 }
 
-const ProviderBadge: FC<BadgeProps> = ({ prov, idx, total, onMove }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", background: "var(--surface)", padding: "var(--space-xs) var(--space-sm)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)" }}>
-    <span>{idx + 1}. {prov}</span>
-    <button type="button" aria-label={`Move ${prov} up`} disabled={idx === 0} onClick={() => onMove(idx, -1)} style={{ cursor: idx === 0 ? "not-allowed" : "pointer" }}>↑</button>
-    <button type="button" aria-label={`Move ${prov} down`} disabled={idx === total - 1} onClick={() => onMove(idx, 1)} style={{ cursor: idx === total - 1 ? "not-allowed" : "pointer" }}>↓</button>
-  </div>
-);
+const ROLE_CONFIGS: RoleConfig[] = [
+  { role: "pm", labelKey: "role_pm_desc", defaultProv: "claude" },
+  { role: "worker", labelKey: "role_worker_desc", defaultProv: "gemini" },
+  { role: "test", labelKey: "role_test_desc", defaultProv: "codex" },
+  { role: "doc", labelKey: "role_doc_desc", defaultProv: "claude" },
+];
 
-const RoleDefaultRow: FC<{ item: RoleDefaultItem; onMove: (role: string, index: number, dir: -1 | 1) => void }> = ({ item, onMove }) => (
-  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--space-md)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-sm)" }}>
-    <div style={{ fontWeight: 600, width: "200px" }}>{t(`role_${item.role}`)}</div>
-    <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
-      {item.provider_order.map((prov, idx) => (
-        <ProviderBadge key={prov} prov={prov} idx={idx} total={item.provider_order.length} onMove={(i, d) => onMove(item.role, i, d)} />
-      ))}
+function updateRoleProvider(items: RoleDefaultItem[], role: string, newProvider: string): RoleDefaultItem[] {
+  const existing = items.find((it) => it.role === role);
+  if (!existing) {
+    return [...items, { role, provider_order: [newProvider] }];
+  }
+  const filtered = existing.provider_order.filter((p) => p !== newProvider);
+  return items.map((it) =>
+    it.role === role ? { ...it, provider_order: [newProvider, ...filtered] } : it
+  );
+}
+
+function RoleSelectField({
+  config,
+  currentProvider,
+  onChange,
+}: {
+  config: RoleConfig;
+  currentProvider: string;
+  onChange: (role: string, provider: string) => void;
+}) {
+  const label = t(config.labelKey);
+  return (
+    <Select
+      label={label}
+      value={currentProvider}
+      options={PROVIDER_OPTIONS}
+      onChange={(e: ChangeEvent<HTMLSelectElement>) => onChange(config.role, e.target.value)}
+    />
+  );
+}
+
+function RoleGrid({
+  defaults,
+  onChange,
+}: {
+  defaults: RoleDefaultItem[];
+  onChange: (role: string, provider: string) => void;
+}) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "var(--sp-16)" }}>
+      {ROLE_CONFIGS.map((cfg) => {
+        const item = defaults.find((d) => d.role === cfg.role);
+        const currentProvider = item?.provider_order[0] || cfg.defaultProv;
+        return (
+          <RoleSelectField
+            key={cfg.role}
+            config={cfg}
+            currentProvider={currentProvider}
+            onChange={onChange}
+          />
+        );
+      })}
     </div>
-  </div>
-);
-
-function moveInList(items: RoleDefaultItem[], role: string, index: number, dir: -1 | 1): RoleDefaultItem[] {
-  return items.map((item) => {
-    if (item.role !== role) return item;
-    const newOrder = [...item.provider_order];
-    const targetIdx = index + dir;
-    if (targetIdx < 0 || targetIdx >= newOrder.length) return item;
-    const temp = newOrder[index];
-    newOrder[index] = newOrder[targetIdx];
-    newOrder[targetIdx] = temp;
-    return { ...item, provider_order: newOrder };
-  });
+  );
 }
 
 function LeadWorkerDefaultsForm({ projectId }: { projectId: string }) {
@@ -48,7 +89,13 @@ function LeadWorkerDefaultsForm({ projectId }: { projectId: string }) {
   const [defaults, setDefaults] = useState<RoleDefaultItem[]>([]);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
 
-  useEffect(() => { fetchDefaults().then(setDefaults); }, [fetchDefaults]);
+  useEffect(() => {
+    fetchDefaults().then(setDefaults);
+  }, [fetchDefaults]);
+
+  const handleProviderChange = (role: string, provider: string) => {
+    setDefaults((prev) => updateRoleProvider(prev, role, provider));
+  };
 
   const handleSave = async () => {
     if (await saveDefaults(defaults)) {
@@ -58,24 +105,25 @@ function LeadWorkerDefaultsForm({ projectId }: { projectId: string }) {
   };
 
   return (
-    <div style={{ marginTop: "var(--space-lg)" }}>
-      <h3>{t("lead_worker_title")}</h3>
-      <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-md)" }}>{t("lead_worker_desc")}</p>
-      {error && <div style={{ color: "var(--danger)", marginBottom: "var(--space-sm)" }}>{error}</div>}
-      {savedMsg && <div style={{ color: "var(--success)", marginBottom: "var(--space-sm)" }}>{savedMsg}</div>}
-      {defaults.map((item) => (
-        <RoleDefaultRow key={item.role} item={item} onMove={(r, i, d) => setDefaults((p) => moveInList(p, r, i, d))} />
-      ))}
-      <button type="button" disabled={loading} onClick={handleSave} style={{ marginTop: "var(--space-md)", padding: "var(--space-sm) var(--space-lg)" }}>
-        {t("btn_save_defaults")}
-      </button>
-    </div>
+    <Card
+      title={t("lead_worker_title")}
+      actions={<Chip variant="gray">{t("role_defaults_chip")}</Chip>}
+      style={{ marginTop: "var(--sp-16)" }}
+    >
+      {error && <div style={{ color: "var(--rd)", fontSize: "var(--fs-13)" }}>{error}</div>}
+      {savedMsg && <div style={{ color: "var(--gr)", fontSize: "var(--fs-13)" }}>{savedMsg}</div>}
+      <RoleGrid defaults={defaults} onChange={handleProviderChange} />
+      <div style={{ marginTop: "var(--sp-8)" }}>
+        <Button variant="primary" type="button" disabled={loading} loading={loading} onClick={handleSave}>
+          {t("btn_save_defaults")}
+        </Button>
+      </div>
+    </Card>
   );
 }
 
 export const LeadWorkerDefaultsSection: FC<{ context?: Record<string, unknown> }> = ({ context }) => {
   const projectId = typeof context?.projectId === "string" ? context.projectId : "";
-  // Chưa có dự án thì không gọi API với id giả (trước đây hiện chữ "HTTP 404").
   if (!projectId) return <EmptyState title={t("need_project_title")} description={t("need_project_desc")} />;
   return <LeadWorkerDefaultsForm projectId={projectId} />;
 };

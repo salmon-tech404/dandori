@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp, Terminal } from 'lucide-react';
 import React, { useState } from 'react';
 import { t } from '../../core/i18n';
+import { Button } from '../../ui/components/Button';
 import { LogEntry, MAX_LOG_ENTRIES } from './types';
 
 interface Props {
@@ -9,15 +10,9 @@ interface Props {
 }
 
 const LogLine: React.FC<{ entry: LogEntry }> = ({ entry }) => (
-  <div className="flex gap-2 font-mono text-xs leading-relaxed">
-    <span className="select-none text-neutral-500">[{entry.seq}]</span>
-    <span
-      className={
-        entry.stream === 'stderr'
-          ? 'text-rose-400'
-          : 'text-neutral-200 dark:text-neutral-300'
-      }
-    >
+  <div style={{ display: "flex", gap: "var(--sp-8)", fontFamily: "var(--font-mono)", fontSize: "var(--fs-12)", lineHeight: 1.6 }}>
+    <span style={{ userSelect: "none", color: "var(--mu)" }}>[{entry.seq}]</span>
+    <span style={{ color: entry.stream === 'stderr' ? 'var(--rd)' : 'var(--fg)' }}>
       {entry.chunk}
     </span>
   </div>
@@ -28,19 +23,21 @@ const LogHeader: React.FC<{
   isExpanded: boolean;
   onToggle: () => void;
 }> = ({ count, isExpanded, onToggle }) => (
-  <div className="flex items-center justify-between border-b border-neutral-800 px-3 py-2 text-xs">
-    <div className="flex items-center gap-1.5 font-medium text-neutral-300">
-      <Terminal size={13} className="text-emerald-400" />
+  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--ln)", padding: "8px 12px", fontSize: "var(--fs-12)" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500, color: "var(--fg)" }}>
+      <Terminal size={13} style={{ color: "var(--gr)" }} />
       <span>{t('live_status_log_title')}</span>
     </div>
-    <div className="flex items-center gap-3">
-      <span className="text-neutral-400">
+    <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-12)" }}>
+      <span style={{ color: "var(--mu)" }}>
         {t('live_status_log_lines_count', { count, max: MAX_LOG_ENTRIES })}
       </span>
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         type="button"
         onClick={onToggle}
-        className="flex items-center gap-1 text-neutral-300 hover:text-white"
+        style={{ display: "flex", alignItems: "center", gap: 4 }}
       >
         {isExpanded ? (
           <>
@@ -53,8 +50,27 @@ const LogHeader: React.FC<{
             <span>{t('live_status_log_expand')}</span>
           </>
         )}
-      </button>
+      </Button>
     </div>
+  </div>
+);
+
+const LogContainer: React.FC<{ logs: LogEntry[]; isExpanded: boolean }> = ({ logs, isExpanded }) => (
+  <div
+    data-testid="live-log-container"
+    style={{
+      overflowY: "auto",
+      padding: "var(--sp-12)",
+      height: isExpanded ? 384 : 192,
+    }}
+  >
+    {logs.length === 0 ? (
+      <div style={{ fontSize: "var(--fs-12)", color: "var(--mu)", fontStyle: "italic" }}>
+        {t('live_status_log_empty')}
+      </div>
+    ) : (
+      logs.map((entry) => <LogLine key={entry.id} entry={entry} />)
+    )}
   </div>
 );
 
@@ -65,7 +81,15 @@ export const LiveLogViewer: React.FC<Props> = ({ logs, selectedRunId }) => {
     return (
       <div
         data-testid="live-log-prompt"
-        className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-center text-xs text-neutral-400 dark:border-neutral-800 dark:bg-neutral-900/50"
+        style={{
+          borderRadius: "var(--radius-8)",
+          border: "1px solid var(--ln)",
+          backgroundColor: "var(--sf)",
+          padding: "var(--sp-16)",
+          textAlign: "center",
+          fontSize: "var(--fs-12)",
+          color: "var(--mu)",
+        }}
       >
         {t('live_status_log_select_prompt')}
       </div>
@@ -73,24 +97,13 @@ export const LiveLogViewer: React.FC<Props> = ({ logs, selectedRunId }) => {
   }
 
   return (
-    <div className="rounded-lg border border-neutral-200 bg-neutral-900 text-neutral-100 dark:border-neutral-800">
+    <div style={{ borderRadius: "var(--radius-8)", border: "1px solid var(--ln)", backgroundColor: "var(--sf)", color: "var(--fg)" }}>
       <LogHeader
         count={logs.length}
         isExpanded={isExpanded}
         onToggle={() => setIsExpanded((prev) => !prev)}
       />
-      <div
-        data-testid="live-log-container"
-        className={`overflow-y-auto p-3 ${isExpanded ? 'h-96' : 'h-48'}`}
-      >
-        {logs.length === 0 ? (
-          <div className="text-xs text-neutral-500 italic">
-            {t('live_status_log_empty')}
-          </div>
-        ) : (
-          logs.map((entry) => <LogLine key={entry.id} entry={entry} />)
-        )}
-      </div>
+      <LogContainer logs={logs} isExpanded={isExpanded} />
     </div>
   );
 };

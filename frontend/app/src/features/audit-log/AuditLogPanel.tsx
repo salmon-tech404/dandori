@@ -1,5 +1,6 @@
 import { t } from "../../core/i18n";
 import { Button } from "../../ui/components/Button";
+import { Input } from "../../ui/components/Input";
 import { AuditLogTable } from "./AuditLogTable";
 import type { VerifyResult } from "./types";
 import { useAuditLog } from "./useAuditLog";
@@ -73,7 +74,7 @@ function FilterBar({
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-12)", marginBottom: "var(--sp-16)" }}>
       <label style={{ fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("audit_log_filter_action")}</label>
-      <input
+      <Input
         type="text"
         value={filter}
         onChange={(e) => onChange(e.target.value)}

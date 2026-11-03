@@ -25,9 +25,7 @@ function ChannelHeader({
           {channel.channel_type}
         </span>
       </div>
-      <button
-        type="button"
-        onClick={() => onToggle(channel.id, !channel.is_enabled)}
+      <Button variant="ghost" size="sm" type="button" onClick={() => onToggle(channel.id, !channel.is_enabled)}
         style={{
           borderRadius: "var(--radius-pill)",
           padding: "2px 8px",
@@ -42,7 +40,7 @@ function ChannelHeader({
         {channel.is_enabled
           ? t("notifications_status_enabled")
           : t("notifications_status_disabled")}
-      </button>
+      </Button>
     </div>
   );
 }

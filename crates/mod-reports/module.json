@@ -1,19 +1,15 @@
 {
-  "$schema": "https://raw.githubusercontent.com/dandori-dev/dandori/main/schemas/module.schema.json",
   "id": "reports",
   "group": "dashboard",
   "name": "Báo cáo tổng kết (Reports)",
   "version": "0.1.0",
   "description": "Báo cáo tổng kết ngày và tuần xác định, không số liệu bịa, xuất Markdown",
-  "scope": "workspace",
-  "dependencies": ["run-history"],
-  "contributions": [
-    {
-      "id": "reports-panel",
-      "slot": "dashboard.panel",
-      "component": "ReportsPanel"
-    }
-  ],
+  "scopes": ["workspace"],
+  "requires": ["run-history"],
+  "effort": "medium",
+  "risk": "low",
+  "core": false,
+  "requires_worker_restart": false,
   "settings": {
     "autoGenerate": {
       "type": "boolean",
@@ -25,5 +21,15 @@
       "default": "UTC",
       "description": "Múi giờ tính toán ranh giới ngày và tuần"
     }
+  },
+  "ui": {
+    "contributes": [
+      {
+        "id": "reports-panel",
+        "slot": "dashboard.panel",
+        "label": "Báo cáo tuần",
+        "order": 20
+      }
+    ]
   }
 }
