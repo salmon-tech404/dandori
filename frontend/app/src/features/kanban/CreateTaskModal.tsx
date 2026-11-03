@@ -1,7 +1,9 @@
-import { FC, FormEvent, useState, ReactNode } from "react";
+import { FC, FormEvent, useState } from "react";
 import { t } from "../../core/i18n";
 import { Button } from "../../ui/components/Button";
 import { Input } from "../../ui/components/Input";
+import { Modal } from "../../ui/components/Modal";
+import { Textarea } from "../../ui/components/Textarea";
 import { getSafeErrorMessage } from "../../core/api";
 
 export interface CreateTaskModalProps {
@@ -9,36 +11,6 @@ export interface CreateTaskModalProps {
   onClose: () => void;
   projectId: string;
   onCreated?: () => void;
-}
-
-function ModalBackdrop({ children }: { children: ReactNode }) {
-  return (
-    <div
-      data-testid="create-task-modal"
-      style={{
-        position: "fixed",
-        inset: 0,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 50,
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "480px",
-          backgroundColor: "var(--sf)",
-          borderRadius: "var(--radius-10)",
-          border: "1px solid var(--ln)",
-          padding: "var(--sp-24)",
-        }}
-      >
-        {children}
-      </div>
-    </div>
-  );
 }
 
 function ModalErrorBanner({ error }: { error: string | null }) {
@@ -105,7 +77,7 @@ function TaskDescField({ value, onChange }: { value: string; onChange: (v: strin
       >
         {t("task_desc_label")}
       </label>
-      <textarea
+      <Textarea
         id="create-task-desc-input"
         data-testid="create-task-desc-input"
         value={value}
@@ -189,13 +161,14 @@ export const CreateTaskModal: FC<CreateTaskModalProps> = ({
 }) => {
   const form = useCreateTaskForm(projectId, onClose, onCreated);
 
-  if (!isOpen) return null;
-
   return (
-    <ModalBackdrop>
-      <h3 style={{ margin: "0 0 var(--sp-16) 0", fontSize: "var(--fs-18)", fontWeight: 600 }}>
-        {t("create_task_modal_title")}
-      </h3>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      title={t("create_task_modal_title")}
+      data-testid="create-task-modal"
+      size="md"
+    >
       <ModalErrorBanner error={form.error} />
       <form onSubmit={form.handleSubmit} noValidate>
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)", marginBottom: "var(--sp-16)" }}>
@@ -204,6 +177,6 @@ export const CreateTaskModal: FC<CreateTaskModalProps> = ({
         </div>
         <TaskFormActions loading={form.loading} onClose={onClose} />
       </form>
-    </ModalBackdrop>
+    </Modal>
   );
 };

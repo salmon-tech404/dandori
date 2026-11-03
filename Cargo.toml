@@ -84,3 +84,8 @@ tempfile = "3.17"
 strip = true
 # lto, codegen-units: chốt sau khi đo ở P5-01; panic giữ unwind (RS-PANIC-003)
 
+
+[profile.dev]
+# Chỉ giữ bảng số dòng (đủ để báo lỗi/panic có số dòng), bỏ thông tin gỡ lỗi chi tiết từng biến:
+# giảm mạnh dung lượng thư mục `target` (các tệp .pdb từng chiếm hơn một nửa, khoảng 23 GB).
+debug = "line-tables-only"

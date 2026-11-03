@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
 import { TaskAssignment } from "./types";
 import { useTaskAssignment } from "./useLeadWorker";
 import { AgentSelectField } from "./AgentSelectField";
@@ -32,21 +33,19 @@ const FieldGroup: FC<FieldGroupProps> = ({ data, onUpdate }) => (
   </>
 );
 
-export const TaskAssignmentSection: FC<{ context?: Record<string, unknown> }> = ({ context }) => {
-  const taskId = (context?.taskId as string) || (context?.id as string) || "";
-  const taskTitle = (context?.title as string) || "";
-  const taskDesc = (context?.description as string) || "";
+function useAssignmentController(taskId: string, taskTitle: string, taskDesc: string) {
   const { fetchAssignment, assignAgent, dispatch, loading, error, setError } = useTaskAssignment(taskId);
   const [data, setData] = useState<TaskAssignment | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  useEffect(() => { if (taskId) fetchAssignment().then(setData); }, [taskId, fetchAssignment]);
-  if (!taskId) return null;
-  if (!data) return <div>{t("empty_task_assignment")}</div>;
+  useEffect(() => {
+    if (taskId) fetchAssignment().then(setData);
+  }, [taskId, fetchAssignment]);
 
   const handleUpdate = async (field: "lead" | "worker", val: string) => {
-    const lead = field === "lead" ? val : data.task_lead_agent;
-    const worker = field === "worker" ? val : data.task_worker_agent;
+    if (!data) return;
+    const lead = field === "lead" ? val : (data.task_lead_agent || "");
+    const worker = field === "worker" ? val : (data.task_worker_agent || "");
     if (await assignAgent(taskTitle, taskDesc, lead, worker)) {
       const refreshed = await fetchAssignment();
       if (refreshed) setData(refreshed);
@@ -62,15 +61,34 @@ export const TaskAssignmentSection: FC<{ context?: Record<string, unknown> }> = 
     }
   };
 
+  return { data, loading, error, successMsg, handleUpdate, handleDispatch };
+}
+
+export const TaskAssignmentSection: FC<{ context?: Record<string, unknown> }> = ({ context }) => {
+  const taskId = (context?.taskId as string) || (context?.id as string) || "";
+  const taskTitle = (context?.title as string) || "";
+  const taskDesc = (context?.description as string) || "";
+  const ctrl = useAssignmentController(taskId, taskTitle, taskDesc);
+
+  if (!taskId) return null;
+  if (!ctrl.data) return <div>{t("empty_task_assignment")}</div>;
+
   return (
-    <div style={{ borderTop: "1px solid var(--border)", paddingTop: "var(--space-md)", marginTop: "var(--space-md)" }}>
+    <div style={{ borderTop: "1px solid var(--ln)", paddingTop: "var(--sp-16)", marginTop: "var(--sp-16)" }}>
       <h4>{t("task_assignment_title")}</h4>
-      {error && <div role="alert" style={{ color: "var(--danger)", padding: "var(--space-sm)", background: "var(--surface)", border: "1px solid var(--danger)", borderRadius: "var(--radius-sm)", marginBottom: "var(--space-sm)" }}>{error}</div>}
-      {successMsg && <div style={{ color: "var(--success)", marginBottom: "var(--space-sm)" }}>{successMsg}</div>}
-      <FieldGroup data={data} onUpdate={handleUpdate} />
-      <button type="button" disabled={loading} onClick={handleDispatch} style={{ width: "100%", padding: "var(--space-sm)", background: "var(--primary)", color: "var(--surface)", border: "none", borderRadius: "var(--radius-sm)", cursor: loading ? "not-allowed" : "pointer" }}>
+      {ctrl.error && <div role="alert" style={{ color: "var(--rd)", padding: "var(--sp-8)", background: "var(--sf)", border: "1px solid var(--rd)", borderRadius: "var(--radius-6)", marginBottom: "var(--sp-8)" }}>{ctrl.error}</div>}
+      {ctrl.successMsg && <div style={{ color: "var(--gr)", marginBottom: "var(--sp-8)" }}>{ctrl.successMsg}</div>}
+      <FieldGroup data={ctrl.data} onUpdate={ctrl.handleUpdate} />
+      <Button
+        variant="primary"
+        type="button"
+        disabled={ctrl.loading}
+        loading={ctrl.loading}
+        onClick={ctrl.handleDispatch}
+        style={{ width: "100%" }}
+      >
         {t("btn_dispatch")}
-      </button>
+      </Button>
     </div>
   );
 };

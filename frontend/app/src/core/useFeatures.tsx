@@ -49,39 +49,49 @@ export interface FeaturesProviderProps {
   children: React.ReactNode;
 }
 
+async function fetchFeatures(
+  workspaceId: string | undefined,
+  projectId: string | undefined
+): Promise<{ effective: string[]; totalCount: number | null }> {
+  const q = new URLSearchParams();
+  if (workspaceId) q.set("workspace", workspaceId);
+  if (projectId) q.set("project", projectId);
+  const queryStr = q.toString() ? `?${q.toString()}` : "";
+  const effRes = await apiClient<{ effective: Array<{ module_id: string; enabled: boolean }> }>(
+    `/api/v1/features/effective${queryStr}`
+  );
+  const effective = Array.isArray(effRes.effective)
+    ? effRes.effective.filter((e) => e.enabled).map((e) => e.module_id)
+    : [];
+  const modRes = await apiClient<{ modules: unknown[] }>("/api/v1/features/modules").catch(() => null);
+  const totalCount = Array.isArray(modRes?.modules) ? modRes.modules.length : null;
+  return { effective, totalCount };
+}
+
 function useFeaturesLoader(
   initialModules: string[] | undefined,
   setEffectiveModules: (mods: string[]) => void,
   setTotalCount: (total: number) => void
 ) {
   const { currentWorkspace, currentProject } = useProject();
-  const [loading, setLoading] = useState(false);
+  const workspaceId = currentWorkspace?.id;
+  const projectId = currentProject?.id;
+  const [loading, setLoading] = useState(initialModules === undefined);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const q = new URLSearchParams();
-      if (currentWorkspace?.id) q.set("workspace", currentWorkspace.id);
-      if (currentProject?.id) q.set("project", currentProject.id);
-      const queryStr = q.toString() ? `?${q.toString()}` : "";
-      const effRes = await apiClient<{ effective: Array<{ module_id: string; enabled: boolean }> }>(
-        `/api/v1/features/effective${queryStr}`
-      );
-      if (Array.isArray(effRes.effective)) {
-        setEffectiveModules(effRes.effective.filter((e) => e.enabled).map((e) => e.module_id));
-      }
-      const modRes = await apiClient<{ modules: unknown[] }>("/api/v1/features/modules").catch(() => null);
-      if (modRes?.modules && Array.isArray(modRes.modules)) {
-        setTotalCount(modRes.modules.length);
-      }
+      const data = await fetchFeatures(workspaceId, projectId);
+      setEffectiveModules(data.effective);
+      if (data.totalCount !== null) setTotalCount(data.totalCount);
     } catch (err) {
       setError(getSafeErrorMessage(err).userMessage);
     } finally {
       setLoading(false);
     }
-  }, [currentWorkspace, currentProject, setEffectiveModules, setTotalCount]);
+  }, [workspaceId, projectId, setEffectiveModules, setTotalCount]);
 
   useEffect(() => {
     if (initialModules === undefined) {

@@ -37,20 +37,12 @@ fn default_settings() -> HashMap<String, SettingSchema> {
 
 fn default_ui() -> UiDeclaration {
     UiDeclaration {
-        contributes: vec![
-            UiContribution {
-                id: "quiet-hours-toolbar".to_string(),
-                slot: "calendar.toolbar".to_string(),
-                label: "Giờ cấm".to_string(),
-                order: 30,
-            },
-            UiContribution {
-                id: "quiet-hours-settings".to_string(),
-                slot: "settings.panel".to_string(),
-                label: "Cấu hình giờ cấm".to_string(),
-                order: 35,
-            },
-        ],
+        contributes: vec![UiContribution {
+            id: "quiet-hours-toolbar".to_string(),
+            slot: "calendar.toolbar".to_string(),
+            label: "Giờ cấm".to_string(),
+            order: 20,
+        }],
     }
 }
 

@@ -6,6 +6,10 @@ export * from './useReports';
 
 import { ReportsPanel } from './ReportsPanel';
 
+export const contributions = {
+  'reports-panel': ReportsPanel,
+};
+
 export default {
   ReportsPanel,
 };

@@ -61,17 +61,28 @@ fn error_response(code: &str, message: &str, status: StatusCode) -> Response {
         .into_response()
 }
 
-fn extract_cookie(headers: &HeaderMap, cookie_name: &str) -> Option<String> {
-    let cookie_header = headers.get(axum::http::header::COOKIE)?.to_str().ok()?;
-    for pair in cookie_header.split(';') {
-        let mut parts = pair.trim().splitn(2, '=');
-        let key = parts.next()?.trim();
-        let val = parts.next()?.trim();
-        if key == cookie_name {
-            return Some(val.to_string());
+fn extract_auth_token(headers: &HeaderMap) -> Option<String> {
+    if let Some(cookie_header) = headers
+        .get(axum::http::header::COOKIE)
+        .and_then(|h| h.to_str().ok())
+    {
+        for pair in cookie_header.split(';') {
+            let mut parts = pair.trim().splitn(2, '=');
+            let key = parts.next()?.trim();
+            let val = parts.next()?.trim();
+            if key == "dandori_session" && !val.is_empty() {
+                return Some(val.to_string());
+            }
         }
     }
-    None
+
+    headers
+        .get(axum::http::header::AUTHORIZATION)
+        .and_then(|h| h.to_str().ok())
+        .and_then(|h| h.strip_prefix("Bearer "))
+        .map(str::trim)
+        .filter(|t| !t.is_empty())
+        .map(ToString::to_string)
 }
 
 async fn get_user_from_session(pool: &SqlitePool, token: &str) -> Option<(String, String)> {
@@ -79,9 +90,10 @@ async fn get_user_from_session(pool: &SqlitePool, token: &str) -> Option<(String
     let row = sqlx::query(
         "SELECT u.id, u.system_role FROM user u
          JOIN session s ON s.user_id = u.id
-         WHERE s.token_hash = ? AND s.expires_at > CURRENT_TIMESTAMP",
+         WHERE s.token_hash = ? AND s.expires_at > ?",
     )
     .bind(hashed)
+    .bind(chrono::Utc::now().to_rfc3339())
     .fetch_optional(pool)
     .await
     .ok()??;
@@ -122,7 +134,7 @@ async fn authenticate_request(
         None => return Ok(("test_user".to_string(), "admin".to_string())),
     };
 
-    let session_token = extract_cookie(headers, "dandori_session").ok_or_else(|| {
+    let session_token = extract_auth_token(headers).ok_or_else(|| {
         Box::new(error_response(
             "unauthorized",
             "Thiếu phiên đăng nhập",
@@ -192,6 +204,23 @@ fn create_sse_event(env: &Envelope) -> Event {
         .data(data)
 }
 
+fn send_missed_events(
+    last_event_id: Option<&str>,
+    scope: &WorkspaceScope,
+    recent_events: &RecentEventBuffer,
+    tx: &mut mpsc::Sender<Event>,
+) -> bool {
+    if let Some(last_id) = last_event_id {
+        let missed = recent_events.events_after(last_id, scope);
+        for env in missed {
+            if tx.try_send(create_sse_event(&env)).is_err() {
+                return false;
+            }
+        }
+    }
+    true
+}
+
 async fn run_stream_loop(
     _guard: ConnectionGuard,
     mut sub: EventSubscription,
@@ -200,14 +229,13 @@ async fn run_stream_loop(
     scope: WorkspaceScope,
     recent_events: Arc<RecentEventBuffer>,
 ) {
-    if let Some(ref last_id) = last_event_id {
-        let missed = recent_events.events_after(last_id, &scope);
-        for env in missed {
-            if tx.try_send(create_sse_event(&env)).is_err() {
-                return;
-            }
-        }
+    if !send_missed_events(last_event_id.as_deref(), &scope, &recent_events, &mut tx) {
+        return;
     }
+
+    // Gửi ngay ping ban đầu để flush stream qua reverse proxy (Vite / Nginx)
+    let init_ping = Event::default().event("ping").data("{}");
+    let _ = tx.try_send(init_ping);
 
     let mut interval = tokio::time::interval(Duration::from_secs(15));
     interval.tick().await;

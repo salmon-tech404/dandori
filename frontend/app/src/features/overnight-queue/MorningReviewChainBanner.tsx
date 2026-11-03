@@ -3,14 +3,14 @@ import { t } from '../../core/i18n';
 import type { MorningSummaryDto, ReviewChainItem } from './types';
 
 const ReviewItemRow: React.FC<{ item: ReviewChainItem }> = ({ item }) => (
-  <div className="flex items-center justify-between text-xs py-1 border-b last:border-b-0">
-    <span className="font-medium">{item.title}</span>
-    <div className="flex items-center gap-2">
-      <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "var(--fs-12)", padding: "4px 0", borderBottom: "1px solid var(--ln)" }}>
+    <span style={{ fontWeight: 500, color: "var(--fg)" }}>{item.title}</span>
+    <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)" }}>
+      <span style={{ padding: "2px 6px", borderRadius: "var(--radius-4)", backgroundColor: "var(--sf2)", color: "var(--mu)" }}>
         {item.status}
       </span>
       {item.branch_name ? (
-        <span className="font-mono text-blue-600 dark:text-blue-400">
+        <span style={{ fontFamily: "var(--font-mono)", color: "var(--bl)" }}>
           {t('overnight_queue_review_branch', { branch: item.branch_name })}
         </span>
       ) : null}
@@ -32,12 +32,12 @@ export const MorningReviewChainBanner: React.FC<{ summary: MorningSummaryDto | n
   });
 
   return (
-    <div className="p-3 mb-4 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
-      <h3 className="font-semibold text-sm text-amber-900 dark:text-amber-200">
+    <div style={{ padding: "var(--sp-12)", marginBottom: "var(--sp-16)", borderRadius: "var(--radius-8)", border: "1px solid var(--or)", backgroundColor: "var(--orb)" }}>
+      <h3 style={{ margin: 0, fontWeight: 600, fontSize: "var(--fs-14)", color: "var(--or)" }}>
         {t('overnight_queue_morning_summary')}
       </h3>
-      <p className="text-xs text-amber-700 dark:text-amber-300 mb-2">{stats}</p>
-      <div className="divide-y divide-amber-200 dark:divide-amber-800/40">
+      <p style={{ margin: "4px 0 var(--sp-8)", fontSize: "var(--fs-12)", color: "var(--or)" }}>{stats}</p>
+      <div style={{ display: "flex", flexDirection: "column" }}>
         {summary.review_items.map((item) => (
           <ReviewItemRow key={item.task_id} item={item} />
         ))}

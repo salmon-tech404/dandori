@@ -2,6 +2,8 @@ import { useState, type ReactElement } from "react";
 import { Zap } from "lucide-react";
 import type { ProviderGroup, AccountDetail } from "./types";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
+import { Input } from "../../ui/components/Input";
 
 function AccountRunningBadge({ title }: { title: string }): ReactElement {
   return (
@@ -14,7 +16,7 @@ function AccountRunningBadge({ title }: { title: string }): ReactElement {
         gap: "6px",
         padding: "2px 8px",
         borderRadius: "4px",
-        backgroundColor: "var(--bl-soft, #eef4ff)",
+        backgroundColor: "var(--blb)",
         color: "var(--bl, #0052cc)",
         fontSize: "12px",
         fontWeight: 500,
@@ -35,8 +37,8 @@ function AccountInfoCol({ acc }: { acc: AccountDetail }): ReactElement {
           {acc.status}
         </span>
       </div>
-      <div style={{ fontSize: "11px", color: "var(--mu)", fontFamily: "monospace", marginTop: "2px" }}>
-        {acc.id.slice(0, 8)} • {acc.home_dir}
+      <div style={{ fontFamily: "monospace", fontSize: "12px", color: "var(--mu)", marginTop: "2px" }}>
+        {acc.id.slice(0, 8)}
       </div>
       {acc.running_task && <AccountRunningBadge title={acc.running_task.task_title} />}
     </div>
@@ -58,37 +60,27 @@ function AccountActionsCol({ acc, priority, setPriority, onUpdate, onShowRelogin
         <label htmlFor={`priority-${acc.id}`} style={{ fontSize: "12px", color: "var(--mu)" }}>
           {t("account_priority")}:
         </label>
-        <input
+        <Input
           id={`priority-${acc.id}`}
           type="number"
           value={priority}
-          onChange={(e) => setPriority(Number(e.target.value))}
-          style={{ width: "60px", height: "32px", padding: "0 6px", borderRadius: "4px", border: "1px solid var(--ln)" }}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPriority(Number(e.target.value))}
+          style={{ width: "80px" }}
         />
         {priority !== acc.priority && (
-          <button
-            type="button"
-            className="btn btn-secondary"
-            style={{ height: "32px", fontSize: "12px", padding: "0 8px" }}
-            onClick={() => onUpdate(acc.id, { priority })}
-          >
+          <Button variant="secondary" size="sm" type="button" onClick={() => onUpdate(acc.id, { priority })}>
             {t("multi_account_save_priority")}
-          </button>
+          </Button>
         )}
       </div>
 
-      <button type="button" className="btn btn-secondary" style={{ height: "32px", fontSize: "12px" }} onClick={() => onShowRelogin(acc)}>
+      <Button variant="secondary" size="sm" type="button" onClick={() => onShowRelogin(acc)}>
         {t("multi_account_relogin_hint")}
-      </button>
+      </Button>
 
-      <button
-        type="button"
-        className={`btn ${acc.enabled ? "btn-secondary" : "btn-primary"}`}
-        style={{ height: "32px", fontSize: "12px" }}
-        onClick={() => onUpdate(acc.id, { enabled: !acc.enabled })}
-      >
+      <Button variant={acc.enabled ? "secondary" : "primary"} size="sm" type="button" onClick={() => onUpdate(acc.id, { enabled: !acc.enabled })}>
         {acc.enabled ? t("multi_account_disable_label") : t("multi_account_enable_label")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -113,7 +105,7 @@ function AccountRowItem({ acc, onUpdate, onShowRelogin }: AccountRowProps): Reac
         padding: "10px 14px",
         border: "1px solid var(--ln)",
         borderRadius: "8px",
-        backgroundColor: acc.enabled ? "var(--bg)" : "var(--sf-muted, #f8f9fa)",
+        backgroundColor: acc.enabled ? "var(--bg)" : "var(--sf2)",
         opacity: acc.enabled ? 1 : 0.7,
         gap: "12px",
       }}

@@ -1,4 +1,5 @@
 import { t } from '../../../core/i18n';
+import { Button } from '../../../ui/components/Button';
 import type { RunSummary } from '../types';
 
 interface RowProps {
@@ -43,31 +44,22 @@ const RowActions = ({
   onOpenReplay: (id: string) => void;
   onOpenNote: (id: string) => void;
   onExport: (id: string, format: 'markdown' | 'json') => void;
-}) => {
-  const btnStyle = {
-    padding: '4px 8px',
-    minHeight: '44px',
-    borderRadius: '6px',
-    border: '1px solid var(--ln)',
-    backgroundColor: 'var(--sf)',
-  };
-  return (
-    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
-      <button type="button" onClick={() => onOpenReplay(id)} style={btnStyle}>
-        {t('run_history_btn_replay')}
-      </button>
-      <button type="button" onClick={() => onOpenNote(id)} style={btnStyle}>
-        {t('run_history_note_label')}
-      </button>
-      <button type="button" onClick={() => onExport(id, 'markdown')} style={btnStyle}>
-        {t('run_history_btn_export_md')}
-      </button>
-      <button type="button" onClick={() => onExport(id, 'json')} style={btnStyle}>
-        {t('run_history_btn_export_json')}
-      </button>
-    </div>
-  );
-};
+}) => (
+  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+    <Button type="button" variant="secondary" size="sm" onClick={() => onOpenReplay(id)}>
+      {t('run_history_btn_replay')}
+    </Button>
+    <Button type="button" variant="secondary" size="sm" onClick={() => onOpenNote(id)}>
+      {t('run_history_note_label')}
+    </Button>
+    <Button type="button" variant="secondary" size="sm" onClick={() => onExport(id, 'markdown')}>
+      {t('run_history_btn_export_md')}
+    </Button>
+    <Button type="button" variant="secondary" size="sm" onClick={() => onExport(id, 'json')}>
+      {t('run_history_btn_export_json')}
+    </Button>
+  </div>
+);
 
 export const RunTableRow = ({ run, onOpenReplay, onOpenNote, onExport }: RowProps) => {
   const st = getStatusStyle(run.status);
@@ -86,11 +78,15 @@ export const RunTableRow = ({ run, onOpenReplay, onOpenNote, onExport }: RowProp
           {run.status}
         </span>
       </td>
-      <td style={{ padding: '10px 12px', color: 'var(--mu)' }}>{run.started_at}</td>
       <td style={{ padding: '10px 12px' }}>{dur}</td>
-      <td style={{ padding: '10px 12px' }}>{exitCode}</td>
-      <td style={{ padding: '10px 12px', textAlign: 'right' }}>
-        <RowActions id={run.id} onOpenReplay={onOpenReplay} onOpenNote={onOpenNote} onExport={onExport} />
+      <td style={{ padding: '10px 12px', fontFamily: 'monospace' }}>{exitCode}</td>
+      <td style={{ padding: '10px 12px' }}>
+        <RowActions
+          id={run.id}
+          onOpenReplay={onOpenReplay}
+          onOpenNote={onOpenNote}
+          onExport={onExport}
+        />
       </td>
     </tr>
   );

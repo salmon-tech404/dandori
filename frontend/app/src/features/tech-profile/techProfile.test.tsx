@@ -4,6 +4,7 @@ import { EntryEditorModal } from './EntryEditorModal';
 import { contributions } from './index';
 import { ProfilePreviewModal } from './ProfilePreviewModal';
 import { TechProfileTab } from './TechProfileTab';
+import { t } from '../../core/i18n';
 
 const MOCK_ENTRIES = [
   {
@@ -43,7 +44,7 @@ describe('Tech Profile Tab Header', () => {
     render(<TechProfileTab projectId="p-1" workspaceId="ws-1" />);
     expect(screen.getByText('Hồ sơ kỹ thuật dự án')).toBeDefined();
     expect(screen.getByText('Mọi agent đều đọc')).toBeDefined();
-    expect(screen.getByText('+ Thêm mục')).toBeDefined();
+    expect(screen.getByText(t('tech_profile_btn_add'))).toBeDefined();
     expect(screen.getByText('Xem trước khối hồ sơ')).toBeDefined();
   });
 });

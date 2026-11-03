@@ -4,6 +4,9 @@ import { X } from "lucide-react";
 import { t } from "../../core/i18n";
 import { ProjectContext } from "../../core/project";
 import { Button } from "../../ui/components/Button";
+import { IconButton } from "../../ui/components/IconButton";
+import { Input } from "../../ui/components/Input";
+import { Checkbox } from "../../ui/components/Checkbox";
 import type { Task, TaskStatus } from "../../../../../shared/types";
 import { MAIN_COLUMNS, TERMINAL_COLUMNS, type KanbanColumnDef } from "./types";
 import { useKanban, useKanbanFilters } from "./useKanban";
@@ -69,23 +72,14 @@ function FilterBar({
     <div style={toolbarStyle}>
       <span style={{ fontSize: "12px", color: "var(--mu)" }}>{t("kanban_hint_click_card")}</span>
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <input
-          data-testid="kanban-search-input"
+        <Input data-testid="kanban-search-input"
           type="text"
           placeholder={t("kanban_search_placeholder")}
           value={filters.search}
           onChange={(e) => onChange({ search: e.target.value })}
           style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--ln)", fontSize: "12px" }}
         />
-        <label style={{ fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px", cursor: "pointer" }}>
-          <input
-            data-testid="toggle-completed-checkbox"
-            type="checkbox"
-            checked={filters.showCompleted}
-            onChange={(e) => onChange({ showCompleted: e.target.checked })}
-          />
-          {t("kanban_filter_show_completed")}
-        </label>
+        <Checkbox data-testid="toggle-completed-checkbox" checked={filters.showCompleted} onChange={(e) => onChange({ showCompleted: e.target.checked })} label={t("kanban_filter_show_completed")} />
       </div>
     </div>
   );
@@ -190,9 +184,7 @@ function BoardAlerts({
   return (
     <div data-testid="kanban-error-alert" style={errorAlertStyle}>
       <span>{errorMessage}</span>
-      <button type="button" onClick={onClearError} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer" }}>
-        <X size={14} />
-      </button>
+      <IconButton variant="ghost" size="sm" type="button" aria-label={t("btn_close")} onClick={onClearError} icon={<X size={14} />} style={{ background: "none", border: "none", color: "inherit" }} />
     </div>
   );
 }

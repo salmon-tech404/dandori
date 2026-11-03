@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { t } from "../../../core/i18n";
+import { Button } from "../../../ui/components/Button";
 import { approvalGateApi } from "../api/approvalGateApi";
 import type { ApprovalRequest } from "../types";
 import { ApprovalDecisionModal } from "./ApprovalDecisionModal";
@@ -45,15 +46,17 @@ interface PanelHeaderProps {
 
 function PanelHeader({ onRefresh }: PanelHeaderProps) {
   return (
-    <div className="flex items-center justify-between mb-4">
-      <h4 className="text-sm font-semibold text-zinc-200">{t("approval_gate_title")}</h4>
-      <button
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--sp-16)" }}>
+      <h4 style={{ margin: 0, fontSize: "var(--fs-14)", fontWeight: 600, color: "var(--fg)" }}>{t("approval_gate_title")}</h4>
+      <Button
+        variant="ghost"
+        size="sm"
         type="button"
         onClick={onRefresh}
-        className="text-xs text-zinc-400 hover:text-zinc-200"
+        style={{ fontSize: "var(--fs-12)", color: "var(--mu)" }}
       >
         {t("approval_gate_btn_refresh")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -73,14 +76,14 @@ export function ApprovalGatePanel({ taskId, workspaceId, onViewDiff }: ApprovalG
   };
 
   if (loading) {
-    return <div className="p-4 text-xs text-zinc-500">{t("approval_gate_loading")}</div>;
+    return <div style={{ padding: "var(--sp-16)", fontSize: "var(--fs-12)", color: "var(--mu)" }}>{t("approval_gate_loading")}</div>;
   }
   if (error) {
-    return <div className="p-4 text-xs text-red-400">{error}</div>;
+    return <div style={{ padding: "var(--sp-16)", fontSize: "var(--fs-12)", color: "var(--rd)" }}>{error}</div>;
   }
 
   return (
-    <div className="p-4" data-testid="approval-gate-panel">
+    <div style={{ padding: "var(--sp-16)" }} data-testid="approval-gate-panel">
       <PanelHeader onRefresh={() => void loadRequests()} />
 
       <ApprovalQueueList requests={requests} onSelectRequest={setSelectedRequest} />

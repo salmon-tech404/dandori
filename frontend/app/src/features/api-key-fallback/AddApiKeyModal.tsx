@@ -1,5 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { t } from '../../core/i18n';
+import { Modal } from '../../ui/components/Modal';
+import { Button } from '../../ui/components/Button';
+import { Input } from '../../ui/components/Input';
+import { Select } from '../../ui/components/Select';
 import type { SpendingLimit } from './types';
 
 interface AddApiKeyModalProps {
@@ -23,7 +27,7 @@ function PeriodTypeSelect(props: {
     <div className="form-row">
       <div>
         <label htmlFor="limit-period">{t('api_key_fallback_period_label')}</label>
-        <select
+        <Select
           id="limit-period"
           value={props.period}
           onChange={(e) => props.setPeriod(e.target.value as 'daily' | 'weekly' | 'monthly')}
@@ -31,18 +35,18 @@ function PeriodTypeSelect(props: {
           <option value="daily">{t("api_key_period_daily")}</option>
           <option value="weekly">{t("api_key_period_weekly")}</option>
           <option value="monthly">{t("api_key_period_monthly")}</option>
-        </select>
+        </Select>
       </div>
       <div>
         <label htmlFor="limit-type">{t('api_key_fallback_type_label')}</label>
-        <select
+        <Select
           id="limit-type"
           value={props.limitType}
           onChange={(e) => props.setLimitType(e.target.value as 'currency' | 'credits')}
         >
           <option value="currency">{t("api_key_unit_currency")}</option>
           <option value="credits">{t("api_key_unit_credits")}</option>
-        </select>
+        </Select>
       </div>
     </div>
   );
@@ -58,7 +62,7 @@ function LimitThresholdInputs(props: {
     <div className="form-row">
       <div>
         <label htmlFor="limit-val">{t('api_key_fallback_max_label')}</label>
-        <input
+        <Input
           id="limit-val"
           type="number"
           step="0.1"
@@ -69,7 +73,7 @@ function LimitThresholdInputs(props: {
       </div>
       <div>
         <label htmlFor="alert-threshold">{t('api_key_fallback_alert_label')}</label>
-        <input
+        <Input
           id="alert-threshold"
           type="number"
           required
@@ -85,7 +89,7 @@ function ProviderSelect(props: { provider: string; setProvider: (v: string) => v
   return (
     <div className="form-group">
       <label htmlFor="key-provider">{t('api_key_fallback_provider_label')}</label>
-      <select
+      <Select
         id="key-provider"
         value={props.provider}
         onChange={(e) => props.setProvider(e.target.value)}
@@ -93,7 +97,7 @@ function ProviderSelect(props: { provider: string; setProvider: (v: string) => v
         <option value="claude">{t("provider_claude_full")}</option>
         <option value="codex">{t("provider_codex_full")}</option>
         <option value="agy">{t("provider_agy_full")}</option>
-      </select>
+      </Select>
     </div>
   );
 }
@@ -108,7 +112,7 @@ function KeyTextInputs(props: {
     <>
       <div className="form-group">
         <label htmlFor="key-label">{t('api_key_fallback_label_label')}</label>
-        <input
+        <Input
           id="key-label"
           type="text"
           required
@@ -119,7 +123,7 @@ function KeyTextInputs(props: {
       </div>
       <div className="form-group">
         <label htmlFor="key-secret">{t('api_key_fallback_secret_label')}</label>
-        <input
+        <Input
           id="key-secret"
           type="password"
           required
@@ -237,41 +241,37 @@ function SpendingLimitSection(props: {
 
 export function AddApiKeyModal({ isOpen, onClose, onSubmit }: AddApiKeyModalProps) {
   const { state, actions } = useApiKeyForm(onSubmit, onClose);
-  if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <div className="modal-content">
-        <h3>{t('api_key_fallback_modal_title')}</h3>
-        {state.error && <div className="alert-error" role="alert">{state.error}</div>}
-        <form onSubmit={actions.handleSubmit}>
-          <ProviderSelect provider={state.provider} setProvider={actions.setProvider} />
-          <KeyTextInputs
-            label={state.label}
-            setLabel={actions.setLabel}
-            apiKey={state.apiKey}
-            setApiKey={actions.setApiKey}
-          />
-          <SpendingLimitSection
-            period={state.period}
-            setPeriod={actions.setPeriod}
-            limitType={state.limitType}
-            setLimitType={actions.setLimitType}
-            limitValue={state.limitValue}
-            setLimitValue={actions.setLimitValue}
-            alertThreshold={state.alertThreshold}
-            setAlertThreshold={actions.setAlertThreshold}
-          />
-          <div className="modal-actions">
-            <button type="button" onClick={onClose} disabled={state.submitting}>
-              {t('api_key_fallback_cancel_btn')}
-            </button>
-            <button type="submit" disabled={state.submitting}>
-              {state.submitting ? t('api_key_fallback_saving') : t('api_key_fallback_save_btn')}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Modal open={isOpen} onClose={onClose} title={t('api_key_fallback_modal_title')} size="md">
+      {state.error && <div className="alert-error" role="alert">{state.error}</div>}
+      <form onSubmit={actions.handleSubmit}>
+        <ProviderSelect provider={state.provider} setProvider={actions.setProvider} />
+        <KeyTextInputs
+          label={state.label}
+          setLabel={actions.setLabel}
+          apiKey={state.apiKey}
+          setApiKey={actions.setApiKey}
+        />
+        <SpendingLimitSection
+          period={state.period}
+          setPeriod={actions.setPeriod}
+          limitType={state.limitType}
+          setLimitType={actions.setLimitType}
+          limitValue={state.limitValue}
+          setLimitValue={actions.setLimitValue}
+          alertThreshold={state.alertThreshold}
+          setAlertThreshold={actions.setAlertThreshold}
+        />
+        <div className="modal-actions">
+          <Button variant="secondary" type="button" onClick={onClose} disabled={state.submitting}>
+            {t('api_key_fallback_cancel_btn')}
+          </Button>
+          <Button variant="primary" type="submit" disabled={state.submitting}>
+            {state.submitting ? t('api_key_fallback_saving') : t('api_key_fallback_save_btn')}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }

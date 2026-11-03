@@ -68,6 +68,22 @@ function mapRawModules(
   });
 }
 
+async function fetchFeatureData(wsId?: string, projId?: string) {
+  const [modRes, packRes, auditRes, effRes] = await Promise.all([
+    apiClient<{ modules: RawModule[] }>("/api/v1/features/modules"),
+    apiClient<{ packs: FeaturePackItem[] }>("/api/v1/features/packs").catch(() => ({ packs: [] })),
+    apiClient<{ audit: FeatureAuditItem[] }>("/api/v1/features/audit").catch(() => ({ audit: [] })),
+    apiClient<{ effective: Array<{ module_id: string; enabled: boolean; locked?: boolean }> }>(
+      `/api/v1/features/effective?workspace=${wsId || "default"}&project=${projId || "default"}`
+    ).catch(() => ({ effective: [] })),
+  ]);
+  return {
+    modules: mapRawModules(modRes.modules || [], effRes.effective || []),
+    packs: packRes.packs || [],
+    audits: auditRes.audit || [],
+  };
+}
+
 function useFeatureLoader(
   initialModules: FeatureModuleItem[],
   scope: ScopeType,
@@ -76,34 +92,30 @@ function useFeatureLoader(
   setAudits: (a: FeatureAuditItem[]) => void
 ) {
   const { currentWorkspace, currentProject } = useProject();
+  const [loading, setLoading] = useState(initialModules.length === 0);
 
   const loadData = useCallback(async () => {
     if (initialModules.length > 0) return;
+    setLoading(true);
     try {
-      const wsId = currentWorkspace?.id;
-      const projId = currentProject?.id;
-      const [modRes, packRes, auditRes, effRes] = await Promise.all([
-        apiClient<{ modules: RawModule[] }>("/api/v1/features/modules"),
-        apiClient<{ packs: FeaturePackItem[] }>("/api/v1/features/packs").catch(() => ({ packs: [] })),
-        apiClient<{ audit: FeatureAuditItem[] }>("/api/v1/features/audit").catch(() => ({ audit: [] })),
-        apiClient<{ effective: Array<{ module_id: string; enabled: boolean; locked?: boolean }> }>(
-          `/api/v1/features/effective?workspace=${wsId || "default"}&project=${projId || "default"}`
-        ).catch(() => ({ effective: [] })),
-      ]);
-
-      setModules(mapRawModules(modRes.modules || [], effRes.effective || []));
-      setPacks(packRes.packs || []);
-      setAudits(auditRes.audit || []);
+      const wsId = scope === "system" ? undefined : currentWorkspace?.id;
+      const projId = scope === "project" ? currentProject?.id : undefined;
+      const data = await fetchFeatureData(wsId, projId);
+      setModules(data.modules);
+      setPacks(data.packs);
+      setAudits(data.audits);
     } catch {
       // ignore
+    } finally {
+      setLoading(false);
     }
-  }, [initialModules.length, currentWorkspace?.id, currentProject?.id, setModules, setPacks, setAudits]);
+  }, [initialModules.length, scope, currentWorkspace?.id, currentProject?.id, setModules, setPacks, setAudits]);
 
   useEffect(() => {
     loadData();
   }, [loadData, scope]);
 
-  return { loadData };
+  return { loadData, loading };
 }
 
 interface ApplyPlanParams {
@@ -385,7 +397,7 @@ export function useFeatureManagement(initialModules: FeatureModuleItem[] = [], s
   const [modal, setModal] = useState<ModalState>({ type: null });
 
   const { refresh: refreshContext } = useFeatures();
-  const { loadData } = useFeatureLoader(initialModules, scope, setModules, setPacks, setAudits);
+  const { loadData, loading } = useFeatureLoader(initialModules, scope, setModules, setPacks, setAudits);
 
   const applyToggle = useToggleApplier(scope, setModules, setAudits, setModal, refreshContext, isMock);
   const { planEnableAction, planDisableAction } = usePlanActions(modules, scope, setModal, applyToggle, isMock);
@@ -417,5 +429,6 @@ export function useFeatureManagement(initialModules: FeatureModuleItem[] = [], s
     handleUndo,
     applyToggle,
     reload: loadData,
+    loading,
   };
 }

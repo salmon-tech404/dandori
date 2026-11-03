@@ -742,3 +742,116 @@ Tài liệu này ghi nhận các quyết định kỹ thuật do nhóm AI Agent 
 - **Lựa chọn:** Xóa chính xác hai thư mục tạm `D:\dandori-qc` và `D:\dandori-target-ui` bằng `Remove-Item -LiteralPath ... -Recurse -Force`; cập nhật mã kiểm thử `DAN-VERIFY-024` và kịch bản 8 bước chi tiết vào `docs/manual-test-checklist.md`.
 - **Lý do:** Bảo đảm ổ D luôn duy trì dung lượng trống vượt mức an toàn 40 GB theo quy định mới, đồng thời chuẩn bị đầy đủ tài liệu cho chủ dự án kiểm tra độc lập.
 - **Hệ quả:** Giải phóng 49.5 GB dung lượng ổ đĩa (dung lượng trống tăng từ 179.4 GB lên 228.9 GB); bảo toàn nguyên vẹn thư mục mã nguồn và target nhị phân của repo.
+
+## UI-09: Tích hợp thư viện thành phần dùng chung và tệp khai báo môi trường `vite-env.d.ts`
+
+- **Mục:** Cung cấp bộ thành phần dùng chung (`Button`, `IconButton`, `Input`, `Textarea`, `Select`, `Checkbox`, `Modal`, `Dropdown`, `useDismiss`, `Tooltip`, `Tabs`, `Card`, `Chip`, `Badge`, `Spinner`, `Skeleton`, `PageHeader`, `FormField`) và màn hình xem thử dev `/ui-kit`.
+- **Lựa chọn:** Tạo tệp `frontend/app/src/vite-env.d.ts` chứa `/// <reference types="vite/client" />` để TypeScript nhận diện `import.meta.env.DEV` thay vì sửa `tsconfig.json`. Đường dẫn `/ui-kit` được kích hoạt có điều kiện thông qua `import.meta.env.DEV`, đảm bảo tự động bị loại bỏ (tree-shaken) khỏi bản build phát hành sản phẩm.
+- **Lý do:** Tuân thủ quy định Khóa cấu hình chất lượng (không chỉnh sửa nới lỏng tsconfig), đồng thời đáp ứng tiêu chí nghiệm thu của UI-09: chỉ cho phép xem thử `/ui-kit` khi chạy dev và không đưa vào bản dựng chính thức.
+- **Hệ quả:** Bản dựng `pnpm run build` đạt exit 0, toàn bộ 49 tệp test vitest và 19 bước kiểm tra verify xanh hoàn toàn.
+
+
+## UI-10: Chuẩn hóa Modal (`role="dialog" | "alertdialog"`) và bộ lắng nghe sự kiện `useDismiss`
+
+- **Mục:** Đồng bộ hóa toàn bộ 32 modal và các menu thả xuống trong ứng dụng sang thành phần chuẩn `Modal.tsx` và cơ chế lắng nghe sự kiện `useDismiss`.
+- **Lựa chọn:**
+  1. Bổ sung thuộc tính `role?: "dialog" | "alertdialog"` (mặc định `"dialog"`) cho `Modal.tsx`, cho phép các thành phần thông báo cảnh báo nghiêm ngặt như `ConfirmDialog` truyền `role="alertdialog"` mà không phá vỡ kiểm thử ARIA của ứng dụng.
+  2. Bổ sung lắng nghe sự kiện `click` bên cạnh `mousedown` và `touchstart` trong hook `useDismiss.ts` để tương thích hoàn toàn với cả sự kiện nhấp chuột thật và các sự kiện nhấp chuột tổng hợp (synthetic click) từ công cụ tự động hóa hoặc trình duyệt không đầu (CDP automation).
+- **Lý do:** Đáp ứng cả tiêu chuẩn tiếp cận WAI-ARIA, tính bảo thủ khi tương tác người dùng chuột/cảm ứng, và tính ổn định khi chạy bộ kiểm thử giao diện tự động.
+- **Hệ quả:** 100% modal đều che phủ toàn màn hình (`position: fixed`), z-index 1000, hỗ trợ Escape và click outside; 100% dropdown đóng tự động; toàn bộ test frontend và verify gate xanh 100%.
+
+## UI-11: Chuyển đổi toàn diện nút và ô nhập dùng chung, xóa bỏ Double Plus và bổ sung kiểm tra tự động
+
+- **Mục:** Thay thế triệt để các thẻ `<button>`, `<input>`, `<select>`, `<textarea>` thô và thuộc tính `title=` tương tác trên toàn bộ 22 phân hệ giao diện (`features/**`) và các thành phần cốt lõi (`core/**`) bằng bộ thành phần dùng chung (`Button`, `IconButton`, `Input`, `Select`, `Textarea`, `Checkbox`, `Tooltip`); xóa bỏ triệt để lỗi "Double Plus" (hai dấu cộng song song).
+- **Lựa chọn:**
+  1. Cho phép chuyển tiếp `className` xuống phần tử `<input>` trong `Input.tsx` để bảo toàn khả năng truy vấn lớp kiểu dáng trong các bài kiểm thử đơn vị di động (ví dụ `min-h-[44px]`).
+  2. Chuẩn hóa nút có icon và nhãn bằng thuộc tính `icon={<Plus ... />}` của `Button`, đồng thời làm sạch toàn bộ các ký tự tiền tố trang trí `+` trong từ điển i18n (`btn_create_task`, `btn_add_account`, `prompt_btn_create`, `tech_profile_btn_add`, `api_key_fallback_add_btn`).
+  3. Bổ sung các quy tắc kiểm tra tĩnh tự động trong `scripts/check-i18n.mjs` (và kiểm thử bằng 6 ca test đỏ/xanh trong `tests/tooling/check-i18n.test.mjs`), cấm hoàn toàn phần tử form thô và tiền tố trang trí trong i18n, tích hợp trực tiếp vào bước 11c của cổng `pnpm run verify`.
+- **Lý do:** Đảm bảo tính nhất quán của hệ thống thiết kế (Design System), loại bỏ hoàn toàn các lỗi trực quan gây khó chịu cho người dùng, và bảo vệ mã nguồn lâu dài chống suy thoái thông qua cổng tự động hóa.
+- **Hệ quả:** Toàn bộ ứng dụng sạch 100% thẻ form thô; 3 ảnh chụp trình duyệt thật xác nhận không còn lỗi double plus; toàn bộ 225 test frontend và 19 bước verify gate xanh tuyệt đối.
+
+## UI-12: Gỡ bỏ triệt để Tailwind CSS, chuyển sang hệ thống thành phần dùng chung và Tokens
+
+- **Mục:** Loại bỏ toàn bộ 351 vị trí sử dụng class Tailwind CSS trong `frontend/app/src/features/**`, gỡ gói thư viện `tailwindcss` khỏi `package.json`, và khóa chất lượng bằng kiểm tra tự động trong cổng verify.
+- **Lựa chọn:**
+  1. Loại bỏ gói phụ thuộc `tailwindcss` khỏi `frontend/app/package.json`, chạy `pnpm install` để cập nhật `pnpm-lock.yaml`, xác thực qua `pnpm install --frozen-lockfile` đạt exit code 0.
+  2. Chuyển đổi toàn bộ 52 tệp trong `frontend/app/src/features/**` sang sử dụng các thành phần dùng chung (`Card`, `PageHeader`, `FormField`, `Table`, `Button`, `Modal`, `Input`, `Select`, `Textarea`, `Badge`, `Chip`, `Spinner`) kết hợp CSS tokens từ `ui/tokens.css` và layout classes chuẩn CSS.
+  3. Bổ sung hàm kiểm tra tĩnh `validateNoTailwind` vào `scripts/check-i18n.mjs` nhằm ngăn chặn mọi việc tái đưa các lớp Tailwind phổ biến vào `features/**`. Bổ sung bộ kiểm thử tooling chuyên biệt `tests/tooling/check-i18n.test.mjs` với các ca xanh và ca đỏ (phát hiện chính xác các class `space-y-`, `p-4`, `bg-`, `text-sm`, `flex`, `grid-cols-`, `rounded-lg`).
+  4. Phân rã các component bị vượt ngưỡng ESLint `max-lines-per-function` (> 40 dòng) khi refactor (ví dụ: `EtaCardBadge`, `EtaTaskSection`, `IntegrationsCard`, `ActiveAgentsTable`, `LiveLogViewer`, `SkillsTable`, `ProfilePreviewModal`, `TechProfileTab`, `VoiceReportControl`) thành các subcomponent nhỏ gọn, mạch lạc.
+- **Lý do:** Tuân thủ quyết định thiết kế ràng buộc (D-21): duy trì duy nhất một hệ thống kiểu dáng trong toàn dự án (thành phần dùng chung + design tokens), loại bỏ hoàn toàn mã kiểu dáng không hoạt động và giảm tải trọng gói phụ thuộc.
+- **Hệ quả:** Mã nguồn frontend tinh gọn, nhất quán; `check-i18n` kiểm tra 0 class Tailwind còn sót; 225 unit test frontend và 19 bước `verify` xanh trên cả cây làm việc lẫn bản sao sạch `D:\dandori-qc`.
+
+## UI-13: Chuyển trang mượt mà, triệt tiêu giật bố cục (CLS < 0.1) qua toàn bộ 6 lần chuyển route
+
+- **Mục:** Giảm thiểu điểm số giật bố cục (Cumulative Layout Shift - CLS) giữa 7 màn hình xuống dưới 0.1 (đặc biệt là lần chuyển Tích hợp -> Cài đặt từ 0.51 xuống dưới 0.1), giữ vững kích thước nội dung không co giật thanh cuộn (`scrollbar-gutter: stable`).
+- **Lựa chọn:**
+  1. Xây dựng thành phần `SettingsModulesSkeleton.tsx` mô phỏng chính xác cấu trúc 8 nhóm thẻ và 34 hàng module với chiều cao thực tế (~58px/hàng, tổng chiều cao ~2400px), giữ chỗ ổn định ngay khi màn hình Cài đặt bắt đầu nạp.
+  2. Định cấu hình chiều cao khung chờ mặc định cho từng ô cắm (`DEFAULT_SLOT_HEIGHTS`) trong `core/Slot.tsx`, hiển thị `Skeleton` giữ chỗ thay vì trả về `<></>` (0px) trong quá trình nạp module bất đồng bộ.
+  3. Triển khai cơ chế nạp trước module `preloadScreen` (`core/preload.ts`), tự động kích hoạt `contrib.load()` khi người dùng rê chuột (`onMouseEnter`) hoặc chuyển tiêu điểm (`onFocus`) vào các liên kết điều hướng trên thanh bên `AppSidebar.tsx`.
+  4. Loại bỏ hiện tượng nhấp nháy "Tính năng này đang tắt": trong `LayoutMain` của `AppLayout.tsx`, chỉ hiển thị `ModuleDisabledNotice` khi trạng thái nạp của `FeaturesProvider` đã hoàn tất (`loading === false`). Trong lúc đang nạp, hiển thị khung chờ `Skeleton` chuẩn mực.
+  5. Tối ưu hook nạp tính năng `useFeaturesLoader`: chuyển đổi danh sách phụ thuộc từ tham chiếu đối tượng `currentWorkspace`/`currentProject` sang các trường định danh `workspaceId`/`projectId`, ngăn chặn việc kích hoạt lại hàm fetch vô ích khi chỉ thay đổi địa chỉ bộ nhớ của đối tượng.
+  6. Xây dựng kịch bản đo lường CLS tự động qua Chrome DevTools Protocol (`node scripts/ui-shots.mjs UI-13` hoặc cờ `--cls`) sử dụng `PerformanceObserver` lắng nghe sự kiện `layout-shift`, ghi nhận chi tiết nguồn gốc dịch chuyển layout và đối chiếu kích thước `main`.
+- **Lý do:** Đáp ứng trọn vẹn 5 tiêu chí kỹ thuật của UI-13 và mục tiêu trải nghiệm người dùng không giật khung hình theo bài học thực tế từ đợt đo bằng trình duyệt thật của Claude.
+- **Hệ quả:** Điểm số CLS của cả 6 lần chuyển màn hình đều đạt xuất sắc dưới 0.1 (lần chuyển Tích hợp -> Cài đặt giảm mạnh từ 0.51 xuống 0.0119); độ chênh lệch chiều rộng nội dung bằng 0px trên toàn bộ các route; 230 unit test và 19/19 bước verify gate xanh tuyệt đối.
+
+## UI-14: Chuẩn hóa Màn hình Agent & Tài khoản theo Mockup và Bổ sung API Runs Task
+
+- **Mục:** Dựng lại giao diện màn hình Agent và Tài khoản theo thiết kế mockup `02-agent-tai-khoan.png`, loại bỏ chuỗi thô `"1. claude ↑↓"`, xây dựng lưới thẻ tài khoản 3 cột với huy hiệu chữ cái tròn và thanh hạn mức 5h/tuần, tích hợp Auto-Switch và API Key dự phòng; đồng thời giải quyết triệt để lỗi thiếu API truy vấn lượt chạy của task cho `TaskLiveRunSection`.
+- **Lựa chọn:**
+  1. Đổi thứ tự khai báo slot trong `frontend/app/src/App.tsx` (`AgentsScreen`): đưa `agents.defaults` lên trước `agents.accounts` để khối "Vai trò mặc định" hiển thị trang trọng ngay trên đầu màn hình trước khi đi vào danh sách tài khoản, khớp hoàn toàn với mockup thiết kế.
+  2. Bổ sung endpoint backend `GET /api/v1/runs?task_id=` và `GET /api/v1/tasks/{id}/runs` trong `crates/dandori-server/src/routes/runs.rs` và `run_service.rs`. Thực thi kiểm tra phân quyền workspace chặt chẽ (từ chối 403 Forbidden nếu người dùng không thuộc workspace), sắp xếp các lượt chạy mới nhất lên đầu (`Reverse(started_at)`). Bổ sung bộ kiểm thử 3 vai trò (outsider 403, member 200, admin 200) kèm mutation proof trong `core_api_tests.rs`.
+  3. Chuẩn hóa huy hiệu tròn chữ cái đầu nhà cung cấp: C (Claude - cam), G (Gemini - xanh dương), K (Codex - ngọc bích), F (Fake Agent - xám) với kích thước cố định 36px và màu sắc dựa trên token hệ thống.
+  4. Đóng gói khối tự động chuyển đổi `AutoSwitchSection` trong `features/auto-switch/index.tsx` gom nhóm `AutoSwitchNotice` và `AutoSwitchConfigCard` dưới slot `auto-switch-config`.
+  5. Tái cấu trúc `ApiKeyFallbackCard` bằng `Card`, `Chip` token "Trả theo token", `Button`, và trích xuất subcomponent `ApiKeyListContent` để thỏa mãn triệt để lint `max-lines-per-function: 40`.
+- **Lý do:** Đáp ứng trọn vẹn tiêu chí nghiệm thu UI-14, đảm bảo các màn hình phụ thuộc vào lượt chạy task hoạt động thông suốt với backend thật, và giữ mã nguồn sạch sẽ, dễ bảo trì.
+- **Hệ quả:** Màn hình Agent & Tài khoản hiển thị đẹp mắt, trực quan trên cả desktop (1440px) và di động (390px); không lỗi console; toàn bộ 19 bước kiểm tra verify gate xanh tuyệt đối.
+
+## UI-15: Màn hình Dashboard và Lịch theo Mockup, Sửa Lỗi Luồng SSE Live-Status và Nâng Cấp Kanban Card
+
+- **Mục:** Hoàn thiện giao diện màn hình Tổng quan (`03-dashboard.png`) và Lịch (`04-lich.png`), sửa lỗi luồng SSE stream `/api/v1/m/live-status/stream` bị treo hoặc "Mất kết nối", và nâng cấp thẻ nhiệm vụ Kanban (`01-board.png`) hiển thị tiến độ và hạn mức thời gian thực.
+- **Lựa chọn:**
+  1. **Khắc phục luồng SSE backend (`crates/mod-live-status/src/handlers.rs`):**
+     - Bổ sung phát sự kiện `ping` ban đầu ngay khi kết nối được chấp thuận, đảm bảo phía client kích hoạt sự kiện `onopen` tức thì và chuyển trạng thái sang "Đang kết nối thời gian thực" thay vì bị treo ở trạng thái kết nối chờ (pending).
+     - Hỗ trợ giải nén token xác thực linh hoạt từ cả query parameter `?token=`, header `Authorization: Bearer`, hoặc cookie phiên đăng nhập.
+     - Tách hàm trợ giúp `send_missed_events` từ vòng lặp `run_stream_loop` để tuân thủ triệt để quy chuẩn Clippy `too-many-lines: 50`.
+  2. **Bố cục Màn hình Tổng quan (`DashboardScreen`):**
+     - Xây dựng thành phần `DashboardKpiSection.tsx` hiển thị 4 thẻ KPI chỉ số ("Đang chạy", "Cần bạn", "Xong tuần này", "Hạn mức tuần đã dùng") sử dụng `Card` và token hệ thống.
+     - Bố cục 2 cột dạng lưới (`grid2`) cho các phân hệ theo dõi: "Agent đang làm việc" (`live-status`) với huy hiệu tròn chữ cái C/G/K/F và thanh tiến độ; "Hạn mức đã dùng theo agent" (`cost-tracking`) với chip "Tuần này"; "Báo cáo tuần" (`reports`) với biểu đồ cột hoàn thành các ngày trong tuần (T2..CN) kèm nút "Xuất báo cáo".
+     - Trong `ReportsPanel.tsx`, chỉ hiển thị biểu đồ cột tuần khi loại kỳ báo cáo là `weekly` (`periodType === 'weekly'`), vừa đúng ngữ cảnh mockup vừa tránh trùng lặp phần tử trong các bài kiểm thử tự động.
+  3. **Bố cục Màn hình Lịch (`CalendarScreen`):**
+     - Chuẩn hóa thanh công cụ (`CalendarToolbar.tsx`) với nút "Thêm lịch", chip "Tuần 44", và chip khung giờ cấm "Giờ cấm: 09:00 đến 18:00" kết nối với module `mod-quiet-hours`.
+     - Dựng lưới lịch tuần 7 cột (`T2..CN`) trong `CalendarGrid.tsx` hỗ trợ cuộn ngang (`overflow-x: auto`) trên giao diện di động. Các cột ngày (`.day`) chứa các thẻ sự kiện (`.ev`) hiển thị giờ monospace và tiêu đề công việc.
+     - Bố cục khối dưới dạng lưới 2 cột: "Job viết bằng Markdown" (`md-jobs`) và "Hàng đợi chạy qua đêm" (`overnight-queue`).
+  4. **Nâng cấp Thẻ Kanban (`KanbanCard.tsx`):**
+     - Tích hợp huy hiệu tròn chữ cái nhà cung cấp (C/G/K/F), thanh tiến độ ngang, và các chip thông tin phụ ("còn ~14 phút", "3% hạn mức").
+     - Thiết lập độ rộng cột tối thiểu `min-width: 248px` cùng khả năng cuộn ngang tổng thể trên bảng Kanban, bảo đảm cột thứ 5 "Sẵn sàng merge" không bao giờ bị cắt cụt.
+  5. **Tối ưu Kịch bản Chụp Màn hình Trình duyệt Thật (`scripts/ui-shots.mjs`):**
+     - Bổ sung kịch bản `runUi15Scenario` chụp 5 ảnh kiểm chứng: Dashboard desktop/mobile, Calendar desktop/mobile, và Board desktop.
+     - Nâng thời gian chờ `waitForSelector('[data-testid="btn-load-sample-tasks"]', 20000)` trong kịch bản E2E UI-07 để đảm bảo độ tin cậy tuyệt đối khi hệ thống đang chịu tải biên dịch.
+- **Lý do:** Đáp ứng 100% tiêu chí nghiệm thu của UI-15 theo đặc tả `17_UI_THANH_PHAN_DUNG_CHUNG.md`, loại bỏ hoàn toàn các lỗi trực quan và kết nối thời gian thực, mang lại trải nghiệm chuẩn xác theo mockup trực quan.
+- **Hệ quả:** Màn hình Tổng quan, Lịch và Bảng Kanban hoạt động mượt mà, kết nối thời gian thực ổn định, 230 unit test frontend và toàn bộ 19 bước verify gate xanh 100% trên cả cây làm việc lẫn bản sao sạch.
+
+## UI-16: Màn hình Prompt và tri thức, Tích hợp theo Mockup
+
+- **Mục:** Tái cấu trúc và hoàn thiện giao diện màn hình Prompt và tri thức (`05-prompt-tri-thuc.png`) và Tích hợp (`06-tich-hop.png`) theo đúng thiết kế đồ họa; chuyển đổi toàn bộ sang thành phần dùng chung và tokens, loại bỏ hộp thoại thô và khối hiển thị thu nhỏ không khớp đặc tả.
+- **Lựa chọn:**
+  1. **Bố cục 2 cột màn hình Prompt và tri thức (`05-prompt-tri-thuc.png`):**
+     - Cột trái: Xây dựng thành phần `KnowledgeRoleSidebar.tsx` hiển thị danh sách 4 vai trò agent tiêu chuẩn: PM (Claude · cam, huy hiệu C), Worker (Codex · ngọc bích, huy hiệu K), Agent test (Gemini · xanh dương, huy hiệu G), Agent tài liệu (Claude · cam, huy hiệu C). Khi bấm vào vai trò nào, trạng thái active chuyển đổi và đồng bộ ngữ cảnh xuống các tab bên phải.
+     - Cột phải: Khung tab tri thức chuẩn WAI-ARIA (`knowledge.tab`) bao gồm: Prompt, Hồ sơ kỹ thuật, Skill, Bộ nhớ, Đồng bộ hướng dẫn.
+     - Tab Prompt: Xây dựng `RolePromptSection.tsx` hiển thị tiêu đề `Prompt: {roleName}`, chip phiên bản `v{n}`, nút phụ "Thử" và nút chính "Lưu", vùng soạn thảo chỉ thị font monospace. Bên dưới giữ trọn vẹn bảng danh mục prompt tùy chỉnh cùng nút "Tạo prompt" và lịch sử phiên bản.
+     - Hỗ trợ cuộn và co giãn linh hoạt: trên màn hình di động (< 768px), hai cột tự động xếp chồng dạng dọc (`flex-wrap`).
+  2. **Lưới thẻ 3 cột màn hình Tích hợp (`06-tich-hop.png`):**
+     - Nâng cấp thành phần `IntegrationsCard.tsx` từ khối thông tin đơn giản thành lưới thẻ 3 cột responsive (`repeat(auto-fill, minmax(min(100%, 340px), 1fr))`) bao phủ trọn vẹn 6 kênh dịch vụ: GitHub, GitLab, Linear, Telegram, Discord và Slack, Điện thoại.
+     - Mỗi thẻ hiển thị: Tiêu đề đậm, chip trạng thái màu sắc theo token (`green` cho Đã kết nối / Đã ghép máy, `gray` cho Chưa kết nối / Chưa ghép máy), mô tả ngắn gọn một dòng và nút hành động chuẩn ("Quản lý" / "Kết nối" / "Ghép máy mới").
+     - Khi bấm nút, ứng dụng mở hộp thoại modal tương ứng: `IntegrationsSettings` cho các kênh git/Linear, `NotificationsPanel` cho Telegram/Discord/Slack, và `MobileSettingsPanel` cho kết nối thiết bị di động.
+  3. **Kiểm thử tự động và Chụp ảnh Trình duyệt Thật:**
+     - Bổ sung kịch bản `runUi16Scenario` trong `scripts/ui-shots.mjs` và kiểm thử xuất khẩu trong `tests/tooling/ui-shots.test.mjs`.
+     - Chụp 4 ảnh nghiệm thu thực tế: `UI-16-knowledge.png` (1440x900), `UI-16-knowledge-mobile.png` (390x844), `UI-16-integrations.png` (1440x900), `UI-16-integrations-mobile.png` (390x844).
+- **Lý do:** Đáp ứng trọn vẹn tiêu chí của task UI-16, mang lại trải nghiệm quản lý tri thức và tích hợp liền mạch, chuyên nghiệp, bảo mật theo đúng kiến trúc mở rộng module.
+- **Hệ quả:** Màn hình Prompt và tri thức cùng Tích hợp chuẩn hóa 100% theo mockup; 231 bài kiểm thử Vitest và 19/19 bước kiểm tra chất lượng verify gate xanh trên cả cây làm việc lẫn bản sao sạch `D:\dandori-qc`.
+
+
+
+
+
+

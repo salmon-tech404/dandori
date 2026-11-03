@@ -2,6 +2,7 @@ import { FC } from "react";
 import { Settings as SettingsIcon } from "lucide-react";
 import { t } from "../../core/i18n";
 import { Tooltip } from "../../ui/components/Tooltip";
+import { IconButton } from "../../ui/components/IconButton";
 import { Switch } from "./Switch";
 import { ModuleBadges } from "./ModuleBadges";
 import { FeatureModuleItem } from "./types";
@@ -30,15 +31,12 @@ export const ModuleRow: FC<ModuleRowProps> = ({ item, onToggle, onConfigure }) =
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-12)" }}>
         <ModuleBadges item={item} />
-        <button
-          type="button"
-          disabled={!item.enabled}
+        <IconButton
+          icon={<SettingsIcon size={16} />}
           aria-label={t("configure_module")}
+          disabled={!item.enabled}
           onClick={() => onConfigure(item)}
-          style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "32px", height: "32px", minWidth: "var(--touch-target)", minHeight: "var(--touch-target)", borderRadius: "var(--radius-8)", border: "none", backgroundColor: "transparent", color: item.enabled ? "var(--fg)" : "var(--ln)", cursor: item.enabled ? "pointer" : "not-allowed" }}
-        >
-          <SettingsIcon size={16} />
-        </button>
+        />
       </div>
     </div>
   );

@@ -1,249 +1,22 @@
 import { FC, ReactNode, useState, useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Users,
-  BarChart3,
-  Calendar,
-  BookOpen,
-  Boxes,
-  Settings,
-  Sun,
-  Moon,
-  Plus,
-  LogOut,
-} from "lucide-react";
+import { Sun, Moon, Plus } from "lucide-react";
 import { t } from "./i18n";
 import { useFeatures, SCREEN_PRIMARY_MODULE } from "./useFeatures";
 import { Slot } from "./Slot";
 import { Button } from "../ui/components/Button";
 import { Table, Column } from "../ui/components/Table";
 import { StatusBadge } from "../ui/components/StatusBadge";
-import { SessionContext, User } from "./session";
+import { Skeleton } from "../ui/components/Skeleton";
 import { ProjectContext } from "./project";
-import { ProjectSelector } from "./ProjectSelector";
+import { AppSidebar } from "./AppSidebar";
+import { MENU_ITEMS, type MenuItem } from "./menu";
 import { CreateProjectModal, CreateWorkspaceModal } from "./ProjectModals";
 import { CreateTaskModal } from "../features/kanban/CreateTaskModal";
 import type { Task, TaskStatus } from "../../../../shared/types";
 
-export interface MenuItem {
-  id: string;
-  label: string;
-  path: string;
-  icon: React.ComponentType<{ size?: number }>;
-}
-
-export const MENU_ITEMS: MenuItem[] = [
-  { id: "board", label: t("nav_board"), path: "/", icon: LayoutDashboard },
-  { id: "agents", label: t("nav_agents"), path: "/agents", icon: Users },
-  { id: "dashboard", label: t("nav_dashboard"), path: "/dashboard", icon: BarChart3 },
-  { id: "calendar", label: t("nav_calendar"), path: "/calendar", icon: Calendar },
-  { id: "knowledge", label: t("nav_knowledge"), path: "/knowledge", icon: BookOpen },
-  { id: "integrations", label: t("nav_integrations"), path: "/integrations", icon: Boxes },
-  { id: "settings", label: t("nav_settings"), path: "/settings", icon: Settings },
-];
-
-function SidebarBrand() {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "var(--sp-8)",
-        padding: "0 var(--sp-8) var(--sp-16) var(--sp-8)",
-        borderBottom: "1px solid var(--ln)",
-        marginBottom: "var(--sp-16)",
-      }}
-    >
-      <div
-        style={{
-          width: "28px",
-          height: "28px",
-          borderRadius: "var(--radius-8)",
-          backgroundColor: "var(--ac)",
-          color: "var(--acf)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: 700,
-          fontSize: "var(--fs-13)",
-        }}
-      >
-        {t("app_logo_text")}
-      </div>
-      <span style={{ fontSize: "var(--fs-16)", fontWeight: 700 }}>
-        {t("app_title")}
-      </span>
-    </div>
-  );
-}
-
-function SidebarNavItem({
-  item,
-  isSelected,
-}: {
-  item: MenuItem;
-  isSelected: boolean;
-}) {
-  const IconComp = item.icon;
-  return (
-    <li>
-      <Link
-        to={item.path}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "var(--sp-8)",
-          height: "var(--menu-height)",
-          padding: "0 var(--sp-12)",
-          borderRadius: "var(--radius-8)",
-          textDecoration: "none",
-          color: isSelected ? "var(--fg)" : "var(--mu)",
-          backgroundColor: isSelected ? "var(--sf2)" : "transparent",
-          fontWeight: isSelected ? 600 : 500,
-          fontSize: "var(--fs-14)",
-        }}
-      >
-        <IconComp size={16} />
-        <span>{item.label}</span>
-      </Link>
-    </li>
-  );
-}
-
-function SidebarNav({
-  items,
-  currentScreenId,
-}: {
-  items: MenuItem[];
-  currentScreenId: string;
-}) {
-  return (
-    <nav aria-label={t("nav_main")}>
-      <ul
-        style={{
-          listStyle: "none",
-          padding: 0,
-          margin: 0,
-          display: "flex",
-          flexDirection: "column",
-          gap: "2px",
-        }}
-      >
-        {items.map((item) => (
-          <SidebarNavItem
-            key={item.id}
-            item={item}
-            isSelected={item.id === currentScreenId}
-          />
-        ))}
-      </ul>
-    </nav>
-  );
-}
-
-const userCardStyle = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  padding: "var(--sp-8) var(--sp-12)",
-  backgroundColor: "var(--sf2)",
-  borderRadius: "var(--radius-8)",
-  fontSize: "var(--fs-13)",
-};
-
-const userLabelStyle = {
-  fontWeight: 600,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap" as const,
-  maxWidth: "120px",
-};
-
-function SidebarUserSection({
-  user,
-  logout,
-}: {
-  user: User;
-  logout?: () => void;
-}) {
-  return (
-    <div style={userCardStyle}>
-      <span style={userLabelStyle}>{user.username}</span>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => logout && logout()}
-        aria-label={t("btn_logout")}
-        icon={<LogOut size={14} />}
-      >
-        {t("btn_logout")}
-      </Button>
-    </div>
-  );
-}
-
-function SidebarFooter({
-  effectiveCount,
-  totalCount,
-  user,
-  logout,
-}: {
-  effectiveCount: number;
-  totalCount: number;
-  user?: User | null;
-  logout?: () => void;
-}) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
-      <div
-        style={{
-          padding: "var(--sp-12)",
-          backgroundColor: "var(--sf2)",
-          borderRadius: "var(--radius-8)",
-          fontSize: "var(--fs-12)",
-          color: "var(--mu)",
-        }}
-      >
-        {t("active_features_note", { on: effectiveCount, total: totalCount })}
-      </div>
-      {user && <SidebarUserSection user={user} logout={logout} />}
-    </div>
-  );
-}
-
-function AppSidebar({ screenId }: { screenId: string }) {
-  const { effectiveModules, totalModulesCount } = useFeatures();
-  const session = useContext(SessionContext);
-
-  return (
-    <aside
-      style={{
-        width: "var(--sidebar-width)",
-        minWidth: "var(--sidebar-width)",
-        backgroundColor: "var(--sf)",
-        borderRight: "1px solid var(--ln)",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        padding: "var(--sp-16) var(--sp-12)",
-      }}
-    >
-      <div>
-        <SidebarBrand />
-        <ProjectSelector />
-        <SidebarNav items={MENU_ITEMS} currentScreenId={screenId} />
-      </div>
-      <SidebarFooter
-        effectiveCount={effectiveModules.length}
-        totalCount={totalModulesCount}
-        user={session?.user}
-        logout={session?.logout}
-      />
-    </aside>
-  );
-}
-
+export { MENU_ITEMS };
+export type { MenuItem };
 function HeaderLeft({
   title,
   isBoard,
@@ -513,8 +286,13 @@ interface LayoutMainProps {
 }
 
 function LayoutMain(props: LayoutMainProps) {
-  const { isModuleEnabled } = useFeatures();
-  if (!props.active) return <ModuleDisabledNotice screenId={props.screenId} />;
+  const { isModuleEnabled, loading } = useFeatures();
+  if (!props.active) {
+    if (loading) {
+      return <Skeleton height="400px" width="100%" radius="lg" />;
+    }
+    return <ModuleDisabledNotice screenId={props.screenId} />;
+  }
   if (props.screenId === "board") {
     if (!props.hasProject && props.tasks.length === 0) {
       return <EmptyProjectGuide onOpenCreate={props.onOpenCreateProject} />;
@@ -550,7 +328,8 @@ function LayoutContent(props: LayoutContentProps) {
         display: "flex",
         flexDirection: "column",
         minWidth: 0,
-        overflowY: "auto",
+        height: "100vh",
+        overflow: "hidden",
       }}
     >
       <AppHeader
@@ -561,7 +340,7 @@ function LayoutContent(props: LayoutContentProps) {
         onToggleTheme={props.onToggleTheme}
         onOpenCreateTask={props.onOpenCreateTask}
       />
-      <main style={{ padding: "var(--sp-24)", flex: 1 }}>
+      <main style={{ padding: "var(--sp-24)", flex: 1, minHeight: 0, overflowY: "auto", scrollbarGutter: "stable" }}>
         <LayoutMain
           active={props.active}
           screenId={props.screenId}
@@ -590,7 +369,8 @@ function useAppLayoutNav() {
 
 const layoutRootStyle = {
   display: "flex",
-  minHeight: "100vh",
+  height: "100vh",
+  overflow: "hidden",
   backgroundColor: "var(--bg)",
   color: "var(--fg)",
 };
@@ -667,7 +447,7 @@ export const AppLayout: FC<AppLayoutProps> = ({
 
   return (
     <div style={layoutRootStyle}>
-      <AppSidebar screenId={nav.screenId} />
+      <AppSidebar screenId={nav.screenId} theme={nav.theme} onToggleTheme={nav.toggleTheme} />
       <LayoutContent
         title={nav.currentMenu.label}
         screenId={nav.screenId}

@@ -1,4 +1,7 @@
+import { CSSProperties } from "react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
+import { Checkbox } from "../../ui/components/Checkbox";
 import type { MemoryEntry } from "./types";
 
 interface TableProps {
@@ -22,7 +25,7 @@ export function MemoryTable({
 }: TableProps) {
   if (memories.length === 0) {
     return (
-      <div className="text-center py-12 text-slate-500 text-sm">
+      <div style={{ textAlign: "center", padding: "var(--sp-32) 0", color: "var(--mu)", fontSize: "var(--fs-14)" }}>
         {t("shared_memory_empty")}
       </div>
     );
@@ -31,8 +34,8 @@ export function MemoryTable({
   const allSelected = memories.length > 0 && selectedIds.length === memories.length;
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-slate-800">
-      <table className="w-full text-left text-sm text-slate-300">
+    <div style={{ overflowX: "auto", borderRadius: "var(--radius-8)", border: "1px solid var(--ln)", backgroundColor: "var(--sf)" }}>
+      <table style={{ width: "100%", textAlign: "left", fontSize: "var(--fs-14)", borderCollapse: "collapse" }}>
         <TableHeader
           allSelected={allSelected}
           onSelectAll={() => onSelectAll(allSelected ? [] : memories.map((m) => m.id))}
@@ -58,21 +61,19 @@ function TableHeader({
   onSelectAll: () => void;
 }) {
   return (
-    <thead className="bg-slate-800/80 text-xs uppercase text-slate-400">
+    <thead style={{ backgroundColor: "var(--sf2)", fontSize: "var(--fs-12)", textTransform: "uppercase", color: "var(--mu)", borderBottom: "1px solid var(--ln)" }}>
       <tr>
-        <th className="p-3 w-10">
-          <input
-            type="checkbox"
+        <th style={{ padding: "10px 12px", width: 40 }}>
+          <Checkbox
             checked={allSelected}
             onChange={onSelectAll}
-            className="rounded border-slate-700 bg-slate-800 text-indigo-600 focus:ring-0"
           />
         </th>
-        <th className="p-3 w-28">{t("shared_memory_col_category")}</th>
-        <th className="p-3">{t("shared_memory_col_content")}</th>
-        <th className="p-3 w-40">{t("shared_memory_col_source")}</th>
-        <th className="p-3 w-28">{t("shared_memory_col_status")}</th>
-        <th className="p-3 w-44 text-right">{t("shared_memory_col_actions")}</th>
+        <th style={{ padding: "10px 12px", width: 112 }}>{t("shared_memory_col_category")}</th>
+        <th style={{ padding: "10px 12px" }}>{t("shared_memory_col_content")}</th>
+        <th style={{ padding: "10px 12px", width: 160 }}>{t("shared_memory_col_source")}</th>
+        <th style={{ padding: "10px 12px", width: 112 }}>{t("shared_memory_col_status")}</th>
+        <th style={{ padding: "10px 12px", width: 176, textAlign: "right" }}>{t("shared_memory_col_actions")}</th>
       </tr>
     </thead>
   );
@@ -94,7 +95,7 @@ function TableBody({
   onDelete: (id: string) => void;
 }) {
   return (
-    <tbody className="divide-y divide-slate-800">
+    <tbody>
       {memories.map((entry) => (
         <Row
           key={entry.id}
@@ -126,22 +127,20 @@ function Row({
   onDelete: () => void;
 }) {
   return (
-    <tr className="hover:bg-slate-800/40 transition">
-      <td className="p-3">
-        <input
-          type="checkbox"
+    <tr style={{ borderBottom: "1px solid var(--ln)", backgroundColor: isSelected ? "var(--blb)" : "transparent" }}>
+      <td style={{ padding: "10px 12px" }}>
+        <Checkbox
           checked={isSelected}
           onChange={onToggle}
-          className="rounded border-slate-700 bg-slate-800 text-indigo-600 focus:ring-0"
         />
       </td>
-      <td className="p-3"><CategoryBadge category={entry.category} /></td>
-      <td className="p-3 font-mono text-xs whitespace-pre-wrap max-w-md">{entry.content}</td>
-      <td className="p-3 text-xs text-slate-400">
-        <span className="font-semibold text-slate-300">{entry.source_type}:</span> {entry.source_ref}
+      <td style={{ padding: "10px 12px" }}><CategoryBadge category={entry.category} /></td>
+      <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontSize: "var(--fs-12)", whiteSpace: "pre-wrap", maxWidth: 448, color: "var(--fg)" }}>{entry.content}</td>
+      <td style={{ padding: "10px 12px", fontSize: "var(--fs-12)", color: "var(--mu)" }}>
+        <span style={{ fontWeight: 600, color: "var(--fg)" }}>{entry.source_type}:</span> {entry.source_ref}
       </td>
-      <td className="p-3"><StatusBadge status={entry.status} /></td>
-      <td className="p-3 text-right">
+      <td style={{ padding: "10px 12px" }}><StatusBadge status={entry.status} /></td>
+      <td style={{ padding: "10px 12px", textAlign: "right" }}>
         <RowActions status={entry.status} onApprove={onApprove} onReject={onReject} onDelete={onDelete} />
       </td>
     </tr>
@@ -149,29 +148,29 @@ function Row({
 }
 
 function CategoryBadge({ category }: { category: string }) {
-  const colors: Record<string, string> = {
-    fact: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    decision: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-    convention: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    lesson: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  const styles: Record<string, CSSProperties> = {
+    fact: { backgroundColor: "var(--blb)", color: "var(--bl)", border: "1px solid var(--bl)" },
+    decision: { backgroundColor: "var(--tlb)", color: "var(--tl)", border: "1px solid var(--tl)" },
+    convention: { backgroundColor: "var(--orb)", color: "var(--or)", border: "1px solid var(--or)" },
+    lesson: { backgroundColor: "var(--grb)", color: "var(--gr)", border: "1px solid var(--gr)" },
   };
-  const color = colors[category.toLowerCase()] || "bg-slate-500/10 text-slate-400 border-slate-500/20";
+  const style = styles[category.toLowerCase()] || { backgroundColor: "var(--sf2)", color: "var(--mu)", border: "1px solid var(--ln)" };
   return (
-    <span className={`inline-block px-2 py-0.5 text-xs rounded border ${color}`}>
+    <span style={{ display: "inline-block", padding: "2px 8px", fontSize: "var(--fs-12)", borderRadius: "var(--radius-4)", ...style }}>
       {category.toUpperCase()}
     </span>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const badges: Record<string, { label: string; cls: string }> = {
-    pending: { label: t("shared_memory_status_pending"), cls: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-    approved: { label: t("shared_memory_status_approved"), cls: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-    rejected: { label: t("shared_memory_status_rejected"), cls: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
+  const badges: Record<string, { label: string; style: CSSProperties }> = {
+    pending: { label: t("shared_memory_status_pending"), style: { backgroundColor: "var(--orb)", color: "var(--or)", border: "1px solid var(--or)" } },
+    approved: { label: t("shared_memory_status_approved"), style: { backgroundColor: "var(--grb)", color: "var(--gr)", border: "1px solid var(--gr)" } },
+    rejected: { label: t("shared_memory_status_rejected"), style: { backgroundColor: "var(--rdb)", color: "var(--rd)", border: "1px solid var(--rd)" } },
   };
-  const b = badges[status.toLowerCase()] || { label: status, cls: "bg-slate-500/10 text-slate-400 border-slate-500/20" };
+  const b = badges[status.toLowerCase()] || { label: status, style: { backgroundColor: "var(--sf2)", color: "var(--mu)", border: "1px solid var(--ln)" } };
   return (
-    <span className={`inline-block px-2 py-0.5 text-xs rounded border ${b.cls}`}>
+    <span style={{ display: "inline-block", padding: "2px 8px", fontSize: "var(--fs-12)", borderRadius: "var(--radius-4)", ...b.style }}>
       {b.label}
     </span>
   );
@@ -189,20 +188,20 @@ function RowActions({
   onDelete: () => void;
 }) {
   return (
-    <div className="flex items-center justify-end gap-2 text-xs">
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "var(--sp-8)", fontSize: "var(--fs-12)" }}>
       {status !== "approved" && (
-        <button type="button" onClick={onApprove} className="text-emerald-400 hover:underline font-medium">
+        <Button type="button" variant="ghost" size="sm" onClick={onApprove} style={{ color: "var(--gr)", fontWeight: 500 }}>
           {t("shared_memory_btn_approve")}
-        </button>
+        </Button>
       )}
       {status !== "rejected" && (
-        <button type="button" onClick={onReject} className="text-rose-400 hover:underline font-medium">
+        <Button type="button" variant="ghost" size="sm" onClick={onReject} style={{ color: "var(--rd)", fontWeight: 500 }}>
           {t("shared_memory_btn_reject")}
-        </button>
+        </Button>
       )}
-      <button type="button" onClick={onDelete} className="text-slate-400 hover:text-red-400 hover:underline">
+      <Button type="button" variant="ghost" size="sm" onClick={onDelete} style={{ color: "var(--mu)" }}>
         {t("shared_memory_btn_delete")}
-      </button>
+      </Button>
     </div>
   );
 }

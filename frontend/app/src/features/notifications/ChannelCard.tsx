@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
 import type { PublicNotificationChannel } from "./types";
 
 interface Props {
@@ -17,26 +18,29 @@ function ChannelHeader({
   onToggle: (id: string, enabled: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between">
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
       <div>
-        <h4 className="font-semibold text-neutral-100">{channel.name}</h4>
-        <span className="text-xs uppercase text-neutral-400">
+        <h4 style={{ margin: "0 0 2px 0", fontSize: "var(--fs-14)", fontWeight: 600, color: "var(--fg)" }}>{channel.name}</h4>
+        <span style={{ fontSize: "10px", textTransform: "uppercase", color: "var(--mu)", fontWeight: 600 }}>
           {channel.channel_type}
         </span>
       </div>
-      <button
-        type="button"
-        onClick={() => onToggle(channel.id, !channel.is_enabled)}
-        className={`rounded px-2 py-1 text-xs font-medium ${
-          channel.is_enabled
-            ? "bg-emerald-800 text-emerald-100"
-            : "bg-neutral-600 text-neutral-300"
-        }`}
+      <Button variant="ghost" size="sm" type="button" onClick={() => onToggle(channel.id, !channel.is_enabled)}
+        style={{
+          borderRadius: "var(--radius-pill)",
+          padding: "2px 8px",
+          fontSize: "var(--fs-12)",
+          fontWeight: 600,
+          border: "none",
+          cursor: "pointer",
+          backgroundColor: channel.is_enabled ? "var(--grb)" : "var(--sf2)",
+          color: channel.is_enabled ? "var(--gr)" : "var(--mu)",
+        }}
       >
         {channel.is_enabled
           ? t("notifications_status_enabled")
           : t("notifications_status_disabled")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -54,37 +58,24 @@ function ChannelActions({
 
   const handleTest = async () => {
     setBusy(true);
-    try {
-      await onTest(channelId);
-    } finally {
-      setBusy(false);
-    }
+    await Promise.resolve(onTest(channelId)).finally(() => setBusy(false));
   };
 
   return (
-    <div className="mt-4 flex gap-2">
-      <button
-        type="button"
-        disabled={busy}
-        onClick={handleTest}
-        className="rounded bg-sky-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-sky-600 disabled:opacity-50"
-      >
+    <div style={{ marginTop: "var(--sp-12)", display: "flex", gap: "var(--sp-8)" }}>
+      <Button type="button" variant="secondary" size="sm" disabled={busy} loading={busy} onClick={handleTest}>
         {t("notifications_test_send")}
-      </button>
-      <button
-        type="button"
-        onClick={() => onDelete(channelId)}
-        className="rounded bg-rose-800 px-3 py-1.5 text-xs font-medium text-rose-100 hover:bg-rose-700"
-      >
+      </Button>
+      <Button type="button" variant="ghost" size="sm" onClick={() => onDelete(channelId)} style={{ color: "var(--rd)" }}>
         {t("notifications_delete")}
-      </button>
+      </Button>
     </div>
   );
 }
 
 export function ChannelCard({ channel, onToggle, onTest, onDelete }: Props) {
   return (
-    <div className="rounded border border-neutral-700 bg-neutral-800 p-4 shadow-sm">
+    <div style={{ borderRadius: "var(--radius-8)", border: "1px solid var(--ln)", backgroundColor: "var(--sf2)", padding: "var(--sp-12)" }}>
       <ChannelHeader channel={channel} onToggle={onToggle} />
       <ChannelActions
         channelId={channel.id}

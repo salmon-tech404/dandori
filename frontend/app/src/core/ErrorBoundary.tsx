@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from "react";
 import { t } from "./i18n";
+import { Button } from "../ui/components/Button";
 
 export interface ErrorBoundaryProps {
   name?: string;
@@ -31,7 +32,9 @@ function ErrorFallbackView({ name, onRetry }: { name?: string; onRetry: () => vo
       }}
     >
       <span>{t("slot_error_title", { name: slotName })}</span>
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         type="button"
         onClick={onRetry}
         style={{
@@ -45,7 +48,7 @@ function ErrorFallbackView({ name, onRetry }: { name?: string; onRetry: () => vo
         }}
       >
         {t("slot_error_retry")}
-      </button>
+      </Button>
     </div>
   );
 }

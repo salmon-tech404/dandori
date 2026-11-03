@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { fetchCurrentReport } from './api';
 import type { ReportData } from './types';
 
-export function useReports(workspaceId: string) {
-  const [periodType, setPeriodType] = useState<'daily' | 'weekly'>('daily');
+export function useReports(workspaceId: string, initialPeriod: 'daily' | 'weekly' = 'daily') {
+  const [periodType, setPeriodType] = useState<'daily' | 'weekly'>(initialPeriod);
   const [report, setReport] = useState<ReportData | null>(null);
   const [markdown, setMarkdown] = useState<string>('');
   const [loading, setLoading] = useState(false);

@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { t } from "../../core/i18n";
+import { Modal } from "../../ui/components/Modal";
+import { Button } from "../../ui/components/Button";
+import { Input } from "../../ui/components/Input";
 import type { SetPricingRequest } from "./types";
 
 interface PricingModalProps {
@@ -28,18 +31,24 @@ export function PricingModal({ onSave, onClose }: PricingModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-lg bg-white p-5 shadow dark:bg-slate-800">
-        <h3 className="mb-3 text-base font-semibold">{t("cost_tracking_pricing_title")}</h3>
-        <input value={provider} onChange={(e) => setProvider(e.target.value)} placeholder={t("cost_provider_placeholder")} className="mb-2 w-full rounded border p-1.5 text-xs dark:bg-slate-900" required />
-        <input value={model} onChange={(e) => setModel(e.target.value)} placeholder={t("cost_model_placeholder")} className="mb-2 w-full rounded border p-1.5 text-xs dark:bg-slate-900" required />
-        <input type="number" step="0.01" value={inPrice} onChange={(e) => setInPrice(e.target.value)} placeholder={t("cost_input_price_placeholder")} className="mb-2 w-full rounded border p-1.5 text-xs dark:bg-slate-900" required />
-        <input type="number" step="0.01" value={outPrice} onChange={(e) => setOutPrice(e.target.value)} placeholder={t("cost_output_price_placeholder")} className="mb-4 w-full rounded border p-1.5 text-xs dark:bg-slate-900" required />
-        <div className="flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="rounded px-3 py-1 text-xs">{t("cost_tracking_cancel")}</button>
-          <button type="submit" disabled={loading} className="rounded bg-blue-600 px-3 py-1 text-xs text-white">{t("cost_tracking_save")}</button>
+    <Modal
+      open={true}
+      onClose={onClose}
+      title={t("cost_tracking_pricing_title")}
+      size="sm"
+      footer={
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "var(--sp-8)" }}>
+          <Button variant="ghost" onClick={onClose}>{t("cost_tracking_cancel")}</Button>
+          <Button variant="primary" loading={loading} onClick={handleSubmit}>{t("cost_tracking_save")}</Button>
         </div>
+      }
+    >
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)" }}>
+        <Input value={provider} onChange={(e) => setProvider(e.target.value)} placeholder={t("cost_provider_placeholder")} required />
+        <Input value={model} onChange={(e) => setModel(e.target.value)} placeholder={t("cost_model_placeholder")} required />
+        <Input type="number" step="0.01" value={inPrice} onChange={(e) => setInPrice(e.target.value)} placeholder={t("cost_input_price_placeholder")} required />
+        <Input type="number" step="0.01" value={outPrice} onChange={(e) => setOutPrice(e.target.value)} placeholder={t("cost_output_price_placeholder")} required />
       </form>
-    </div>
+    </Modal>
   );
 }

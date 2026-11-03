@@ -8,20 +8,20 @@ interface AutoSwitchHistoryListProps {
 
 function HistoryItemRow({ item }: { item: AutoSwitchHistoryItem }) {
   return (
-    <div className="flex items-center justify-between rounded border border-slate-100 bg-slate-50/50 p-2 text-xs dark:border-slate-800 dark:bg-slate-800/40">
-      <div className="flex items-center gap-2">
-        <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderRadius: "var(--radius-4)", border: "1px solid var(--ln)", backgroundColor: "var(--sf2)", padding: "var(--sp-8)", fontSize: "var(--fs-12)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)" }}>
+        <span style={{ borderRadius: "var(--radius-4)", backgroundColor: "var(--blb)", padding: "2px 6px", fontSize: "10px", fontWeight: 600, color: "var(--bl)" }}>
           #{item.switch_count}
         </span>
-        <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-          <span className="font-mono text-[11px]">{item.from_account_id}</span>
-          <ArrowRight className="h-3 w-3 text-slate-400" />
-          <span className="font-mono text-[11px] font-medium text-slate-900 dark:text-slate-100">
+        <div style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--fg)" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px" }}>{item.from_account_id}</span>
+          <ArrowRight style={{ width: 12, height: 12, color: "var(--mu)" }} />
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 500, color: "var(--fg)" }}>
             {item.to_account_id}
           </span>
         </div>
       </div>
-      <div className="text-[10px] text-slate-400 dark:text-slate-500">
+      <div style={{ fontSize: "10px", color: "var(--mu)" }}>
         {item.created_at}
       </div>
     </div>
@@ -31,20 +31,20 @@ function HistoryItemRow({ item }: { item: AutoSwitchHistoryItem }) {
 export function AutoSwitchHistoryList({ items }: AutoSwitchHistoryListProps) {
   if (items.length === 0) {
     return (
-      <div className="flex items-center gap-1.5 py-2 text-xs text-slate-400 dark:text-slate-500">
-        <History className="h-3.5 w-3.5" />
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "var(--sp-8) 0", fontSize: "var(--fs-12)", color: "var(--mu)" }}>
+        <History style={{ width: 14, height: 14 }} />
         <span>{t("auto_switch_no_history")}</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      <h5 className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
-        <History className="h-3.5 w-3.5 text-blue-500" />
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
+      <h5 style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "var(--fs-12)", fontWeight: 600, color: "var(--fg)", margin: 0 }}>
+        <History style={{ width: 14, height: 14, color: "var(--bl)" }} />
         <span>{t("auto_switch_history_title")}</span>
       </h5>
-      <div className="space-y-1.5">
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {items.map((item) => (
           <HistoryItemRow key={item.id} item={item} />
         ))}

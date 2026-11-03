@@ -7,12 +7,12 @@ interface Props {
   state: ConnectionState;
 }
 
-const STATE_CONFIG: Record<ConnectionState, { dot: string; textKey: string }> = {
-  connected: { dot: 'bg-emerald-500', textKey: 'live_status_conn_connected' },
-  connecting: { dot: 'bg-amber-400 animate-pulse', textKey: 'live_status_conn_connecting' },
-  reconnecting: { dot: 'bg-amber-500 animate-pulse', textKey: 'live_status_conn_reconnecting' },
-  disconnected: { dot: 'bg-neutral-400', textKey: 'live_status_conn_disconnected' },
-  error: { dot: 'bg-rose-500', textKey: 'live_status_conn_error' },
+const STATE_CONFIG: Record<ConnectionState, { dotColor: string; pulse?: boolean; textKey: string }> = {
+  connected: { dotColor: 'var(--gr)', textKey: 'live_status_conn_connected' },
+  connecting: { dotColor: 'var(--or)', pulse: true, textKey: 'live_status_conn_connecting' },
+  reconnecting: { dotColor: 'var(--or)', pulse: true, textKey: 'live_status_conn_reconnecting' },
+  disconnected: { dotColor: 'var(--mu)', textKey: 'live_status_conn_disconnected' },
+  error: { dotColor: 'var(--rd)', textKey: 'live_status_conn_error' },
 };
 
 export const ConnectionIndicator: React.FC<Props> = ({ state }) => {
@@ -21,10 +21,29 @@ export const ConnectionIndicator: React.FC<Props> = ({ state }) => {
   return (
     <div
       data-testid="connection-indicator"
-      className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-xs text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "var(--sp-8)",
+        borderRadius: "var(--radius-pill)",
+        border: "1px solid var(--ln)",
+        backgroundColor: "var(--sf)",
+        padding: "4px 10px",
+        fontSize: "var(--fs-12)",
+        color: "var(--fg)",
+      }}
     >
-      <Radio size={12} className="text-neutral-400" />
-      <span className={`inline-block h-2 w-2 rounded-full ${config.dot}`} />
+      <Radio size={12} style={{ color: "var(--mu)" }} />
+      <span
+        style={{
+          display: "inline-block",
+          width: 8,
+          height: 8,
+          borderRadius: "var(--radius-pill)",
+          backgroundColor: config.dotColor,
+          animation: config.pulse ? "dandori-pulse 1.5s infinite" : "none",
+        }}
+      />
       <span>{t(config.textKey)}</span>
     </div>
   );

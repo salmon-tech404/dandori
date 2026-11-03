@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { t } from "../../core/i18n";
+import { Input } from "../../ui/components/Input";
 import type { Task, TaskStatus } from "../../../../../shared/types";
 import { KanbanCard } from "./KanbanCard";
 
@@ -58,12 +59,12 @@ function QuickCreateForm({ onQuickCreate }: { onQuickCreate: (title: string) => 
 
   return (
     <form onSubmit={handleSubmit} style={{ marginBottom: "4px" }}>
-      <input
+      <Input
         data-testid="quick-create-input"
         type="text"
         placeholder={t("kanban_quick_create_placeholder")}
         value={quickTitle}
-        onChange={(e) => setQuickTitle(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuickTitle(e.target.value)}
         style={quickInputStyle}
       />
     </form>

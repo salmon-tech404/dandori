@@ -4,6 +4,9 @@
 
 import React, { useState } from "react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
+import { Input } from "../../ui/components/Input";
+import { Checkbox } from "../../ui/components/Checkbox";
 import type { AutoLessonsConfig, UpdateAutoLessonsConfigRequest } from "./types";
 
 interface AutoLessonsConfigFormProps {
@@ -11,39 +14,56 @@ interface AutoLessonsConfigFormProps {
   onSave: (payload: UpdateAutoLessonsConfigRequest) => Promise<void>;
 }
 
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  height: "var(--btn-height)",
+  padding: "0 12px",
+  fontSize: "var(--fs-13)",
+  fontFamily: "var(--font-sans)",
+  color: "var(--fg)",
+  backgroundColor: "var(--sf)",
+  border: "1px solid var(--ln)",
+  borderRadius: "var(--radius-8)",
+  outline: "none",
+  boxSizing: "border-box",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: "var(--fs-12)",
+  fontWeight: 500,
+  color: "var(--mu)",
+  marginBottom: "var(--sp-4)",
+};
+
 const ToggleItem: React.FC<{
   id: string;
   label: string;
   checked: boolean;
   onChange: (v: boolean) => void;
 }> = ({ id, label, checked, onChange }) => (
-  <div className="flex items-center space-x-2">
-    <input
-      type="checkbox"
-      id={id}
-      checked={checked}
-      onChange={(e) => onChange(e.target.checked)}
-    />
-    <label htmlFor={id} className="text-sm">
-      {label}
-    </label>
-  </div>
+  <Checkbox
+    id={id}
+    checked={checked}
+    onChange={(e) => onChange(e.target.checked)}
+    label={label}
+  />
 );
 
 const BudgetInput: React.FC<{
   budget: number;
   onChange: (v: number) => void;
 }> = ({ budget, onChange }) => (
-  <div className="space-y-1">
-    <label htmlFor="al-budget" className="text-xs text-muted-foreground">
+  <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-4)" }}>
+    <label htmlFor="al-budget" style={labelStyle}>
       {t("auto_lessons_max_budget")}
     </label>
-    <input
+    <Input
       type="number"
       id="al-budget"
       value={budget}
       onChange={(e) => onChange(Number(e.target.value))}
-      className="w-full rounded border px-3 py-1 text-sm"
+      style={inputStyle}
       min={100}
       max={10000}
     />
@@ -60,14 +80,14 @@ const FormFields: React.FC<{
   budget: number;
   setBudget: (v: number) => void;
 }> = (props) => (
-  <>
+  <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-12)" }}>
     <ToggleItem
       id="al-enabled"
       label={t("auto_lessons_enable")}
       checked={props.enabled}
       onChange={props.setEnabled}
     />
-    <div className="grid grid-cols-2 gap-4">
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--sp-12)" }}>
       <ToggleItem
         id="al-done"
         label={t("auto_lessons_trigger_done")}
@@ -82,7 +102,7 @@ const FormFields: React.FC<{
       />
     </div>
     <BudgetInput budget={props.budget} onChange={props.setBudget} />
-  </>
+  </div>
 );
 
 function useConfigForm(
@@ -131,7 +151,7 @@ export const AutoLessonsConfigForm: React.FC<AutoLessonsConfigFormProps> = ({
   const f = useConfigForm(config, onSave);
 
   return (
-    <form onSubmit={f.handleSubmit} className="space-y-4 rounded border p-4">
+    <form onSubmit={f.handleSubmit} style={{ backgroundColor: "var(--sf2)", borderRadius: "var(--radius-8)", border: "1px solid var(--ln)", padding: "var(--sp-16)", display: "flex", flexDirection: "column", gap: "var(--sp-16)" }}>
       <FormFields
         enabled={f.enabled}
         setEnabled={f.setEnabled}
@@ -142,13 +162,17 @@ export const AutoLessonsConfigForm: React.FC<AutoLessonsConfigFormProps> = ({
         budget={f.budget}
         setBudget={f.setBudget}
       />
-      <button
-        type="submit"
-        disabled={f.saving}
-        className="rounded bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
-      >
-        {t("auto_lessons_save_config")}
-      </button>
+      <div>
+        <Button
+          type="submit"
+          variant="primary"
+          size="sm"
+          disabled={f.saving}
+          loading={f.saving}
+        >
+          {t("auto_lessons_save_config")}
+        </Button>
+      </div>
     </form>
   );
 };

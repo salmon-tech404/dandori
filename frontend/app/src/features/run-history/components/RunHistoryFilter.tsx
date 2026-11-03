@@ -1,4 +1,5 @@
 import { t } from '../../../core/i18n';
+import { Select } from '../../../ui/components/Select';
 
 interface FilterProps {
   statusFilter: string;
@@ -7,34 +8,39 @@ interface FilterProps {
   onAgentChange: (val: string) => void;
 }
 
-const selectStyle: React.CSSProperties = {
-  padding: '6px 10px',
-  minHeight: '44px',
-  borderRadius: '8px',
-  border: '1px solid var(--ln)',
-  backgroundColor: 'var(--sf)',
-  color: 'var(--fg)',
-};
+const statusOptions = [
+  { value: "", label: t('run_history_filter_all_status') },
+  { value: "success", label: t('status_done') },
+  { value: "failed", label: t('status_failed') },
+  { value: "running", label: t('status_running') },
+  { value: "cancelled", label: t('status_cancelled') },
+];
 
 export const RunHistoryFilter = ({
   statusFilter,
   agentFilter,
   onStatusChange,
   onAgentChange,
-}: FilterProps) => (
-  <div style={{ display: 'flex', gap: '8px' }}>
-    <select value={statusFilter} onChange={(e) => onStatusChange(e.target.value)} style={selectStyle}>
-      <option value="">{t('run_history_filter_all_status')}</option>
-      <option value="success">{t('status_done')}</option>
-      <option value="failed">{t('status_failed')}</option>
-      <option value="running">{t('status_running')}</option>
-      <option value="cancelled">{t('status_cancelled')}</option>
-    </select>
-    <select value={agentFilter} onChange={(e) => onAgentChange(e.target.value)} style={selectStyle}>
-      <option value="">{t('run_history_filter_all_agents')}</option>
-      <option value="claude">{t("provider_claude")}</option>
-      <option value="gemini">{t("provider_gemini")}</option>
-      <option value="codex">{t("provider_codex")}</option>
-    </select>
-  </div>
-);
+}: FilterProps) => {
+  const agentOptions = [
+    { value: "", label: t('run_history_filter_all_agents') },
+    { value: "claude", label: t("provider_claude") },
+    { value: "gemini", label: t("provider_gemini") },
+    { value: "codex", label: t("provider_codex") },
+  ];
+
+  return (
+    <div style={{ display: 'flex', gap: '8px' }}>
+      <Select
+        value={statusFilter}
+        onChange={(e) => onStatusChange(e.target.value)}
+        options={statusOptions}
+      />
+      <Select
+        value={agentFilter}
+        onChange={(e) => onAgentChange(e.target.value)}
+        options={agentOptions}
+      />
+    </div>
+  );
+};

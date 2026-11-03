@@ -207,6 +207,51 @@ pub async fn create_session_for_user(
     Ok((token, cookie_header))
 }
 
+/// Đảm bảo tài khoản có ít nhất một workspace (cài mới chưa có workspace nào nên không tạo được dự án).
+///
+/// Chỉ tạo khi tài khoản chưa là thành viên của workspace nào; người dùng vẫn đổi tên hoặc tạo thêm được.
+///
+/// # Errors
+/// Trả về lỗi chuỗi nếu truy vấn cơ sở dữ liệu thất bại.
+pub async fn ensure_default_workspace(pool: &SqlitePool, username: &str) -> Result<(), String> {
+    let user = sqlx::query("SELECT id FROM user WHERE username = ?")
+        .bind(username)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    let Some(row) = user else {
+        return Ok(());
+    };
+    let user_id: String = row.get("id");
+
+    let has_ws: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM workspace_member WHERE user_id = ?")
+        .bind(&user_id)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    if has_ws > 0 {
+        return Ok(());
+    }
+
+    let ws_id = dandori_types::WorkspaceId::new().to_string();
+    sqlx::query("INSERT INTO workspace (id, name, created_at) VALUES (?, ?, ?)")
+        .bind(&ws_id)
+        .bind("Không gian của tôi")
+        .bind(Utc::now().to_rfc3339())
+        .execute(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    sqlx::query(
+        "INSERT INTO workspace_member (workspace_id, user_id, role) VALUES (?, ?, 'admin')",
+    )
+    .bind(&ws_id)
+    .bind(&user_id)
+    .execute(pool)
+    .await
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 /// Tạo hoặc đồng bộ tài khoản quản trị cố định lấy từ môi trường/`.env` (bản dùng thử cá nhân).
 ///
 /// Môi trường là nguồn sự thật: tài khoản chưa có thì tạo với vai trò `admin`; đã có mà mật khẩu khác thì cập nhật

@@ -69,9 +69,15 @@ async function parseApiError(response: Response): Promise<DandoriApiError> {
   } catch {
     // Không thể parse json
   }
+  return nonJsonError(response.status);
+}
+
+/** Lỗi không có thân JSON của máy chủ: 5xx thường là máy chủ chưa chạy (proxy báo lỗi), còn lại là lỗi chung. */
+function nonJsonError(status: number): DandoriApiError {
+  const unreachable = status === 500 || status === 502 || status === 503 || status === 504;
   return new DandoriApiError(
-    `http_${response.status}`,
-    `Yêu cầu thất bại với mã ${response.status}`,
+    `http_${status}`,
+    unreachable ? t("api_error_unreachable") : t("api_error_generic"),
     ""
   );
 }
@@ -86,11 +92,17 @@ export async function apiClient<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-    credentials: "same-origin",
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+      credentials: "same-origin",
+    });
+  } catch {
+    // Mất kết nối hoặc máy chủ chưa chạy: không để lộ thông báo thô của trình duyệt.
+    throw new DandoriApiError("network_error", t("api_error_unreachable"), "");
+  }
 
   const contentType = response.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
@@ -103,7 +115,7 @@ export async function apiClient<T>(
     }
     const apiError = isJson
       ? await parseApiError(response)
-      : new DandoriApiError(`http_${response.status}`, `Lỗi HTTP ${response.status}`, "");
+      : nonJsonError(response.status);
     throw apiError;
   }
 

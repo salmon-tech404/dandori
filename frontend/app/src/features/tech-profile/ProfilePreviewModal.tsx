@@ -1,6 +1,6 @@
-import { Eye, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { t } from '../../core/i18n';
+import { Modal } from '../../ui/components/Modal';
 import { fetchProfilePreview } from './useTechProfile';
 
 interface Props {
@@ -9,29 +9,42 @@ interface Props {
   onClose: () => void;
 }
 
-const PreviewHeader: React.FC<{ onClose: () => void }> = ({ onClose }) => (
-  <div className="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-neutral-800">
-    <div className="flex items-center gap-2">
-      <Eye size={18} className="text-indigo-600" />
-      <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{t('tech_profile_preview_title')}</h3>
-    </div>
-    <button type="button" onClick={onClose} className="text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300">
-      <X size={20} />
-    </button>
-  </div>
-);
+const preStyle: React.CSSProperties = {
+  padding: 'var(--sp-16)',
+  backgroundColor: 'var(--sf2)',
+  borderRadius: 'var(--radius-8)',
+  fontSize: 'var(--fs-12)',
+  fontFamily: 'var(--font-mono)',
+  whiteSpace: 'pre-wrap',
+  maxHeight: '320px',
+  overflowY: 'auto',
+  color: 'var(--fg)',
+  border: '1px solid var(--ln)',
+};
+
+const badgeStyle: React.CSSProperties = {
+  display: 'inline-block',
+  marginBottom: 'var(--sp-4)',
+  padding: '2px 8px',
+  borderRadius: 'var(--radius-6)',
+  backgroundColor: 'rgba(245, 158, 11, 0.15)',
+  border: '1px solid var(--or)',
+  color: 'var(--or)',
+  fontSize: '11px',
+  fontWeight: 500,
+};
 
 const PreviewContent: React.FC<{ preview: string }> = ({ preview }) => (
-  <div className="mt-4">
-    <div className="inline-block mb-2 px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-medium dark:bg-amber-950/40 dark:border-amber-900 dark:text-amber-300">
+  <div>
+    <div style={badgeStyle}>
       {t('tech_profile_all_agents_read')}
     </div>
     {preview ? (
-      <pre className="p-3 bg-neutral-100 dark:bg-neutral-950 rounded text-xs font-mono whitespace-pre-wrap max-h-80 overflow-y-auto text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-800">
-        {preview}
-      </pre>
+      <pre style={preStyle}>{preview}</pre>
     ) : (
-      <p className="text-xs text-neutral-500 italic py-4">{t('tech_profile_preview_empty')}</p>
+      <p style={{ fontSize: 'var(--fs-12)', color: 'var(--mu)', fontStyle: 'italic', padding: 'var(--sp-16) 0' }}>
+        {t('tech_profile_preview_empty')}
+      </p>
     )}
   </div>
 );
@@ -50,13 +63,10 @@ export const ProfilePreviewModal: React.FC<Props> = ({ projectId, workspaceId, o
   }, [projectId, workspaceId]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-lg border border-neutral-200 bg-white p-6 shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
-        <PreviewHeader onClose={onClose} />
-        {loading && <p className="py-4 text-xs text-neutral-500">{t('loading')}</p>}
-        {err && <p className="py-2 text-xs text-rose-500">{err}</p>}
-        {!loading && <PreviewContent preview={preview} />}
-      </div>
-    </div>
+    <Modal open onClose={onClose} title={t('tech_profile_preview_title')} size="lg">
+      {loading && <p style={{ padding: 'var(--sp-16) 0', fontSize: 'var(--fs-12)', color: 'var(--mu)' }}>{t('loading')}</p>}
+      {err && <p style={{ padding: 'var(--sp-4) 0', fontSize: 'var(--fs-12)', color: 'var(--rd)' }}>{err}</p>}
+      {!loading && <PreviewContent preview={preview} />}
+    </Modal>
   );
 };

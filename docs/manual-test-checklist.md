@@ -116,7 +116,7 @@ node scripts/check-i18n.mjs
    # Sử dụng tài khoản admin được cấu hình trong .env
    cargo run -p dandori-server
    ```
-   *Kỳ vọng:* Máy chủ lắng nghe tại cổng `http://127.0.0.1:3000`.
+   *Kỳ vọng:* Máy chủ lắng nghe tại cổng `http://127.0.0.1:3100`.
 2. Khởi động giao diện Vite trong terminal 2:
    ```powershell
    pnpm --filter app dev
@@ -151,7 +151,7 @@ node scripts/check-i18n.mjs
 
 #### Bước 4: Kích hoạt module trong Cài đặt (5 phút)
 - **Thao tác:**
-  - Bấm vào nút "Mở Cài đặt" hoặc chọn mục "Cài đặt: Tính năng" trên thanh bên.
+  - Bấm vào nút "Mở Cài đặt" hoặc chọn mục "Cài đặt" trên thanh bên.
   - Quan sát chip đếm ở góc trên: hiển thị số lượng thật (ví dụ "Đang bật 2/41").
   - Bấm vào nút gói mẫu "Đầy đủ".
   - Hộp thoại xác nhận hiện ra, liệt kê các module sẽ được kích hoạt -> Bấm "Xác nhận".

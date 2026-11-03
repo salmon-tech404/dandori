@@ -1085,7 +1085,7 @@ fn test_config_from_env_defaults_and_validation() {
     let none = |_: &str| None;
     let defaults = ServerConfig::from_lookup(none).unwrap();
     assert_eq!(defaults.host, "127.0.0.1");
-    assert_eq!(defaults.port, 3000);
+    assert_eq!(defaults.port, 3100);
 
     let custom = ServerConfig::from_lookup(|k| match k {
         "DANDORI_PORT" => Some("4100".to_string()),

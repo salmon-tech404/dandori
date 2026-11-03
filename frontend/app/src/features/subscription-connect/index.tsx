@@ -1,9 +1,11 @@
 import type { ReactElement } from "react";
+import { Plus } from "lucide-react";
 import { AccountCard } from "./AccountCard";
 import { AddAccountModal } from "./AddAccountModal";
 import { LoginInstructionsModal } from "./LoginInstructionsModal";
 import { useSubscriptionAccounts } from "./useSubscriptionAccounts";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
 
 export function SubscriptionAccounts(): ReactElement {
   const {
@@ -19,9 +21,14 @@ export function SubscriptionAccounts(): ReactElement {
           <h2 style={{ fontSize: "18px", margin: "0 0 4px 0", color: "var(--fg)" }}>{t("subscription_connect_title")}</h2>
           <p style={{ fontSize: "13px", margin: 0, color: "var(--mu)" }}>{t("subscription_connect_desc")}</p>
         </div>
-        <button type="button" className="btn btn-primary" style={{ minHeight: "44px" }} onClick={() => setShowAddModal(true)}>
+        <Button
+          type="button"
+          variant="primary"
+          icon={<Plus size={16} />}
+          onClick={() => setShowAddModal(true)}
+        >
           {t("btn_add_account")}
-        </button>
+        </Button>
       </div>
       {loading && <p style={{ color: "var(--mu)" }}>{t("loading")}</p>}
       {error && <p style={{ color: "var(--rd)" }}>{error}</p>}

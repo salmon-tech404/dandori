@@ -1,4 +1,8 @@
 import { t } from '../../../core/i18n';
+import { Modal } from '../../../ui/components/Modal';
+import { Button } from '../../../ui/components/Button';
+import { Input } from '../../../ui/components/Input';
+import { Textarea } from '../../../ui/components/Textarea';
 
 interface ModalProps {
   noteText: string;
@@ -27,20 +31,18 @@ const NoteFields = ({
       <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px', color: 'var(--mu)' }}>
         {t('tech_profile_dialog_val_label')}
       </label>
-      <textarea
+      <Textarea
         value={note}
         onChange={(e) => onNote(e.target.value)}
         rows={4}
-        style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--ln)', backgroundColor: 'var(--sf2)', color: 'var(--fg)', fontSize: '13px' }}
       />
     </div>
     <div style={{ marginBottom: '16px' }}>
       <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px', color: 'var(--mu)' }}>{t("note_label")}</label>
-      <input
+      <Input
         type="text"
         value={tags}
         onChange={(e) => onTags(e.target.value)}
-        style={{ width: '100%', padding: '8px', minHeight: '44px', borderRadius: '6px', border: '1px solid var(--ln)', backgroundColor: 'var(--sf2)', color: 'var(--fg)', fontSize: '13px' }}
       />
     </div>
   </>
@@ -48,21 +50,21 @@ const NoteFields = ({
 
 const NoteActions = ({ saving, onSave, onClose }: { saving: boolean; onSave: () => void; onClose: () => void }) => (
   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-    <button
+    <Button
       type="button"
+      variant="secondary"
       onClick={onClose}
-      style={{ padding: '6px 12px', minHeight: '44px', border: '1px solid var(--ln)', borderRadius: '8px', backgroundColor: 'var(--sf2)', color: 'var(--fg)' }}
     >
       {t('btn_cancel')}
-    </button>
-    <button
-      type="button"
+    </Button>
+    <Button
+      type="submit"
+      variant="primary"
       onClick={onSave}
       disabled={saving}
-      style={{ padding: '6px 16px', minHeight: '44px', border: 'none', borderRadius: '8px', backgroundColor: 'var(--ac)', color: 'var(--acf)', fontWeight: 600 }}
     >
       {saving ? t('loading') : t('run_history_btn_save_note')}
-    </button>
+    </Button>
   </div>
 );
 
@@ -75,21 +77,17 @@ export const NoteEditorModal = ({
   onTagsChange,
   onSave,
   onClose,
-}: ModalProps) => (
-  <div
-    role="dialog"
-    aria-modal="true"
-    style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' }}
-  >
-    <div style={{ backgroundColor: 'var(--sf)', border: '1px solid var(--ln)', borderRadius: '10px', width: '100%', maxWidth: '500px', padding: '20px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
-      <h3 style={{ margin: '0 0 12px 0', fontSize: '16px' }}>{t('run_history_note_label')}</h3>
+}: ModalProps) => {
+  const footer = <NoteActions saving={saving} onSave={onSave} onClose={onClose} />;
+
+  return (
+    <Modal open onClose={onClose} title={t('run_history_note_label')} footer={footer} size="md">
       <NoteFields note={noteText} tags={tagsText} onNote={onNoteChange} onTags={onTagsChange} />
       {statusMessage && (
         <div style={{ marginBottom: '12px', fontSize: '13px', color: statusMessage.includes('Lỗi') ? 'var(--rd)' : 'var(--gr)' }}>
           {statusMessage}
         </div>
       )}
-      <NoteActions saving={saving} onSave={onSave} onClose={onClose} />
-    </div>
-  </div>
-);
+    </Modal>
+  );
+};

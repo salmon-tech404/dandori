@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2, Play, Plus, Trash2 } from "lucide-react";
 import { t } from "../../../core/i18n";
+import { Button } from "../../../ui/components/Button";
+import { Input } from "../../../ui/components/Input";
+import { Select } from "../../../ui/components/Select";
 import { integrationsApi } from "../api/integrationsApi";
 import type { CreateConnectionRequest, PublicIntegrationConnection } from "../types";
 
@@ -8,58 +11,100 @@ export interface IntegrationsSettingsProps {
   workspaceId: string;
 }
 
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: "var(--fs-12)",
+  fontWeight: 500,
+  color: "var(--mu)",
+  marginBottom: "var(--sp-4)",
+};
+
+const ConnectionButtons: React.FC<{
+  id: string;
+  onDelete: (id: string) => void;
+  onTest: (id: string) => void;
+}> = ({ id, onDelete, onTest }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)" }}>
+    <Button
+      type="button"
+      variant="secondary"
+      size="sm"
+      onClick={() => onTest(id)}
+      icon={<Play size={12} style={{ color: "var(--gr)" }} />}
+    >
+      {t("integrations_test_btn")}
+    </Button>
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      onClick={() => onDelete(id)}
+      style={{ color: "var(--rd)" }}
+    >
+      <Trash2 size={14} />
+    </Button>
+  </div>
+);
+
 const ConnectionItem: React.FC<{
   conn: PublicIntegrationConnection;
   onDelete: (id: string) => void;
   onTest: (id: string) => void;
 }> = ({ conn, onDelete, onTest }) => (
-  <div className="p-3 border rounded flex items-center justify-between text-xs bg-neutral-50">
+  <div
+    style={{
+      padding: "var(--sp-12)",
+      borderRadius: "var(--radius-8)",
+      border: "1px solid var(--ln)",
+      backgroundColor: "var(--sf2)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      fontSize: "var(--fs-13)",
+    }}
+  >
     <div>
-      <div className="font-semibold text-neutral-800 flex items-center gap-2">
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-8)", fontWeight: 600, color: "var(--fg)" }}>
         <span>{conn.name}</span>
-        <span className="uppercase text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">
+        <span
+          style={{
+            textTransform: "uppercase",
+            fontSize: "10px",
+            padding: "2px 6px",
+            borderRadius: "var(--radius-4)",
+            backgroundColor: "var(--blb)",
+            color: "var(--bl)",
+            fontWeight: 700,
+          }}
+        >
           {conn.provider}
         </span>
       </div>
-      <div className="text-neutral-500 mt-0.5">{conn.base_url}</div>
+      <div style={{ fontSize: "var(--fs-12)", color: "var(--mu)", marginTop: "2px" }}>{conn.base_url}</div>
     </div>
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={() => onTest(conn.id)}
-        className="px-2 py-1 bg-white border rounded text-neutral-700 hover:bg-neutral-100 flex items-center gap-1"
-      >
-        <Play className="w-3 h-3 text-green-600" />
-        <span>{t("integrations_test_btn")}</span>
-      </button>
-      <button
-        type="button"
-        onClick={() => onDelete(conn.id)}
-        className="p-1 text-red-600 hover:bg-red-50 rounded"
-      >
-        <Trash2 className="w-3.5 h-3.5" />
-      </button>
-    </div>
+    <ConnectionButtons id={conn.id} onDelete={onDelete} onTest={onTest} />
   </div>
 );
+
+const providerOptions = [
+  { value: "github", label: t("integration_provider_github") },
+  { value: "gitlab", label: t("integration_provider_gitlab") },
+  { value: "linear", label: t("integration_provider_linear") },
+];
 
 const ProviderSelect: React.FC<{
   provider: string;
   onChange: (p: string) => void;
 }> = ({ provider, onChange }) => (
   <div>
-    <label className="block font-medium text-neutral-700 mb-0.5">
+    <label style={labelStyle}>
       {t("integrations_provider_label")}
     </label>
-    <select
+    <Select
       value={provider}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full border rounded px-2 py-1"
-    >
-      <option value="github">{t("integration_provider_github")}</option>
-      <option value="gitlab">{t("integration_provider_gitlab")}</option>
-      <option value="linear">{t("integration_provider_linear")}</option>
-    </select>
+      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
+      options={providerOptions}
+    />
   </div>
 );
 
@@ -67,33 +112,31 @@ const FormInputs: React.FC<{
   form: CreateConnectionRequest;
   onChange: (f: Partial<CreateConnectionRequest>) => void;
 }> = ({ form, onChange }) => (
-  <div className="space-y-2 text-xs">
+  <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
     <ProviderSelect
       provider={form.provider}
       onChange={(provider) => onChange({ provider })}
     />
     <div>
-      <label className="block font-medium text-neutral-700 mb-0.5">
+      <label style={labelStyle}>
         {t("integrations_name_label")}
       </label>
-      <input
+      <Input
         type="text"
-        className="w-full border rounded px-2 py-1"
         placeholder={t("integrations_name_placeholder")}
         value={form.name}
-        onChange={(e) => onChange({ name: e.target.value })}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange({ name: e.target.value })}
       />
     </div>
     <div>
-      <label className="block font-medium text-neutral-700 mb-0.5">
+      <label style={labelStyle}>
         {t("integrations_token_label")}
       </label>
-      <input
+      <Input
         type="password"
-        className="w-full border rounded px-2 py-1"
         placeholder={t("integrations_token_placeholder")}
         value={form.token}
-        onChange={(e) => onChange({ token: e.target.value })}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange({ token: e.target.value })}
       />
     </div>
   </div>
@@ -101,10 +144,23 @@ const FormInputs: React.FC<{
 
 const MessageAlert: React.FC<{ msg: { text: string; ok: boolean } | null }> = ({ msg }) => {
   if (!msg) return null;
-  const cls = msg.ok ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700";
+  const bg = msg.ok ? "var(--grb)" : "var(--rdb)";
+  const color = msg.ok ? "var(--gr)" : "var(--rd)";
   return (
-    <div className={`p-2 rounded text-xs flex items-center gap-1.5 ${cls}`}>
-      {msg.ok ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+    <div
+      style={{
+        padding: "var(--sp-8) var(--sp-12)",
+        borderRadius: "var(--radius-8)",
+        fontSize: "var(--fs-13)",
+        display: "flex",
+        alignItems: "center",
+        gap: "var(--sp-8)",
+        backgroundColor: bg,
+        color,
+        marginBottom: "var(--sp-12)",
+      }}
+    >
+      {msg.ok ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
       <span>{msg.text}</span>
     </div>
   );
@@ -118,16 +174,30 @@ const NewConnectionCard: React.FC<{
 }> = ({ show, form, onChange, onCreate }) => {
   if (!show) return null;
   return (
-    <div className="p-3 border rounded bg-neutral-50 space-y-3">
+    <div
+      style={{
+        padding: "var(--sp-12)",
+        borderRadius: "var(--radius-8)",
+        border: "1px solid var(--ln)",
+        backgroundColor: "var(--sf2)",
+        display: "flex",
+        flexDirection: "column",
+        gap: "var(--sp-12)",
+        marginBottom: "var(--sp-12)",
+      }}
+    >
       <FormInputs form={form} onChange={onChange} />
-      <button
-        type="button"
-        onClick={onCreate}
-        disabled={!form.name || !form.token}
-        className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 disabled:opacity-50"
-      >
-        {t("integrations_save_btn")}
-      </button>
+      <div>
+        <Button
+          type="button"
+          variant="primary"
+          size="sm"
+          onClick={onCreate}
+          disabled={!form.name || !form.token}
+        >
+          {t("integrations_save_btn")}
+        </Button>
+      </div>
     </div>
   );
 };
@@ -138,10 +208,10 @@ const ConnectionList: React.FC<{
   onTest: (id: string) => void;
 }> = ({ conns, onDelete, onTest }) => {
   if (conns.length === 0) {
-    return <p className="text-xs text-neutral-500">{t("integrations_no_connections")}</p>;
+    return <p style={{ fontSize: "var(--fs-13)", color: "var(--mu)", margin: 0 }}>{t("integrations_no_connections")}</p>;
   }
   return (
-    <div className="space-y-2">
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
       {conns.map((c) => (
         <ConnectionItem key={c.id} conn={c} onDelete={onDelete} onTest={onTest} />
       ))}
@@ -172,7 +242,7 @@ function useIntegrationsData(workspaceId: string) {
 function useIntegrationsActions(
   workspaceId: string,
   reload: () => void,
-  setMsg: (m: { text: string; ok: boolean }) => void,
+  setMsg: (m: { text: string; ok: boolean } | null) => void
 ) {
   const [form, setForm] = useState<CreateConnectionRequest>({
     provider: "github",
@@ -184,19 +254,24 @@ function useIntegrationsActions(
     try {
       await integrationsApi.createConnection(workspaceId, form);
       setForm({ provider: "github", name: "", token: "" });
-      setMsg({ text: t("integrations_test_success"), ok: true });
+      setMsg({ text: t("integrations_save_success"), ok: true });
       reload();
-    } catch (e: unknown) {
-      setMsg({ text: e instanceof Error ? e.message : t("integrations_test_failed"), ok: false });
+    } catch {
+      setMsg({ text: t("integrations_save_error"), ok: false });
     }
   };
 
   const handleTest = async (id: string) => {
     try {
-      await integrationsApi.testConnection(id);
-      setMsg({ text: t("integrations_test_success"), ok: true });
-    } catch (e: unknown) {
-      setMsg({ text: e instanceof Error ? e.message : t("integrations_test_failed"), ok: false });
+      const ok = await integrationsApi.testConnection(id);
+      if (ok) {
+        setMsg({ text: t("integrations_test_success", { status: "200" }), ok: true });
+      } else {
+        setMsg({ text: t("integrations_test_error", { err: "failed" }), ok: false });
+      }
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : "network error";
+      setMsg({ text: t("integrations_test_error", { err: errMsg }), ok: false });
     }
   };
 
@@ -216,20 +291,21 @@ export const IntegrationsSettings: React.FC<IntegrationsSettingsProps> = ({ work
   if (loading) return null;
 
   return (
-    <div className="p-4 border rounded bg-white space-y-4 max-w-xl">
-      <div className="flex items-center justify-between">
+    <div style={{ backgroundColor: "var(--sf)", borderRadius: "var(--radius-10)", border: "1px solid var(--ln)", padding: "var(--sp-16)", marginBottom: "var(--sp-16)" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--sp-12)" }}>
         <div>
-          <h3 className="text-base font-semibold text-neutral-800">{t("integrations_title")}</h3>
-          <p className="text-xs text-neutral-500">{t("integrations_desc")}</p>
+          <h3 style={{ margin: "0 0 2px 0", fontSize: "var(--fs-16)", fontWeight: 600, color: "var(--fg)" }}>{t("integrations_title")}</h3>
+          <p style={{ margin: 0, fontSize: "var(--fs-13)", color: "var(--mu)" }}>{t("integrations_desc")}</p>
         </div>
-        <button
+        <Button
           type="button"
+          variant="primary"
+          size="sm"
           onClick={() => setShowAdd(!showAdd)}
-          className="px-2.5 py-1.5 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 flex items-center gap-1"
+          icon={<Plus size={14} />}
         >
-          <Plus className="w-3.5 h-3.5" />
-          <span>{t("integrations_add_btn")}</span>
-        </button>
+          {t("integrations_add_btn")}
+        </Button>
       </div>
       <MessageAlert msg={msg} />
       <NewConnectionCard

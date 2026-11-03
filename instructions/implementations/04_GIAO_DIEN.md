@@ -24,7 +24,7 @@ Mockup là **đích về bố cục, nhãn và cảm giác**; không phải đ�
 
 - **Thanh bên trái** rộng khoảng 232px: logo (ô vuông chữ "AH") và tên "Agent Hub"; **bộ chọn dự án** (tên dự án dạng chữ đơn cách + nhãn "n repo"); danh sách **7 màn hình**; ở đáy một ô ghi chú "Đang bật n / m tính năng. Menu bên trái chỉ hiện những gì bạn đã bật." (mockup ghi nhầm "menu bên trên"; sửa thành "bên trái").
 - **Thanh tiêu đề** của mỗi màn hình: tên màn hình + các nhãn trạng thái. Trong mockup có "Dữ liệu minh họa" (**bỏ**), "Server: đang chạy" (giữ, từ health), "Điện thoại: n máy" (chỉ hiện khi module `mobile` bật). Màn hình Board có nút chính đen "+ Giao task".
-- **Bảy màn hình** (mục nhập cố định của lõi, không phải do module sinh): `Board` · `Agent và tài khoản` · `Dashboard` · `Lịch` · `Prompt và tri thức` · `Tích hợp` · `Cài đặt: Tính năng`. Mỗi mục hiện khi **có ít nhất một ô cắm đang bật** thuộc màn hình đó (xem mục 3); riêng `Cài đặt: Tính năng` luôn hiện.
+- **Bảy màn hình** (mục nhập cố định của lõi, không phải do module sinh): `Board` · `Agent và tài khoản` · `Dashboard` · `Lịch` · `Prompt và tri thức` · `Tích hợp` · `Cài đặt`. Mỗi mục hiện khi **có ít nhất một ô cắm đang bật** thuộc màn hình đó (xem mục 3); riêng `Cài đặt` luôn hiện.
 - Biểu tượng menu: bộ Lucide (không emoji). Mục đang chọn có nền xám nhạt và chữ đậm.
 - Nội dung chính cuộn độc lập; thanh bên cố định.
 

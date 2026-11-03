@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { t } from "../../core/i18n";
+import { Modal } from "../../ui/components/Modal";
+import { Button } from "../../ui/components/Button";
+import { Input } from "../../ui/components/Input";
 import { importSkillDir, importSkillZip } from "./api";
 
 interface ImportSkillDialogProps {
@@ -53,45 +56,44 @@ export function ImportSkillDialog({ workspaceId, onClose, onSuccess }: ImportSki
   const state = useImportState(workspaceId, onSuccess);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-md rounded bg-white p-6 shadow-lg">
-        <h3 className="text-lg font-bold">{t("skills_import_btn")}</h3>
-        <ImportTabs tab={state.tab} onSelectTab={state.setTab} />
-        <ImportInput
-          tab={state.tab}
-          dirPath={state.dirPath}
-          onDirChange={state.setDirPath}
-          onFileChange={state.handleFileChange}
-        />
-        {state.errorMsg && <p className="mt-2 text-xs text-red-600">{state.errorMsg}</p>}
-        <ImportActions
-          onClose={onClose}
-          onSubmit={() => void state.executeImport()}
-          canSubmit={state.canSubmit}
-          importing={state.importing}
-        />
-      </div>
-    </div>
+    <Modal open onClose={onClose} title={t("skills_import_btn")} size="md">
+      <ImportTabs tab={state.tab} onSelectTab={state.setTab} />
+      <ImportInput
+        tab={state.tab}
+        dirPath={state.dirPath}
+        onDirChange={state.setDirPath}
+        onFileChange={state.handleFileChange}
+      />
+      {state.errorMsg && <p style={{ marginTop: "var(--sp-8)", fontSize: "var(--fs-12)", color: "var(--rd)" }}>{state.errorMsg}</p>}
+      <ImportActions
+        onClose={onClose}
+        onSubmit={() => void state.executeImport()}
+        canSubmit={state.canSubmit}
+        importing={state.importing}
+      />
+    </Modal>
   );
 }
 
 function ImportTabs({ tab, onSelectTab }: { tab: "dir" | "zip"; onSelectTab: (t: "dir" | "zip") => void }) {
   return (
-    <div className="mt-4 flex border-b">
-      <button
+    <div style={{ marginTop: "var(--sp-16)", display: "flex", borderBottom: "1px solid var(--ln)" }}>
+      <Button
         type="button"
+        variant={tab === "dir" ? "primary" : "ghost"}
+        size="sm"
         onClick={() => onSelectTab("dir")}
-        className={`px-4 py-2 text-sm font-medium ${tab === "dir" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500"}`}
       >
         {t("skills_import_dir")}
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant={tab === "zip" ? "primary" : "ghost"}
+        size="sm"
         onClick={() => onSelectTab("zip")}
-        className={`px-4 py-2 text-sm font-medium ${tab === "zip" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500"}`}
       >
         {t("skills_import_zip")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -105,17 +107,16 @@ interface ImportInputProps {
 
 function ImportInput({ tab, dirPath, onDirChange, onFileChange }: ImportInputProps) {
   return (
-    <div className="mt-4">
+    <div style={{ marginTop: "var(--sp-16)" }}>
       {tab === "dir" ? (
-        <input
+        <Input
           type="text"
           value={dirPath}
           onChange={(e) => onDirChange(e.target.value)}
           placeholder={t("skills_dir_path_placeholder")}
-          className="w-full rounded border p-2 text-sm"
         />
       ) : (
-        <input type="file" accept=".zip" onChange={onFileChange} className="w-full text-sm" />
+        <Input type="file" accept=".zip" onChange={onFileChange} />
       )}
     </div>
   );
@@ -130,16 +131,16 @@ interface ImportActionsProps {
 
 function ImportActions({ onClose, onSubmit, canSubmit, importing }: ImportActionsProps) {
   return (
-    <div className="mt-6 flex justify-end space-x-2">
-      <button type="button" onClick={onClose} className="rounded border px-4 py-2 text-sm hover:bg-gray-50">{t("btn_cancel")}</button>
-      <button
+    <div style={{ marginTop: "var(--sp-24)", display: "flex", justifyContent: "flex-end", gap: "var(--sp-8)" }}>
+      <Button type="button" variant="secondary" onClick={onClose}>{t("btn_cancel")}</Button>
+      <Button
         type="button"
+        variant="primary"
         disabled={!canSubmit}
         onClick={onSubmit}
-        className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
       >
-        {importing ? "Đang nhập..." : "Nhập"}
-      </button>
+        {importing ? "..." : t("skills_import_btn")}
+      </Button>
     </div>
   );
 }

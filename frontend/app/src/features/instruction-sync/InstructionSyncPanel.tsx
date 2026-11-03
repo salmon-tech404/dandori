@@ -12,15 +12,15 @@ interface InstructionSyncPanelProps {
 function SyncHeader() {
   return (
     <>
-      <div className="border-b border-gray-200 pb-4 dark:border-gray-700">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+      <div style={{ borderBottom: "1px solid var(--ln)", paddingBottom: "var(--sp-16)" }}>
+        <h2 style={{ margin: 0, fontSize: "var(--fs-18)", fontWeight: 700, color: "var(--fg)" }}>
           {t("instruction_sync_title")}
         </h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p style={{ margin: "4px 0 0", fontSize: "var(--fs-14)", color: "var(--mu)" }}>
           {t("instruction_sync_desc")}
         </p>
       </div>
-      <div className="rounded-md bg-blue-50 p-4 text-xs text-blue-800 dark:bg-blue-950/40 dark:text-blue-300">
+      <div style={{ borderRadius: "var(--radius-6)", backgroundColor: "var(--blb)", padding: "var(--sp-16)", fontSize: "var(--fs-12)", color: "var(--bl)" }}>
         {t("instruction_sync_notice_exclude")}
       </div>
     </>
@@ -40,7 +40,7 @@ export function InstructionSyncPanel(props: InstructionSyncPanelProps) {
   const cfg = useInstructionConfig(wsId, projId);
 
   return (
-    <div className="space-y-6 p-6">
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-24)", padding: "var(--sp-24)" }}>
       <SyncHeader />
       <SyncForm
         provider={cfg.provider}

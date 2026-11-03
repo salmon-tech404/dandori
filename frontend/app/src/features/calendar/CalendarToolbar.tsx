@@ -1,5 +1,8 @@
 import React, { useState } from "react";
+import { Plus } from "lucide-react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
+import { Chip } from "../../ui/components/Chip";
 import { ScheduleModal } from "./ScheduleModal";
 import { createSchedule } from "./api";
 import type { CreateScheduleRequest } from "./types";
@@ -18,18 +21,19 @@ export const CalendarToolbar: React.FC<Props> = ({ projectId = "default-proj", o
   };
 
   return (
-    <div className="flex items-center justify-between py-2 px-4 border-b bg-surface">
-      <div className="flex items-center space-x-3">
-        <h2 className="text-sm font-semibold text-text">{t("calendar_week_title")}</h2>
-      </div>
-      <div>
-        <button
+    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "var(--sp-12)", padding: "var(--sp-12) var(--sp-16)", borderBottom: "1px solid var(--ln)", backgroundColor: "var(--sf)", borderRadius: "var(--radius-8)" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--sp-12)" }}>
+        <Button
+          variant="primary"
+          size="sm"
+          icon={<Plus size={14} />}
           type="button"
           onClick={() => setModalOpen(true)}
-          className="px-3 py-1.5 text-xs bg-primary text-white rounded hover:bg-primary-hover font-medium cursor-pointer"
         >
           {t("calendar_create_schedule")}
-        </button>
+        </Button>
+        <Chip variant="default">{t("calendar_week_chip")}</Chip>
+        <Chip variant="orange">{t("calendar_quiet_chip")}</Chip>
       </div>
       {modalOpen && (
         <ScheduleModal projectId={projectId} onSave={handleSave} onClose={() => setModalOpen(false)} />

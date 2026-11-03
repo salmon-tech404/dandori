@@ -44,6 +44,21 @@ describe("IntegrationsCard", () => {
     render(<IntegrationsCard workspaceId="ws-1" />);
     expect(await screen.findByText("GitHub Main")).toBeDefined();
   });
+
+  it("renders all 6 service cards per mockup 06-tich-hop", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ connections: [mockConnection] }),
+    } as Response);
+
+    render(<IntegrationsCard workspaceId="ws-1" />);
+    expect(await screen.findByText("GitHub")).toBeDefined();
+    expect(screen.getByText("GitLab")).toBeDefined();
+    expect(screen.getByText("Linear")).toBeDefined();
+    expect(screen.getByText("Telegram")).toBeDefined();
+    expect(screen.getByText("Discord và Slack")).toBeDefined();
+    expect(screen.getByText("Điện thoại")).toBeDefined();
+  });
 });
 
 describe("IntegrationsSettings", () => {

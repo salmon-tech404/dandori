@@ -391,6 +391,22 @@ impl RunService {
         Ok((events, total))
     }
 
+    /// Lấy danh sách các lần chạy của một task, có thể giới hạn số lượng.
+    pub async fn list_task_runs(
+        &self,
+        task_id: TaskId,
+        user_id: UserId,
+        limit: Option<i64>,
+    ) -> Result<Vec<Run>, RunServiceError> {
+        let _ = self.verify_task_access(&task_id, &user_id).await?;
+        let mut runs = RunRepo::new(&self.db).list_runs(&task_id).await?;
+        runs.sort_by_key(|a| std::cmp::Reverse(a.started_at));
+        if let Some(lim) = limit.filter(|&l| l > 0) {
+            runs.truncate(lim as usize);
+        }
+        Ok(runs)
+    }
+
     async fn verify_task_access(
         &self,
         task_id: &TaskId,

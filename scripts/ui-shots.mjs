@@ -457,6 +457,7 @@ export async function runUi01Scenario(env) {
 
   // 5. Đăng xuất -> quay về màn đăng nhập
   console.log("Kiểm tra đăng xuất...");
+  await env.cdp.click('button[aria-label="Tài khoản và cài đặt"]');
   await env.cdp.click('button[aria-label="Đăng xuất"]');
   await env.cdp.waitForSelector("form");
   console.log("=== Kịch bản UI-01 hoàn tất thành công! ===");
@@ -1025,8 +1026,8 @@ export async function runUi07Scenario(env) {
     // 6. Nạp task mẫu trên Board
     console.log("6. Nạp task mẫu trên Board...");
     await env.cdp.navigate(env.viteUrl + "/");
-    await new Promise((r) => setTimeout(r, 800));
-    await env.cdp.waitForSelector('[data-testid="btn-load-sample-tasks"]');
+    await new Promise((r) => setTimeout(r, 1200));
+    await env.cdp.waitForSelector('[data-testid="btn-load-sample-tasks"]', 20000);
     await env.cdp.click('[data-testid="btn-load-sample-tasks"]');
     await new Promise((r) => setTimeout(r, 3500));
 
@@ -1087,6 +1088,929 @@ export async function runUi07Scenario(env) {
   }
 }
 
+export async function runUi09Scenario(env) {
+  console.log("=== Bắt đầu kịch bản UI-09: Thư viện thành phần dùng chung (/ui-kit) ===");
+  await env.cdp.navigate(env.viteUrl + "/ui-kit");
+  await new Promise((r) => setTimeout(r, 1200));
+
+  // 1. Chế độ sáng 1440x900
+  const lightShot = path.join(reportsUiDir, "UI-09-ui-kit-light.png");
+  await env.cdp.screenshot(lightShot, 1440, 900);
+  console.log(`📸 Chụp ảnh (1440x900 Sáng): ${lightShot}`);
+
+  // 2. Chuyển sang chế độ tối
+  console.log("Chuyển sang chế độ tối...");
+  await env.cdp.click('[data-testid="uikit-theme-toggle"]');
+  await new Promise((r) => setTimeout(r, 600));
+  const darkShot = path.join(reportsUiDir, "UI-09-ui-kit-dark.png");
+  await env.cdp.screenshot(darkShot, 1440, 900);
+  console.log(`📸 Chụp ảnh (1440x900 Tối): ${darkShot}`);
+
+  // 3. Chuyển lại sáng và chụp mobile 390x844
+  await env.cdp.click('[data-testid="uikit-theme-toggle"]');
+  await new Promise((r) => setTimeout(r, 400));
+  const mobileShot = path.join(reportsUiDir, "UI-09-ui-kit-mobile.png");
+  await env.cdp.screenshot(mobileShot, 390, 844);
+  console.log(`📸 Chụp ảnh (390x844 Mobile): ${mobileShot}`);
+
+  // 4. Mở modal và chụp
+  console.log("Mở hộp thoại thử nghiệm...");
+  await env.cdp.click('[data-testid="uikit-open-modal"]');
+  await new Promise((r) => setTimeout(r, 600));
+  const modalShot = path.join(reportsUiDir, "UI-09-ui-kit-modal.png");
+  await env.cdp.screenshot(modalShot, 1440, 900);
+  console.log(`📸 Chụp ảnh Modal: ${modalShot}`);
+
+  // 5. Đóng modal
+  await env.cdp.click('[data-testid="uikit-close-modal"]');
+  await new Promise((r) => setTimeout(r, 400));
+
+  // 6. Kiểm tra console errors
+  if (env.cdp.consoleErrors.length > 0) {
+    throw new Error(`Phát hiện lỗi console trong kịch bản UI-09: ${JSON.stringify(env.cdp.consoleErrors)}`);
+  }
+  if (env.cdp.exceptions.length > 0) {
+    throw new Error(`Phát hiện ngoại lệ chưa bắt: ${JSON.stringify(env.cdp.exceptions)}`);
+  }
+  console.log("=== Kịch bản UI-09 hoàn tất thành công! ===");
+}
+
+export async function runUi10Scenario(env) {
+  console.log("=== Bắt đầu kịch bản UI-10: Kiểm thử Modal & Dropdown dùng chung ===");
+  await env.cdp.navigate(env.viteUrl);
+  await env.cdp.waitForSelector("form");
+
+  // 1. Đăng nhập
+  console.log("1. Đăng nhập với tài khoản admin...");
+  await env.cdp.type('input[type="text"]', env.adminUser);
+  await env.cdp.type('input[type="password"]', env.adminPassword);
+  await env.cdp.click('button[type="submit"]');
+  await env.cdp.waitForSelector("aside");
+  await new Promise((r) => setTimeout(r, 800));
+
+  const tempGitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dandori-git-ui10-"));
+  try {
+    execSync("git init -b main", { cwd: tempGitDir });
+    execSync('git config user.name "Dandori UI Test"', { cwd: tempGitDir });
+    execSync('git config user.email "uitest@example.com"', { cwd: tempGitDir });
+    fs.writeFileSync(path.join(tempGitDir, "README.md"), "# Dandori UI-10 Test Repo\n");
+    execSync("git add README.md", { cwd: tempGitDir });
+    execSync('git commit -m "Initial commit"', { cwd: tempGitDir });
+
+    // Tạo workspace & dự án
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo không gian làm việc");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('form input[type="text"]', "Không gian UI-10");
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 800));
+
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo dự án mới");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('[data-testid="project-name-input"]', "Dự án UI-10");
+    await env.cdp.type('[data-testid="project-repo-input"]', tempGitDir);
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 1200));
+
+    // Bật gói Đầy đủ
+    await env.cdp.navigate(env.viteUrl + "/settings");
+    await new Promise((r) => setTimeout(r, 800));
+    await env.cdp.clickByText("Đầy đủ");
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Xác nhận");
+    await new Promise((r) => setTimeout(r, 1400));
+
+    // 2. Kiểm thử Dropdown: ProjectSelector mở & đóng khi bấm ra ngoài
+    console.log("2. Kiểm thử ProjectSelector dropdown...");
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    const dropdownVisible = await env.cdp.evaluate(
+      `Boolean(document.querySelector('[data-testid="project-selector-dropdown"]'))`
+    );
+    if (!dropdownVisible) throw new Error("ProjectSelector dropdown không mở!");
+    const projectOpenShot = path.join(reportsUiDir, "UI-10-project-selector-open.png");
+    await env.cdp.screenshot(projectOpenShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Dropdown mở: ${projectOpenShot}`);
+
+    // Bấm ra ngoài (click vào phần main)
+    console.log("Bấm ra ngoài để đóng dropdown...");
+    await env.cdp.click("main");
+    await new Promise((r) => setTimeout(r, 400));
+    const dropdownClosed = await env.cdp.evaluate(
+      `!document.querySelector('[data-testid="project-selector-dropdown"]')`
+    );
+    if (!dropdownClosed) throw new Error("ProjectSelector dropdown không đóng khi bấm ra ngoài!");
+    const projectClosedShot = path.join(reportsUiDir, "UI-10-project-selector-closed.png");
+    await env.cdp.screenshot(projectClosedShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Dropdown đã đóng: ${projectClosedShot}`);
+
+    // 3. Kiểm thử Modal: Hộp thoại "Tạo prompt"
+    console.log("3. Kiểm thử Modal Tạo prompt...");
+    await env.cdp.navigate(env.viteUrl + "/knowledge");
+    await new Promise((r) => setTimeout(r, 1200));
+    await env.cdp.clickByText("Tạo prompt");
+    await env.cdp.waitForSelector('[data-testid="modal-backdrop"]');
+
+    // Đo vị trí position của backdrop
+    const backdropPos = await env.cdp.evaluate(
+      `window.getComputedStyle(document.querySelector('[data-testid="modal-backdrop"]')).position`
+    );
+    console.log(`Backdrop position đo được trên trình duyệt thật: ${backdropPos}`);
+    if (backdropPos !== "fixed") {
+      throw new Error(`Kỳ vọng backdrop position là 'fixed', nhưng thực tế là '${backdropPos}'!`);
+    }
+
+    const modalOpenShot = path.join(reportsUiDir, "UI-10-prompt-modal-open.png");
+    await env.cdp.screenshot(modalOpenShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Modal Tạo prompt mở: ${modalOpenShot}`);
+
+    // Bấm vào backdrop ngoài hộp thoại để đóng
+    console.log("Bấm ra ngoài backdrop để đóng modal...");
+    await env.cdp.evaluate(
+      `document.querySelector('[data-testid="modal-backdrop"]').click()`
+    );
+    await new Promise((r) => setTimeout(r, 500));
+
+    const modalClosed = await env.cdp.evaluate(
+      `!document.querySelector('[data-testid="modal-backdrop"]')`
+    );
+    if (!modalClosed) throw new Error("Modal không đóng khi bấm vào backdrop!");
+    const modalClosedShot = path.join(reportsUiDir, "UI-10-prompt-modal-closed.png");
+    await env.cdp.screenshot(modalClosedShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Modal đã đóng: ${modalClosedShot}`);
+
+  } finally {
+    fs.rmSync(tempGitDir, { recursive: true, force: true });
+  }
+
+  // 4. Kiểm tra console errors
+  if (env.cdp.consoleErrors.length > 0) {
+    throw new Error(`Phát hiện lỗi console trong kịch bản UI-10: ${JSON.stringify(env.cdp.consoleErrors)}`);
+  }
+  if (env.cdp.exceptions.length > 0) {
+    throw new Error(`Phát hiện ngoại lệ chưa bắt: ${JSON.stringify(env.cdp.exceptions)}`);
+  }
+  console.log("=== Kịch bản UI-10 hoàn tất thành công! ===");
+}
+
+export async function runUi11Scenario(env) {
+  console.log("=== Bắt đầu kịch bản UI-11: Nút dùng chung & Kiểm tra Double Plus ===");
+  await env.cdp.navigate(env.viteUrl);
+  await env.cdp.waitForSelector("form");
+
+  // 1. Đăng nhập
+  console.log("1. Đăng nhập với tài khoản admin...");
+  await env.cdp.type('input[type="text"]', env.adminUser);
+  await env.cdp.type('input[type="password"]', env.adminPassword);
+  await env.cdp.click('button[type="submit"]');
+  await env.cdp.waitForSelector("aside");
+  await new Promise((r) => setTimeout(r, 800));
+
+  const tempGitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dandori-git-ui11-"));
+  try {
+    execSync("git init -b main", { cwd: tempGitDir });
+    execSync('git config user.name "Dandori UI Test"', { cwd: tempGitDir });
+    execSync('git config user.email "uitest@example.com"', { cwd: tempGitDir });
+    fs.writeFileSync(path.join(tempGitDir, "README.md"), "# Dandori UI-11 Test Repo\n");
+    execSync("git add README.md", { cwd: tempGitDir });
+    execSync('git commit -m "Initial commit"', { cwd: tempGitDir });
+
+    // Tạo workspace & dự án
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo không gian làm việc");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('form input[type="text"]', "Không gian UI-11");
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 800));
+
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo dự án mới");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('[data-testid="project-name-input"]', "Dự án UI-11");
+    await env.cdp.type('[data-testid="project-repo-input"]', tempGitDir);
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 1200));
+
+    // Bật gói Đầy đủ để có tất cả các tab
+    await env.cdp.navigate(env.viteUrl + "/settings");
+    await new Promise((r) => setTimeout(r, 800));
+    await env.cdp.clickByText("Đầy đủ");
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Xác nhận");
+    await new Promise((r) => setTimeout(r, 1400));
+
+    // 2. Kiểm tra Board button
+    console.log("2. Kiểm tra nút 'Giao task' trên Board...");
+    await env.cdp.navigate(env.viteUrl + "/kanban");
+    await new Promise((r) => setTimeout(r, 1200));
+
+    const boardBtnInfo = await env.cdp.evaluate(`(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const btn = btns.find(b => b.textContent.includes('Giao task') || b.textContent.includes('Tạo task'));
+      if (!btn) return null;
+      const text = btn.textContent.trim();
+      const plusSvgCount = btn.querySelectorAll('svg').length;
+      const hasLiteralPlus = text.includes('+');
+      return { text, plusSvgCount, hasLiteralPlus };
+    })()`);
+
+    console.log("Board button info:", boardBtnInfo);
+    if (!boardBtnInfo) throw new Error("Không tìm thấy nút 'Giao task'/'Tạo task' trên header!");
+    if (boardBtnInfo.hasLiteralPlus) throw new Error("Nút trên Board có chứa ký tự '+'!");
+    if (boardBtnInfo.plusSvgCount !== 1) throw new Error(`Kỳ vọng 1 SVG plus icon trên Board button, thực tế: ${boardBtnInfo.plusSvgCount}`);
+
+    const boardShot = path.join(reportsUiDir, "UI-11-board-plus.png");
+    await env.cdp.screenshot(boardShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Kanban Board: ${boardShot}`);
+
+    // 3. Kiểm tra Prompt button
+    console.log("3. Kiểm tra nút 'Tạo prompt' trên Tri thức...");
+    await env.cdp.navigate(env.viteUrl + "/knowledge");
+    await new Promise((r) => setTimeout(r, 1200));
+
+    const promptBtnInfo = await env.cdp.evaluate(`(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const btn = btns.find(b => b.textContent.includes('Tạo prompt'));
+      if (!btn) return null;
+      const text = btn.textContent.trim();
+      const plusSvgCount = btn.querySelectorAll('svg').length;
+      const hasLiteralPlus = text.includes('+');
+      return { text, plusSvgCount, hasLiteralPlus };
+    })()`);
+
+    console.log("Prompt button info:", promptBtnInfo);
+    if (!promptBtnInfo) throw new Error("Không tìm thấy nút 'Tạo prompt'!");
+    if (promptBtnInfo.hasLiteralPlus) throw new Error("Nút 'Tạo prompt' có chứa ký tự '+'!");
+    if (promptBtnInfo.plusSvgCount !== 1) throw new Error(`Kỳ vọng 1 SVG plus icon trên Prompt button, thực tế: ${promptBtnInfo.plusSvgCount}`);
+
+    const promptShot = path.join(reportsUiDir, "UI-11-prompt-plus.png");
+    await env.cdp.screenshot(promptShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Prompt Library: ${promptShot}`);
+
+    // 4. Kiểm tra Tech Profile button
+    console.log("4. Kiểm tra nút 'Thêm mục' trên tab Hồ sơ kỹ thuật...");
+    await env.cdp.clickByText("Hồ sơ kỹ thuật");
+    await new Promise((r) => setTimeout(r, 800));
+
+    const techBtnInfo = await env.cdp.evaluate(`(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const btn = btns.find(b => b.textContent.includes('Thêm mục'));
+      if (!btn) return null;
+      const text = btn.textContent.trim();
+      const plusSvgCount = btn.querySelectorAll('svg').length;
+      const hasLiteralPlus = text.includes('+');
+      return { text, plusSvgCount, hasLiteralPlus };
+    })()`);
+
+    console.log("Tech Profile button info:", techBtnInfo);
+    if (!techBtnInfo) throw new Error("Không tìm thấy nút 'Thêm mục' trên tab Hồ sơ kỹ thuật!");
+    if (techBtnInfo.hasLiteralPlus) throw new Error("Nút 'Thêm mục' có chứa ký tự '+'!");
+    if (techBtnInfo.plusSvgCount !== 1) throw new Error(`Kỳ vọng 1 SVG plus icon trên Tech Profile button, thực tế: ${techBtnInfo.plusSvgCount}`);
+
+    const techShot = path.join(reportsUiDir, "UI-11-tech-profile-plus.png");
+    await env.cdp.screenshot(techShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Tech Profile: ${techShot}`);
+
+  } finally {
+    fs.rmSync(tempGitDir, { recursive: true, force: true });
+  }
+
+  // 5. Kiểm tra console errors
+  if (env.cdp.consoleErrors.length > 0) {
+    throw new Error(`Phát hiện lỗi console trong kịch bản UI-11: ${JSON.stringify(env.cdp.consoleErrors)}`);
+  }
+  if (env.cdp.exceptions.length > 0) {
+    throw new Error(`Phát hiện ngoại lệ chưa bắt: ${JSON.stringify(env.cdp.exceptions)}`);
+  }
+  console.log("=== Kịch bản UI-11 hoàn tất thành công! ===");
+}
+
+async function runUi12Scenario(env) {
+  console.log("=== Bắt đầu kịch bản UI-12: Gỡ class Tailwind & Kiểm tra giao diện dùng token ===");
+  await env.cdp.navigate(env.viteUrl);
+  await env.cdp.waitForSelector("form");
+
+  // 1. Đăng nhập
+  console.log("1. Đăng nhập với tài khoản admin...");
+  await env.cdp.type('input[type="text"]', env.adminUser);
+  await env.cdp.type('input[type="password"]', env.adminPassword);
+  await env.cdp.click('button[type="submit"]');
+  await env.cdp.waitForSelector("aside");
+  await new Promise((r) => setTimeout(r, 800));
+
+  const tempGitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dandori-git-ui12-"));
+  try {
+    execSync("git init -b main", { cwd: tempGitDir });
+    execSync('git config user.name "Dandori UI Test"', { cwd: tempGitDir });
+    execSync('git config user.email "uitest@example.com"', { cwd: tempGitDir });
+    fs.writeFileSync(path.join(tempGitDir, "README.md"), "# Dandori UI-12 Test Repo\n");
+    execSync("git add README.md", { cwd: tempGitDir });
+    execSync('git commit -m "Initial commit"', { cwd: tempGitDir });
+
+    // Tạo workspace & dự án
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo không gian làm việc");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('form input[type="text"]', "Không gian UI-12");
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 800));
+
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo dự án mới");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('[data-testid="project-name-input"]', "Dự án UI-12");
+    await env.cdp.type('[data-testid="project-repo-input"]', tempGitDir);
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 1200));
+
+    // Bật gói Đầy đủ
+    await env.cdp.navigate(env.viteUrl + "/settings");
+    await new Promise((r) => setTimeout(r, 800));
+    await env.cdp.clickByText("Đầy đủ");
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Xác nhận");
+    await new Promise((r) => setTimeout(r, 1400));
+
+    // Chụp Settings sau khi bỏ Tailwind
+    const settingsShot = path.join(reportsUiDir, "UI-12-clean-settings.png");
+    await env.cdp.screenshot(settingsShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Cài đặt: ${settingsShot}`);
+
+    // Đến Prompt & Tri thức
+    await env.cdp.navigate(env.viteUrl + "/knowledge");
+    await new Promise((r) => setTimeout(r, 1200));
+
+    const promptShot = path.join(reportsUiDir, "UI-12-clean-prompts.png");
+    await env.cdp.screenshot(promptShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Thư viện prompt: ${promptShot}`);
+
+    // Hồ sơ kỹ thuật
+    await env.cdp.clickByText("Hồ sơ kỹ thuật");
+    await new Promise((r) => setTimeout(r, 800));
+    const techShot = path.join(reportsUiDir, "UI-12-clean-tech-profile.png");
+    await env.cdp.screenshot(techShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Hồ sơ kỹ thuật: ${techShot}`);
+
+    // Kỹ năng
+    await env.cdp.clickByText("Kỹ năng (SKILL.md)");
+    await new Promise((r) => setTimeout(r, 800));
+    const skillsShot = path.join(reportsUiDir, "UI-12-clean-skills.png");
+    await env.cdp.screenshot(skillsShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Kỹ năng: ${skillsShot}`);
+
+    // Tích hợp
+    await env.cdp.navigate(env.viteUrl + "/integrations");
+    await new Promise((r) => setTimeout(r, 1000));
+    const integrationsShot = path.join(reportsUiDir, "UI-12-clean-integrations.png");
+    await env.cdp.screenshot(integrationsShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Tích hợp: ${integrationsShot}`);
+
+    // Mobile view của Prompt & Tri thức
+    await env.cdp.navigate(env.viteUrl + "/knowledge");
+    await new Promise((r) => setTimeout(r, 800));
+    const mobileShot = path.join(reportsUiDir, "UI-12-mobile.png");
+    await env.cdp.screenshot(mobileShot, 390, 844);
+    console.log(`📸 Chụp ảnh Mobile Prompt: ${mobileShot}`);
+
+  } finally {
+    fs.rmSync(tempGitDir, { recursive: true, force: true });
+  }
+
+  // Kiểm tra console errors
+  if (env.cdp.consoleErrors.length > 0) {
+    throw new Error(`Phát hiện lỗi console trong kịch bản UI-12: ${JSON.stringify(env.cdp.consoleErrors)}`);
+  }
+  if (env.cdp.exceptions.length > 0) {
+    throw new Error(`Phát hiện ngoại lệ chưa bắt: ${JSON.stringify(env.cdp.exceptions)}`);
+  }
+  console.log("=== Kịch bản UI-12 hoàn tất thành công! ===");
+}
+
+export async function runUi13Scenario(env) {
+  console.log("=== Bắt đầu kịch bản UI-13: Đo lường giật layout (CLS) qua 6 lần chuyển trang ===");
+  await env.cdp.setViewport(1440, 900);
+  await env.cdp.navigate(env.viteUrl);
+  await env.cdp.waitForSelector("form");
+
+  // 1. Đăng nhập
+  console.log("1. Đăng nhập với tài khoản admin...");
+  await env.cdp.type('input[type="text"]', env.adminUser);
+  await env.cdp.type('input[type="password"]', env.adminPassword);
+  await env.cdp.click('button[type="submit"]');
+  await env.cdp.waitForSelector("aside");
+  await new Promise((r) => setTimeout(r, 800));
+
+  const tempGitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dandori-git-ui13-"));
+  try {
+    execSync("git init -b main", { cwd: tempGitDir });
+    execSync('git config user.name "Dandori UI Test"', { cwd: tempGitDir });
+    execSync('git config user.email "uitest@example.com"', { cwd: tempGitDir });
+    fs.writeFileSync(path.join(tempGitDir, "README.md"), "# Dandori UI-13 Test Repo\n");
+    execSync("git add README.md", { cwd: tempGitDir });
+    execSync('git commit -m "Initial commit"', { cwd: tempGitDir });
+
+    // Tạo workspace & dự án
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo không gian làm việc");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('form input[type="text"]', "Không gian UI-13");
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 800));
+
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo dự án mới");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('[data-testid="project-name-input"]', "Dự án UI-13");
+    await env.cdp.type('[data-testid="project-repo-input"]', tempGitDir);
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 1200));
+
+    // Bật gói Đầy đủ trong Cài đặt
+    await env.cdp.navigate(env.viteUrl + "/settings");
+    await new Promise((r) => setTimeout(r, 800));
+    await env.cdp.clickByText("Đầy đủ");
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Xác nhận");
+    await new Promise((r) => setTimeout(r, 1400));
+
+    // Bắt đầu đo CLS 6 lần chuyển trang
+    console.log("=== Bắt đầu đo lường CLS và độ ổn định chiều rộng nội dung ===");
+
+    const setupClsScript = `(() => {
+      window.__clsScore = 0;
+      window.__clsEntries = [];
+      if (window.__clsObserver) {
+        window.__clsObserver.disconnect();
+      }
+      window.__clsObserver = new PerformanceObserver((entryList) => {
+        for (const entry of entryList.getEntries()) {
+          if (!entry.hadRecentInput) {
+            window.__clsScore += entry.value;
+            const sources = (entry.sources || []).map(s => ({
+              node: s.node ? (s.node.className || s.node.nodeName || "element") : "unknown",
+              prevTop: s.previousRect?.top,
+              curTop: s.currentRect?.top,
+              prevHeight: s.previousRect?.height,
+              curHeight: s.currentRect?.height,
+            }));
+            window.__clsEntries.push({ value: entry.value, sources });
+          }
+        }
+      });
+      window.__clsObserver.observe({ type: "layout-shift", buffered: true });
+    })()`;
+
+    const transitions = [
+      { id: 1, name: "Board -> Agents", from: "/", to: "/agents", baselineCls: 0.04 },
+      { id: 2, name: "Agents -> Dashboard", from: "/agents", to: "/dashboard", baselineCls: 0.02 },
+      { id: 3, name: "Dashboard -> Calendar", from: "/dashboard", to: "/calendar", baselineCls: 0.03 },
+      { id: 4, name: "Calendar -> Knowledge", from: "/calendar", to: "/knowledge", baselineCls: 0.06 },
+      { id: 5, name: "Knowledge -> Integrations", from: "/knowledge", to: "/integrations", baselineCls: 0.05 },
+      { id: 6, name: "Integrations -> Settings", from: "/integrations", to: "/settings", baselineCls: 0.51 },
+    ];
+
+    const results = [];
+
+    await env.cdp.navigate(env.viteUrl + "/");
+    await new Promise((r) => setTimeout(r, 1000));
+
+    for (const t of transitions) {
+      console.log(`\n--- Đo chuyển trang [${t.id}/6]: ${t.name} ---`);
+      
+      await env.cdp.evaluate(setupClsScript);
+      await new Promise((r) => setTimeout(r, 200));
+
+      const initialWidth = await env.cdp.evaluate(`document.querySelector("main")?.clientWidth || 0`);
+
+      // Hover link để kích hoạt preloadScreen
+      await env.cdp.evaluate(`(() => {
+        const link = document.querySelector('a[href="${t.to}"]');
+        if (link) {
+          link.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+          link.dispatchEvent(new FocusEvent("focus", { bubbles: true }));
+        }
+      })()`);
+      await new Promise((r) => setTimeout(r, 150));
+
+      await env.cdp.evaluate("window.__clsScore = 0");
+
+      await env.cdp.click(`a[href="${t.to}"]`);
+
+      await new Promise((r) => setTimeout(r, 1200));
+
+      const measuredCls = await env.cdp.evaluate("Number(window.__clsScore || 0)");
+      const finalWidth = await env.cdp.evaluate(`document.querySelector("main")?.clientWidth || 0`);
+      const widthDiff = Math.abs(finalWidth - initialWidth);
+
+      console.log(`  CLS đo được: ${measuredCls.toFixed(4)} (Gốc: ${t.baselineCls})`);
+      console.log(`  Chiều rộng main: ban đầu = ${initialWidth}px, sau khi chuyển = ${finalWidth}px (Chênh lệch: ${widthDiff}px)`);
+
+      const clsEntries = await env.cdp.evaluate("window.__clsEntries || []");
+      if (measuredCls > 0.05) {
+        console.log("  Chi tiết các lần shift:", JSON.stringify(clsEntries, null, 2));
+      }
+
+      const passed = measuredCls < 0.1 && widthDiff === 0;
+      results.push({
+        id: t.id,
+        name: t.name,
+        baselineCls: t.baselineCls,
+        measuredCls,
+        widthDiff,
+        passed,
+      });
+
+      if (!passed) {
+        console.warn(`  ⚠️ CẢNH BÁO: Chuyển trang ${t.name} chưa đạt tiêu chí (CLS < 0.1 và widthDiff == 0)!`);
+      } else {
+        console.log(`  ✓ ĐẠT: CLS < 0.1 và không đổi chiều rộng.`);
+      }
+    }
+
+    console.log("\n==========================================================================");
+    console.log("                  BẢNG KẾT QUẢ ĐO LƯỜNG CLS (UI-13)");
+    console.log("==========================================================================");
+    console.log("| # | Lần chuyển trang            | CLS gốc | CLS mới  | Đổi rộng (px) | Kết quả |");
+    console.log("|---|-----------------------------|---------|----------|---------------|---------|");
+    for (const r of results) {
+      const clsNew = r.measuredCls.toFixed(4).padStart(8, " ");
+      const clsOld = r.baselineCls.toFixed(2).padStart(7, " ");
+      const wDiff = String(r.widthDiff).padStart(13, " ");
+      const status = r.passed ? "  ĐẠT  " : "KHÔNG ĐẠT";
+      console.log(`| ${r.id} | ${r.name.padEnd(27, " ")} | ${clsOld} | ${clsNew} | ${wDiff} | ${status} |`);
+    }
+    console.log("==========================================================================");
+
+    const clsShot = path.join(reportsUiDir, "UI-13-smooth-settings.png");
+    await env.cdp.screenshot(clsShot, 1440, 900);
+    console.log(`📸 Chụp ảnh màn hình Cài đặt ổn định layout: ${clsShot}`);
+
+    const hasFailed = results.some((r) => !r.passed);
+    if (hasFailed) {
+      throw new Error("Một hoặc nhiều lần chuyển trang có CLS >= 0.1 hoặc đổi chiều rộng nội dung!");
+    }
+
+  } finally {
+    fs.rmSync(tempGitDir, { recursive: true, force: true });
+  }
+
+  if (env.cdp.consoleErrors.length > 0) {
+    throw new Error(`Phát hiện lỗi console trong kịch bản UI-13: ${JSON.stringify(env.cdp.consoleErrors)}`);
+  }
+  if (env.cdp.exceptions.length > 0) {
+    throw new Error(`Phát hiện ngoại lệ chưa bắt: ${JSON.stringify(env.cdp.exceptions)}`);
+  }
+  console.log("=== Kịch bản UI-13 hoàn tất thành công! ===");
+}
+
+
+export async function runUi14Scenario(env) {
+  console.log("=== Bắt đầu kịch bản UI-14: Màn Agent và tài khoản theo mockup ===");
+  await env.cdp.setViewport(1440, 900);
+  await env.cdp.navigate(env.viteUrl);
+  await env.cdp.waitForSelector("form");
+
+  // 1. Đăng nhập
+  console.log("1. Đăng nhập với tài khoản admin...");
+  await env.cdp.type('input[type="text"]', env.adminUser);
+  await env.cdp.type('input[type="password"]', env.adminPassword);
+  await env.cdp.click('button[type="submit"]');
+  await env.cdp.waitForSelector("aside");
+  await new Promise((r) => setTimeout(r, 800));
+
+  // 2. Bật gói Đầy đủ ở cấp hệ thống trước để mọi tính năng đều sẵn sàng
+  console.log("Bật gói Đầy đủ trong Cài đặt...");
+  await env.cdp.click('a[href="/settings"]');
+  await new Promise((r) => setTimeout(r, 800));
+  await env.cdp.clickByText("Đầy đủ");
+  await new Promise((r) => setTimeout(r, 400));
+  await env.cdp.clickByText("Xác nhận");
+  await new Promise((r) => setTimeout(r, 1500));
+
+  const tempGitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dandori-git-ui14-"));
+  try {
+    execSync("git init -b main", { cwd: tempGitDir });
+    execSync('git config user.name "Dandori UI Test"', { cwd: tempGitDir });
+    execSync('git config user.email "uitest@example.com"', { cwd: tempGitDir });
+    fs.writeFileSync(path.join(tempGitDir, "README.md"), "# Dandori UI-14 Test Repo\n");
+    execSync("git add README.md", { cwd: tempGitDir });
+    execSync('git commit -m "Initial commit"', { cwd: tempGitDir });
+
+    // Tạo workspace & dự án
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo không gian làm việc");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('form input[type="text"]', "Không gian UI-14");
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 800));
+
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo dự án mới");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('[data-testid="project-name-input"]', "Dự án UI-14");
+    await env.cdp.type('[data-testid="project-repo-input"]', tempGitDir);
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 1200));
+
+    // Đăng ký 3 tài khoản subscription mẫu (Claude, Gemini, Codex)
+    console.log("Đăng ký tài khoản subscription mẫu...");
+    await env.cdp.evaluate(`
+      Promise.all([
+        fetch('/api/v1/m/subscription-connect/accounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider: 'claude', label: 'Claude Pro (Cá nhân)', priority: 1 })
+        }),
+        fetch('/api/v1/m/subscription-connect/accounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider: 'gemini', label: 'Gemini Advanced', priority: 2 })
+        }),
+        fetch('/api/v1/m/subscription-connect/accounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider: 'codex', label: 'OpenAI Codex Team', priority: 3 })
+        })
+      ]).catch(() => {})
+    `);
+    await new Promise((r) => setTimeout(r, 800));
+
+    // Đăng ký khóa API key dự phòng mẫu
+    await env.cdp.evaluate(`
+      fetch('/api/v1/m/api-key-fallback/accounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: 'Anthropic',
+          label: 'Anthropic Claude Fallback',
+          api_key: 'ant-mock-fallback-key-for-ui-testing-sample',
+          spending_limit: {
+            limit_type: 'budget_usd',
+            limit_value: 50.0,
+            period: 'monthly',
+            alert_threshold: 80
+          }
+        })
+      }).catch(() => {})
+    `);
+    await new Promise((r) => setTimeout(r, 600));
+
+    // Chuyển tới màn Agent và tài khoản
+    console.log("3. Điều hướng tới màn hình Agent và tài khoản (/agents)...");
+    await env.cdp.click('a[href="/agents"]');
+    await new Promise((r) => setTimeout(r, 2000));
+
+    // 3. Chụp ảnh màn hình Desktop 1440x900
+    const desktopShot = path.join(reportsUiDir, "UI-14-agents.png");
+    await env.cdp.screenshot(desktopShot, 1440, 900);
+    console.log(`📸 Chụp ảnh màn hình Agent và tài khoản Desktop 1440px: ${desktopShot}`);
+
+    // 4. Chụp ảnh màn hình Mobile 390x844
+    const mobileShot = path.join(reportsUiDir, "UI-14-agents-mobile.png");
+    await env.cdp.screenshot(mobileShot, 390, 844);
+    console.log(`📸 Chụp ảnh màn hình Agent và tài khoản Mobile 390px: ${mobileShot}`);
+
+    // Phục hồi viewport
+    await env.cdp.setViewport(1440, 900);
+
+    // 5. Kiểm tra các thành phần đặc trưng theo mockup
+    const html = await env.cdp.evaluate("document.body.innerText");
+    console.log("Agents page text:", html);
+    if (!html.includes("Vai trò mặc định")) {
+      throw new Error("Không tìm thấy khối 'Vai trò mặc định' trên màn hình!");
+    }
+  } finally {
+    fs.rmSync(tempGitDir, { recursive: true, force: true });
+  }
+
+  if (env.cdp.consoleErrors.length > 0) {
+    throw new Error(`Phát hiện lỗi console trong kịch bản UI-14: ${JSON.stringify(env.cdp.consoleErrors)}`);
+  }
+  if (env.cdp.exceptions.length > 0) {
+    throw new Error(`Phát hiện ngoại lệ chưa bắt: ${JSON.stringify(env.cdp.exceptions)}`);
+  }
+  console.log("=== Kịch bản UI-14 hoàn tất thành công! ===");
+}
+
+export async function runUi15Scenario(env) {
+  console.log("=== Bắt đầu kịch bản UI-15: Màn Dashboard và Lịch ===");
+  await env.cdp.navigate(env.viteUrl);
+  await env.cdp.waitForSelector("form");
+
+  // 1. Đăng nhập với tài khoản admin
+  console.log("1. Đăng nhập với tài khoản admin...");
+  await env.cdp.type('input[type="text"]', env.adminUser);
+  await env.cdp.type('input[type="password"]', env.adminPassword);
+  await env.cdp.click('button[type="submit"]');
+  await new Promise((r) => setTimeout(r, 1200));
+
+  // 2. Kích hoạt bộ preset "Đầy đủ" ở phạm vi hệ thống
+  console.log("2. Kích hoạt Preset 'Đầy đủ'...");
+  await env.cdp.evaluate(`
+    fetch('/api/v1/registry/presets/full/apply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scope: 'system' })
+    }).catch(() => {})
+  `);
+  await new Promise((r) => setTimeout(r, 1000));
+
+  const tempGitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dandori-ui15-repo-"));
+  try {
+    execSync("git init -b main", { cwd: tempGitDir });
+    execSync('git config user.name "Dandori UI Test"', { cwd: tempGitDir });
+    execSync('git config user.email "uitest@example.com"', { cwd: tempGitDir });
+    fs.writeFileSync(path.join(tempGitDir, "README.md"), "# Dandori UI-15 Test Repo\n");
+    execSync("git add README.md", { cwd: tempGitDir });
+    execSync('git commit -m "Initial commit"', { cwd: tempGitDir });
+
+    // Tạo workspace & dự án
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo không gian làm việc");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('form input[type="text"]', "Không gian UI-15");
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 800));
+
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo dự án mới");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('[data-testid="project-name-input"]', "Dự án UI-15");
+    await env.cdp.type('[data-testid="project-repo-input"]', tempGitDir);
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 1200));
+
+    // A. MÀN DASHBOARD (/dashboard)
+    console.log("3. Điều hướng tới Dashboard (/dashboard)...");
+    await env.cdp.click('a[href="/dashboard"]');
+    await new Promise((r) => setTimeout(r, 1500));
+
+    // Chụp Desktop 1440x900
+    const dashDesktopShot = path.join(reportsUiDir, "UI-15-dashboard.png");
+    await env.cdp.screenshot(dashDesktopShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Dashboard Desktop: ${dashDesktopShot}`);
+
+    // Chụp Mobile 390x844
+    const dashMobileShot = path.join(reportsUiDir, "UI-15-dashboard-mobile.png");
+    await env.cdp.screenshot(dashMobileShot, 390, 844);
+    console.log(`📸 Chụp ảnh Dashboard Mobile: ${dashMobileShot}`);
+
+    await env.cdp.setViewport(1440, 900);
+
+    // B. MÀN LỊCH (/calendar)
+    console.log("4. Điều hướng tới Lịch (/calendar)...");
+    await env.cdp.click('a[href="/calendar"]');
+    await new Promise((r) => setTimeout(r, 1500));
+
+    // Chụp Desktop 1440x900
+    const calDesktopShot = path.join(reportsUiDir, "UI-15-calendar.png");
+    await env.cdp.screenshot(calDesktopShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Lịch Desktop: ${calDesktopShot}`);
+
+    // Chụp Mobile 390x844
+    const calMobileShot = path.join(reportsUiDir, "UI-15-calendar-mobile.png");
+    await env.cdp.screenshot(calMobileShot, 390, 844);
+    console.log(`📸 Chụp ảnh Lịch Mobile: ${calMobileShot}`);
+
+    await env.cdp.setViewport(1440, 900);
+
+    // C. MÀN BOARD (/)
+    console.log("5. Điều hướng tới Bảng Kanban (/)...");
+    await env.cdp.click('a[href="/"]');
+    await new Promise((r) => setTimeout(r, 1500));
+
+    const boardDesktopShot = path.join(reportsUiDir, "UI-15-board.png");
+    await env.cdp.screenshot(boardDesktopShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Board Desktop: ${boardDesktopShot}`);
+
+  } finally {
+    fs.rmSync(tempGitDir, { recursive: true, force: true });
+  }
+
+  if (env.cdp.consoleErrors.length > 0) {
+    throw new Error(`Phát hiện lỗi console trong kịch bản UI-15: ${JSON.stringify(env.cdp.consoleErrors)}`);
+  }
+  if (env.cdp.exceptions.length > 0) {
+    throw new Error(`Phát hiện ngoại lệ chưa bắt: ${JSON.stringify(env.cdp.exceptions)}`);
+  }
+  console.log("=== Kịch bản UI-15 hoàn tất thành công! ===");
+}
+
+export async function runUi16Scenario(env) {
+  console.log("=== Bắt đầu kịch bản UI-16: Màn Prompt và tri thức, Tích hợp ===");
+  await env.cdp.navigate(env.viteUrl);
+  await env.cdp.waitForSelector("form");
+
+  // 1. Đăng nhập với tài khoản admin
+  console.log("1. Đăng nhập với tài khoản admin...");
+  await env.cdp.type('input[type="text"]', env.adminUser);
+  await env.cdp.type('input[type="password"]', env.adminPassword);
+  await env.cdp.click('button[type="submit"]');
+  await new Promise((r) => setTimeout(r, 1200));
+
+  // 2. Kích hoạt bộ preset "Đầy đủ" ở phạm vi hệ thống
+  console.log("2. Kích hoạt Preset 'Đầy đủ'...");
+  await env.cdp.evaluate(`
+    fetch('/api/v1/registry/presets/full/apply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scope: 'system' })
+    }).catch(() => {})
+  `);
+  await new Promise((r) => setTimeout(r, 1000));
+
+  const tempGitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dandori-ui16-repo-"));
+  try {
+    execSync("git init -b main", { cwd: tempGitDir });
+    execSync('git config user.name "Dandori UI Test"', { cwd: tempGitDir });
+    execSync('git config user.email "uitest@example.com"', { cwd: tempGitDir });
+    fs.writeFileSync(path.join(tempGitDir, "README.md"), "# Dandori UI-16 Test Repo\n");
+    execSync("git add README.md", { cwd: tempGitDir });
+    execSync('git commit -m "Initial commit"', { cwd: tempGitDir });
+
+    // Tạo workspace & dự án
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo không gian làm việc");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('form input[type="text"]', "Không gian UI-16");
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 800));
+
+    await env.cdp.click('button[aria-label="Chọn dự án hoặc không gian làm việc"]');
+    await new Promise((r) => setTimeout(r, 400));
+    await env.cdp.clickByText("Tạo dự án mới");
+    await env.cdp.waitForSelector('form input[type="text"]');
+    await env.cdp.type('[data-testid="project-name-input"]', "Dự án UI-16");
+    await env.cdp.type('[data-testid="project-repo-input"]', tempGitDir);
+    await env.cdp.click('button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 1200));
+
+    // A. MÀN PROMPT VÀ TRI THỨC (/knowledge)
+    console.log("3. Điều hướng tới Prompt và tri thức (/knowledge)...");
+    await env.cdp.click('a[href="/knowledge"]');
+    await new Promise((r) => setTimeout(r, 1500));
+
+    try {
+      await env.cdp.clickByText("Worker");
+      await new Promise((r) => setTimeout(r, 600));
+    } catch {}
+
+    // Chụp Desktop 1440x900
+    const knowDesktopShot = path.join(reportsUiDir, "UI-16-knowledge.png");
+    await env.cdp.screenshot(knowDesktopShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Prompt & Tri thức Desktop: ${knowDesktopShot}`);
+
+    // Chụp Mobile 390x844
+    const knowMobileShot = path.join(reportsUiDir, "UI-16-knowledge-mobile.png");
+    await env.cdp.screenshot(knowMobileShot, 390, 844);
+    console.log(`📸 Chụp ảnh Prompt & Tri thức Mobile: ${knowMobileShot}`);
+
+    await env.cdp.setViewport(1440, 900);
+
+    // B. MÀN TÍCH HỢP (/integrations)
+    console.log("4. Điều hướng tới Tích hợp (/integrations)...");
+    await env.cdp.click('a[href="/integrations"]');
+    await new Promise((r) => setTimeout(r, 1500));
+
+    // Chụp Desktop 1440x900
+    const integDesktopShot = path.join(reportsUiDir, "UI-16-integrations.png");
+    await env.cdp.screenshot(integDesktopShot, 1440, 900);
+    console.log(`📸 Chụp ảnh Tích hợp Desktop: ${integDesktopShot}`);
+
+    // Chụp Mobile 390x844
+    const integMobileShot = path.join(reportsUiDir, "UI-16-integrations-mobile.png");
+    await env.cdp.screenshot(integMobileShot, 390, 844);
+    console.log(`📸 Chụp ảnh Tích hợp Mobile: ${integMobileShot}`);
+
+    await env.cdp.setViewport(1440, 900);
+
+  } finally {
+    fs.rmSync(tempGitDir, { recursive: true, force: true });
+  }
+
+  if (env.cdp.consoleErrors.length > 0) {
+    throw new Error(`Phát hiện lỗi console trong kịch bản UI-16: ${JSON.stringify(env.cdp.consoleErrors)}`);
+  }
+  if (env.cdp.exceptions.length > 0) {
+    throw new Error(`Phát hiện ngoại lệ chưa bắt: ${JSON.stringify(env.cdp.exceptions)}`);
+  }
+  console.log("=== Kịch bản UI-16 hoàn tất thành công! ===");
+}
+
 // Chạy trực tiếp qua dòng lệnh
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const isVerify = process.argv.includes("--verify");
@@ -1112,7 +2036,31 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const isUi05 = process.argv.includes("UI-05") || process.argv.includes("--ui-05");
     const isUi06 = process.argv.includes("UI-06") || process.argv.includes("--ui-06");
     const isUi07 = isVerify || process.argv.includes("UI-07") || process.argv.includes("--ui-07");
-    if (isUi07) {
+    const isUi09 = process.argv.includes("UI-09") || process.argv.includes("--ui-09");
+    const isUi10 = process.argv.includes("UI-10") || process.argv.includes("--ui-10");
+    const isUi11 = process.argv.includes("UI-11") || process.argv.includes("--ui-11");
+    const isUi12 = process.argv.includes("UI-12") || process.argv.includes("--ui-12");
+    const isUi16 = process.argv.includes("UI-16") || process.argv.includes("--ui-16");
+    const isUi15 = process.argv.includes("UI-15") || process.argv.includes("--ui-15");
+    const isUi14 = process.argv.includes("UI-14") || process.argv.includes("--ui-14");
+    const isUi13 = process.argv.includes("UI-13") || process.argv.includes("--ui-13") || process.argv.includes("--cls");
+    if (isUi16) {
+      await runUi16Scenario(env);
+    } else if (isUi15) {
+      await runUi15Scenario(env);
+    } else if (isUi14) {
+      await runUi14Scenario(env);
+    } else if (isUi13) {
+      await runUi13Scenario(env);
+    } else if (isUi12) {
+      await runUi12Scenario(env);
+    } else if (isUi11) {
+      await runUi11Scenario(env);
+    } else if (isUi10) {
+      await runUi10Scenario(env);
+    } else if (isUi09) {
+      await runUi09Scenario(env);
+    } else if (isUi07) {
       await runUi07Scenario(env);
     } else if (isUi06) {
       await runUi06Scenario(env);

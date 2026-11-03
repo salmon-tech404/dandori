@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Play, AlertCircle } from "lucide-react";
 import { t } from "../../core/i18n";
+import { Button } from "../../ui/components/Button";
 import { getSafeErrorMessage } from "../../core/api";
 import type { Task } from "../../../../../shared/types";
 
@@ -44,20 +45,6 @@ function useTaskDispatch(taskId: string, onTaskUpdated?: () => void) {
   return { loading, errorMsg, isNoAccount, handleDispatch };
 }
 
-const dispatchBtnStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: "8px",
-  padding: "8px 16px",
-  background: "var(--bl)",
-  color: "white",
-  border: "none",
-  borderRadius: "6px",
-  fontWeight: 600,
-  fontSize: "13px",
-};
-
 export function TaskDispatchCard({ task, onTaskUpdated }: Props) {
   const { loading, errorMsg, isNoAccount, handleDispatch } = useTaskDispatch(task.id, onTaskUpdated);
 
@@ -65,16 +52,17 @@ export function TaskDispatchCard({ task, onTaskUpdated }: Props) {
     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
       {isNoAccount && <NoAccountAlert />}
       {errorMsg && <div role="alert" style={{ color: "var(--rd)", fontSize: "12px" }}>{errorMsg}</div>}
-      <button
+      <Button
+        variant="primary"
         type="button"
         data-testid="btn-dispatch-task"
         disabled={loading}
+        loading={loading}
         onClick={handleDispatch}
-        style={{ ...dispatchBtnStyle, cursor: loading ? "not-allowed" : "pointer" }}
+        icon={<Play size={14} />}
       >
-        <Play size={14} />
-        <span>{loading ? t("btn_dispatching") : t("btn_dispatch_task")}</span>
-      </button>
+        {loading ? t("btn_dispatching") : t("btn_dispatch_task")}
+      </Button>
     </div>
   );
 }
@@ -85,8 +73,8 @@ function NoAccountAlert() {
       data-testid="no-account-alert"
       style={{
         padding: "10px 12px",
-        background: "var(--amb, #fffbeb)",
-        border: "1px solid var(--am, #f59e0b)",
+        background: "var(--orb)",
+        border: "1px solid var(--or)",
         borderRadius: "6px",
         fontSize: "12px",
         color: "var(--fg)",
@@ -96,7 +84,7 @@ function NoAccountAlert() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: 600 }}>
-        <AlertCircle size={14} color="var(--am, #f59e0b)" />
+        <AlertCircle size={14} color="var(--or)" />
         <span>{t("dispatch_no_account_notice")}</span>
       </div>
       <Link

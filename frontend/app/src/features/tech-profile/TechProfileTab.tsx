@@ -1,6 +1,9 @@
 import { AlertTriangle, Edit3, Eye, Plus, ShieldCheck, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { t } from '../../core/i18n';
+import { Button } from '../../ui/components/Button';
+import { IconButton } from '../../ui/components/IconButton';
+import { Tooltip } from '../../ui/components/Tooltip';
 import { EntryEditorModal } from './EntryEditorModal';
 import { ProfilePreviewModal } from './ProfilePreviewModal';
 import { TechProfileEntry } from './types';
@@ -18,42 +21,76 @@ function hasSecret(value: string): boolean {
   return SECRET_PATTERNS.some((p) => p.test(value));
 }
 
+const TabTitle: React.FC = () => (
+  <div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-4)' }}>
+      <h2 style={{ margin: 0, fontSize: 'var(--fs-14)', fontWeight: 600, color: 'var(--fg)' }}>{t('tech_profile_title')}</h2>
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '4px',
+          padding: '2px 8px',
+          borderRadius: '9999px',
+          backgroundColor: 'rgba(16, 185, 129, 0.15)',
+          color: 'var(--gr)',
+          fontSize: '11px',
+          fontWeight: 500,
+        }}
+      >
+        <ShieldCheck size={12} />
+        {t('tech_profile_all_agents_read')}
+      </span>
+    </div>
+    <p style={{ margin: '2px 0 0', fontSize: 'var(--fs-12)', color: 'var(--mu)' }}>{t('tech_profile_desc')}</p>
+  </div>
+);
+
+const TabButtons: React.FC<{ onPreview: () => void; onNew: () => void }> = ({ onPreview, onNew }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-4)' }}>
+    <Button
+      type="button"
+      variant="secondary"
+      size="sm"
+      icon={<Eye size={14} />}
+      onClick={onPreview}
+    >
+      {t('tech_profile_btn_preview')}
+    </Button>
+    <Button
+      type="button"
+      variant="primary"
+      size="sm"
+      icon={<Plus size={14} />}
+      onClick={onNew}
+    >
+      {t('tech_profile_btn_add')}
+    </Button>
+  </div>
+);
+
 const TabHeader: React.FC<{ onPreview: () => void; onNew: () => void }> = ({ onPreview, onNew }) => (
-  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-    <div>
-      <div className="flex items-center gap-2">
-        <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{t('tech_profile_title')}</h2>
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 text-[11px] font-medium">
-          <ShieldCheck size={12} />
-          {t('tech_profile_all_agents_read')}
-        </span>
-      </div>
-      <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">{t('tech_profile_desc')}</p>
-    </div>
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onPreview}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800"
-      >
-        <Eye size={14} />
-        <span>{t('tech_profile_btn_preview')}</span>
-      </button>
-      <button
-        type="button"
-        onClick={onNew}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded bg-indigo-600 text-white hover:bg-indigo-700"
-      >
-        <Plus size={14} />
-        <span>{t('tech_profile_btn_add')}</span>
-      </button>
-    </div>
+  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--sp-16)' }}>
+    <TabTitle />
+    <TabButtons onPreview={onPreview} onNew={onNew} />
   </div>
 );
 
 const SecretWarning: React.FC = () => (
-  <div className="flex items-start gap-2 p-3 rounded bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-xs">
-    <AlertTriangle size={16} className="shrink-0 mt-0.5 text-amber-600" />
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 'var(--sp-4)',
+      padding: 'var(--sp-8)',
+      borderRadius: 'var(--radius-6)',
+      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+      border: '1px solid var(--or)',
+      color: 'var(--or)',
+      fontSize: 'var(--fs-12)',
+    }}
+  >
+    <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px', color: 'var(--or)' }} />
     <span>{t('tech_profile_warning_secret')}</span>
   </div>
 );
@@ -63,45 +100,75 @@ const RowActions: React.FC<{ entry: TechProfileEntry; onEdit: (e: TechProfileEnt
   onEdit,
   onDelete,
 }) => (
-  <td className="px-4 py-2.5 text-right space-x-2">
-    <button
-      type="button"
-      onClick={() => onEdit(entry)}
-      title={t("btn_edit")}
-      className="p-1 text-neutral-500 hover:text-emerald-600 dark:hover:text-emerald-400"
-    >
-      <Edit3 size={14} />
-    </button>
-    <button
-      type="button"
-      onClick={() => onDelete(entry)}
-      title={t("btn_delete")}
-      className="p-1 text-neutral-500 hover:text-rose-600 dark:hover:text-rose-400"
-    >
-      <Trash2 size={14} />
-    </button>
+  <td style={{ padding: 'var(--sp-8) var(--sp-16)', textAlign: 'right' }}>
+    <div style={{ display: 'inline-flex', gap: 'var(--sp-4)', justifyContent: 'flex-end' }}>
+      <Tooltip content={t("btn_edit")}>
+        <IconButton
+          icon={<Edit3 size={14} />}
+          aria-label={t("btn_edit")}
+          onClick={() => onEdit(entry)}
+        />
+      </Tooltip>
+      <Tooltip content={t("btn_delete")}>
+        <IconButton
+          icon={<Trash2 size={14} />}
+          aria-label={t("btn_delete")}
+          onClick={() => onDelete(entry)}
+        />
+      </Tooltip>
+    </div>
   </td>
 );
+
+const rowStyle: React.CSSProperties = { borderBottom: '1px solid var(--ln)' };
+const cellStyle: React.CSSProperties = { padding: 'var(--sp-8) var(--sp-16)' };
+const keyCellStyle: React.CSSProperties = { ...cellStyle, fontFamily: 'var(--font-mono)', color: 'var(--fg)' };
+const valCellStyle: React.CSSProperties = {
+  ...cellStyle,
+  fontFamily: 'var(--font-mono)',
+  fontSize: '11px',
+  color: 'var(--mu)',
+  maxWidth: '280px',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const catBadgeStyle: React.CSSProperties = {
+  marginLeft: 'var(--sp-4)',
+  display: 'inline-block',
+  padding: '2px 6px',
+  borderRadius: 'var(--radius-6)',
+  fontSize: '10px',
+  backgroundColor: 'var(--sf2)',
+  color: 'var(--mu)',
+};
+
+const verBadgeStyle: React.CSSProperties = {
+  display: 'inline-block',
+  padding: '2px 6px',
+  borderRadius: 'var(--radius-6)',
+  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+  color: 'var(--ac)',
+  fontFamily: 'var(--font-mono)',
+  fontSize: '10px',
+};
 
 const EntryRow: React.FC<{ entry: TechProfileEntry; onEdit: (e: TechProfileEntry) => void; onDelete: (e: TechProfileEntry) => void }> = ({
   entry,
   onEdit,
   onDelete,
 }) => (
-  <tr className="hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30">
-    <td className="px-4 py-2.5 font-mono text-neutral-900 dark:text-neutral-100">
-      <span className="font-semibold">{entry.key}</span>
-      <span className="ml-2 inline-block px-1.5 py-0.5 rounded text-[10px] bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
-        {entry.category}
-      </span>
+  <tr style={rowStyle}>
+    <td style={keyCellStyle}>
+      <span style={{ fontWeight: 600 }}>{entry.key}</span>
+      <span style={catBadgeStyle}>{entry.category}</span>
     </td>
-    <td className="px-4 py-2.5 font-mono text-[11px] text-neutral-600 dark:text-neutral-300 max-w-md truncate">
-      {entry.value}
+    <td style={valCellStyle}>{entry.value}</td>
+    <td style={cellStyle}>
+      <span style={verBadgeStyle}>{t("version_prefix")}{entry.version}</span>
     </td>
-    <td className="px-4 py-2.5">
-      <span className="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 font-mono text-[10px]">{t("version_prefix")}{entry.version}</span>
-    </td>
-    <td className="px-4 py-2.5 text-neutral-500">{new Date(entry.updated_at).toLocaleDateString()}</td>
+    <td style={{ ...cellStyle, color: 'var(--mu)' }}>{new Date(entry.updated_at).toLocaleDateString()}</td>
     <RowActions entry={entry} onEdit={onEdit} onDelete={onDelete} />
   </tr>
 );
@@ -112,19 +179,29 @@ interface TableProps {
   onDelete: (e: TechProfileEntry) => void;
 }
 
+const EntryTableHeader: React.FC = () => (
+  <thead
+    style={{
+      backgroundColor: 'var(--sf2)',
+      borderBottom: '1px solid var(--ln)',
+      color: 'var(--mu)',
+    }}
+  >
+    <tr>
+      <th style={{ padding: 'var(--sp-8) var(--sp-16)', fontWeight: 500 }}>{t('tech_profile_col_key')}</th>
+      <th style={{ padding: 'var(--sp-8) var(--sp-16)', fontWeight: 500 }}>{t('tech_profile_col_value')}</th>
+      <th style={{ padding: 'var(--sp-8) var(--sp-16)', fontWeight: 500 }}>{t('tech_profile_col_version')}</th>
+      <th style={{ padding: 'var(--sp-8) var(--sp-16)', fontWeight: 500 }}>{t('tech_profile_col_updated_at')}</th>
+      <th style={{ padding: 'var(--sp-8) var(--sp-16)', fontWeight: 500, textAlign: 'right' }}>{t('tech_profile_col_actions')}</th>
+    </tr>
+  </thead>
+);
+
 const EntryTable: React.FC<TableProps> = ({ entries, onEdit, onDelete }) => (
-  <div className="overflow-x-auto rounded border border-neutral-200 dark:border-neutral-800">
-    <table className="w-full text-left text-xs">
-      <thead className="bg-neutral-50 border-b border-neutral-200 text-neutral-600 dark:bg-neutral-800/50 dark:border-neutral-700 dark:text-neutral-400">
-        <tr>
-          <th className="px-4 py-2 font-medium">{t('tech_profile_col_key')}</th>
-          <th className="px-4 py-2 font-medium">{t('tech_profile_col_value')}</th>
-          <th className="px-4 py-2 font-medium">{t('tech_profile_col_version')}</th>
-          <th className="px-4 py-2 font-medium">{t('tech_profile_col_updated_at')}</th>
-          <th className="px-4 py-2 font-medium text-right">{t('tech_profile_col_actions')}</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+  <div style={{ overflowX: 'auto', borderRadius: 'var(--radius-8)', border: '1px solid var(--ln)' }}>
+    <table style={{ width: '100%', textAlign: 'left', fontSize: 'var(--fs-12)', borderCollapse: 'collapse' }}>
+      <EntryTableHeader />
+      <tbody>
         {entries.map((e) => (
           <EntryRow key={e.id} entry={e} onEdit={onEdit} onDelete={onDelete} />
         ))}
@@ -151,13 +228,13 @@ export const TechProfileTab: React.FC<Props> = ({ context, projectId, workspaceI
   const hasAnySecret = entries.some((e) => hasSecret(e.value));
 
   return (
-    <div className="space-y-4 p-4">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-16)', padding: 'var(--sp-16)' }}>
       <TabHeader onPreview={() => setPreviewOpen(true)} onNew={() => { setEditingEntry(null); setEditorOpen(true); }} />
       {hasAnySecret && <SecretWarning />}
-      {loading && <p className="text-xs text-neutral-500">{t('loading')}</p>}
-      {error && <p className="text-xs text-rose-500">{error}</p>}
+      {loading && <p style={{ fontSize: 'var(--fs-12)', color: 'var(--mu)' }}>{t('loading')}</p>}
+      {error && <p style={{ fontSize: 'var(--fs-12)', color: 'var(--rd)' }}>{error}</p>}
       {!loading && entries.length === 0 && (
-        <div className="rounded border border-dashed border-neutral-300 dark:border-neutral-700 p-8 text-center text-xs text-neutral-500">
+        <div style={{ borderRadius: 'var(--radius-8)', border: '1px dashed var(--ln)', padding: 'var(--sp-32)', textAlign: 'center', fontSize: 'var(--fs-12)', color: 'var(--mu)' }}>
           {t('tech_profile_empty')}
         </div>
       )}

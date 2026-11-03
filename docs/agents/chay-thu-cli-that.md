@@ -90,7 +90,7 @@ Tắt máy chủ ở cửa sổ A bằng Ctrl+C.
 |---|---|---|
 | `cd D:9-dandori` | Vào thư mục dự án | Các lệnh sau tìm tệp theo thư mục hiện tại |
 | `$env:DANDORI_DATA_DIR = "D:\dandori-real-test-data"` | Bảo Dandori lưu dữ liệu (cơ sở dữ liệu, thư mục HOME riêng của từng tài khoản, thư mục làm việc của task) vào đây | Để dữ liệu thử nằm riêng, dọn một lần là sạch, không lẫn dữ liệu thật sau này. Nếu không đặt, Dandori dùng thư mục mặc định trong `%APPDATA%` |
-| `cargo run -p dandori-server` | `cargo` là công cụ build của Rust; `run` biên dịch rồi chạy; `-p dandori-server` chọn chương trình máy chủ (dự án có nhiều phần) | Máy chủ chỉ lắng nghe `127.0.0.1:3000`, tức chỉ máy bạn truy cập được |
+| `cargo run -p dandori-server` | `cargo` là công cụ build của Rust; `run` biên dịch rồi chạy; `-p dandori-server` chọn chương trình máy chủ (dự án có nhiều phần) | Máy chủ chỉ lắng nghe `127.0.0.1:3100`, tức chỉ máy bạn truy cập được |
 | `Set-ExecutionPolicy -Scope Process Bypass` | Cho phép chạy tệp `.ps1` | Windows mặc định chặn script. `-Scope Process` nghĩa là chỉ trong cửa sổ này |
 | `.\docsgents\chay-thu-cli-that.ps1 -Provider claude` | Chạy script; `.\` nghĩa là "tệp ở thư mục hiện tại"; `-Provider` chọn CLI cần thử | Script gọi API của Dandori thay bạn |
 

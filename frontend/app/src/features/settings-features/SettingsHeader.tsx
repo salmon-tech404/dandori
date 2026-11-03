@@ -2,6 +2,7 @@ import { FC } from "react";
 import { Search } from "lucide-react";
 import { t } from "../../core/i18n";
 import { Button } from "../../ui/components/Button";
+import { Input } from "../../ui/components/Input";
 import { ScopeType } from "./types";
 
 export interface SettingsHeaderProps {
@@ -29,13 +30,13 @@ export const SettingsHeader: FC<SettingsHeaderProps> = ({ scope, onScopeChange, 
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-12)", flexWrap: "wrap" }}>
         <div style={{ position: "relative", flex: 1, minWidth: "260px" }}>
-          <Search size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--mu)" }} />
-          <input
+          <Search size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--mu)", zIndex: 1 }} />
+          <Input
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={t("search_features_placeholder")}
-            style={{ width: "100%", height: "var(--btn-height)", paddingLeft: "36px", paddingRight: "12px", borderRadius: "var(--radius-8)", border: "1px solid var(--ln)", backgroundColor: "var(--sf)", color: "var(--fg)", fontSize: "var(--fs-14)", outline: "none" }}
+            style={{ paddingLeft: "36px" }}
           />
         </div>
         <div style={{ display: "flex", gap: "4px" }}>

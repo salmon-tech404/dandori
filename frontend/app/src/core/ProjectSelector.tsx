@@ -1,9 +1,11 @@
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import { t } from "./i18n";
 import { useProject, Project } from "./project";
 import { CreateProjectModal, CreateWorkspaceModal } from "./ProjectModals";
 import { Button } from "../ui/components/Button";
+import { Tooltip } from "../ui/components/Tooltip";
+import { useDismiss } from "../ui/components/useDismiss";
 
 interface DropdownListProps {
   projects: Project[];
@@ -23,29 +25,31 @@ function DropdownItem({
   onSelect: (id: string) => void;
 }) {
   return (
-    <button
+    <Button
+      variant="ghost"
       type="button"
       onClick={() => onSelect(project.id)}
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
+        width: "100%",
         padding: "6px 8px",
         borderRadius: "var(--radius-6)",
-        border: "none",
         backgroundColor: isSelected ? "var(--sf2)" : "transparent",
         color: "var(--fg)",
-        cursor: "pointer",
         textAlign: "left",
         fontSize: "var(--fs-13)",
         fontFamily: "var(--font-mono)",
+        height: "auto",
+        minHeight: "unset",
       }}
     >
       <span>{project.name}</span>
       <span style={{ fontSize: "var(--fs-12)", color: "var(--mu)" }}>
         {t("project_selector_repos", { count: 1 })}
       </span>
-    </button>
+    </Button>
   );
 }
 
@@ -100,7 +104,7 @@ const dropdownContainerStyle = {
 
 function ProjectDropdownList(props: DropdownListProps) {
   return (
-    <div style={dropdownContainerStyle}>
+    <div data-testid="project-selector-dropdown" style={dropdownContainerStyle}>
       <div style={{ fontSize: "var(--fs-12)", color: "var(--mu)", padding: "4px 8px" }}>
         {t("all_projects_label")}
       </div>
@@ -144,13 +148,14 @@ function SelectorTrigger({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={t("project_selector_tooltip")}
-      title={t("project_selector_tooltip")}
-      style={triggerBtnStyle}
-    >
+    <Tooltip content={t("project_selector_tooltip")}>
+      <Button
+        variant="ghost"
+        type="button"
+        onClick={onClick}
+        aria-label={t("project_selector_tooltip")}
+        style={{ ...triggerBtnStyle, height: "auto", minHeight: "unset" }}
+      >
       <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
         <span
           style={{
@@ -169,7 +174,27 @@ function SelectorTrigger({
         </span>
       </div>
       <ChevronDown size={14} style={{ color: "var(--mu)", flexShrink: 0 }} />
-    </button>
+      </Button>
+    </Tooltip>
+  );
+}
+
+function ProjectModalsGroup({
+  showProj,
+  onCloseProj,
+  showWs,
+  onCloseWs,
+}: {
+  showProj: boolean;
+  onCloseProj: () => void;
+  showWs: boolean;
+  onCloseWs: () => void;
+}) {
+  return (
+    <>
+      <CreateProjectModal isOpen={showProj} onClose={onCloseProj} />
+      <CreateWorkspaceModal isOpen={showWs} onClose={onCloseWs} />
+    </>
   );
 }
 
@@ -178,39 +203,30 @@ export const ProjectSelector: FC = () => {
   const [open, setOpen] = useState(false);
   const [showNewProj, setShowNewProj] = useState(false);
   const [showNewWs, setShowNewWs] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  useDismiss({ isOpen: open, onDismiss: () => setOpen(false), ref: containerRef });
   const projName = currentProject ? currentProject.name : t("no_project_selected");
   const reposCount = currentProject ? 1 : 0;
 
   return (
-    <div style={{ position: "relative", marginBottom: "var(--sp-16)" }}>
-      <SelectorTrigger
-        name={projName}
-        reposCount={reposCount}
-        onClick={() => setOpen(!open)}
-      />
-
+    <div ref={containerRef} style={{ position: "relative", marginBottom: "var(--sp-16)" }}>
+      <SelectorTrigger name={projName} reposCount={reposCount} onClick={() => setOpen(!open)} />
       {open && (
         <ProjectDropdownList
           projects={projects}
           currentProjectId={currentProject?.id}
-          onSelect={(id) => {
-            selectProject(id);
-            setOpen(false);
-          }}
-          onOpenNewProj={() => {
-            setOpen(false);
-            setShowNewProj(true);
-          }}
-          onOpenNewWs={() => {
-            setOpen(false);
-            setShowNewWs(true);
-          }}
+          onSelect={(id) => { selectProject(id); setOpen(false); }}
+          onOpenNewProj={() => { setOpen(false); setShowNewProj(true); }}
+          onOpenNewWs={() => { setOpen(false); setShowNewWs(true); }}
         />
       )}
-
-      <CreateProjectModal isOpen={showNewProj} onClose={() => setShowNewProj(false)} />
-      <CreateWorkspaceModal isOpen={showNewWs} onClose={() => setShowNewWs(false)} />
+      <ProjectModalsGroup
+        showProj={showNewProj}
+        onCloseProj={() => setShowNewProj(false)}
+        showWs={showNewWs}
+        onCloseWs={() => setShowNewWs(false)}
+      />
     </div>
   );
 };
